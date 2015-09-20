@@ -21,7 +21,7 @@ public class Main {
 
         Server server = new Server(port);
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        context.addServlet(new ServletHolder(new AdminPageServlet()), AdminPageServlet.adminPageURL);
+        context.addServlet(new ServletHolder(new AdminPageServlet()), AdminPageServlet.ADMIN_PAGE_URL);
 
         ResourceHandler resource_handler = new ResourceHandler();
         resource_handler.setDirectoriesListed(true);

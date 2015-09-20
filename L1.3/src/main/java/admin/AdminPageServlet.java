@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AdminPageServlet extends HttpServlet {
-    public static final String adminPageURL = "/admin";
+    public static final String ADMIN_PAGE_URL = "/admin";
 
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
