@@ -207,10 +207,10 @@
   </inspection_tool>
   <inspection_tool class="ParameterHidingMemberVariable" enabled="true" level="WARNING" enabled_by_default="true">
     <option name="m_ignoreInvisibleFields" value="true" />
-    <option name="m_ignoreStaticMethodParametersHidingInstanceFields" value="false" />
-    <option name="m_ignoreForConstructors" value="false" />
-    <option name="m_ignoreForPropertySetters" value="false" />
-    <option name="m_ignoreForAbstractMethods" value="false" />
+    <option name="m_ignoreStaticMethodParametersHidingInstanceFields" value="true" />
+    <option name="m_ignoreForConstructors" value="true" />
+    <option name="m_ignoreForPropertySetters" value="true" />
+    <option name="m_ignoreForAbstractMethods" value="true" />
   </inspection_tool>
   <inspection_tool class="ProblematicWhitespace" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="ProtectedMemberInFinalClass" enabled="true" level="WARNING" enabled_by_default="true" />
