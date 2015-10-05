@@ -1,10 +1,10 @@
-package accountServer;
+package account.server;
 
 
 public class AccountServerController implements AccountServerControllerMBean {
-    private final AccountServerI accountServer;
+    private final AccountService accountServer;
 
-    public AccountServerController(AccountServerI accountServer) {
+    public AccountServerController(AccountService accountServer) {
         this.accountServer = accountServer;
     }
 

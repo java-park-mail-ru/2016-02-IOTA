@@ -1,9 +1,9 @@
-package accountServer;
+package account.server;
 
 /**
  * Created by jim on 3/13/15.
  */
-public interface AccountServerI {
+public interface AccountService {
     void addNewUser();
 
     void removeUser();

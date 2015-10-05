@@ -1,7 +1,7 @@
 package servlets;
 
-import accountServer.AccountServer;
-import accountServer.AccountServerI;
+import account.server.AccountServer;
+import account.server.AccountService;
 import org.junit.Test;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,7 +16,7 @@ import static org.mockito.Mockito.*;
 
 
 public class HomePageServletTest {
-    private AccountServerI accountServer = mock(AccountServer.class);
+    private AccountService accountServer = mock(AccountServer.class);
 
     private HttpServletResponse getMockedResponse(StringWriter stringWriter) throws IOException {
         HttpServletResponse response = mock(HttpServletResponse.class);

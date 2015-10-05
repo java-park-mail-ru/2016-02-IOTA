@@ -1,7 +1,7 @@
-package accountServer;
+package account.server;
 
 
-public class AccountServer implements AccountServerI {
+public class AccountServer implements AccountService {
     private int usersCount;
     private int usersLimit;
 

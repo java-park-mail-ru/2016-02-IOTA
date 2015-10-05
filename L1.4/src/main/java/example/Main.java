@@ -1,9 +1,9 @@
 package example;
 
-import accountServer.AccountServer;
-import accountServer.AccountServerController;
-import accountServer.AccountServerControllerMBean;
-import accountServer.AccountServerI;
+import account.server.AccountServer;
+import account.server.AccountServerController;
+import account.server.AccountServerControllerMBean;
+import account.server.AccountService;
 import servlets.HomePageServlet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,7 +32,7 @@ public class Main {
 
         logger.info("Starting at http://127.0.0.1:" + portString);
 
-        AccountServerI accountServer = new AccountServer(1);
+        AccountService accountServer = new AccountServer(1);
 
         AccountServerControllerMBean serverStatistics = new AccountServerController(accountServer);
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
