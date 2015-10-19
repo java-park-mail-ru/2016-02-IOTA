@@ -8,10 +8,9 @@ import time.TimeService;
 import vfs.VFS;
 import vfs.VFSImpl;
 
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Random;
-import java.util.TimerTask;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.*;
 
 @SuppressWarnings({"StringConcatenationInsideStringBufferAppend", "UnusedDeclaration"})
 public class Main {
@@ -21,11 +20,13 @@ public class Main {
         //timerExample();
         //vfsExample();
 
-        writeToBinFile();
+        //writeToBinFile();
         //readFromBinFile();
 
         //reflectionExample();
         //saxExample();
+
+        //propertiesExample();
     }
 
     private static void saxExample() {
@@ -37,17 +38,21 @@ public class Main {
 
     private static void reflectionExample() {
         SerializationObject object = (SerializationObject) ReflectionHelper.createInstance("main.SerializationObject");
-        System.out.append(object.toString() + '\n');
+        if (object != null) {
+            System.out.append(object.toString() + '\n');
+            ReflectionHelper.setFieldValue(object, "name", "Kaylee");
+            ReflectionHelper.setFieldValue(object, "age", "24");
+            System.out.append(object.toString() + '\n');
+        }
 
-        ReflectionHelper.setFieldValue(object, "name", "Kaylee");
-        ReflectionHelper.setFieldValue(object, "age", "24");
-        System.out.append(object.toString() + '\n');
     }
 
     private static void readFromBinFile() {
         System.out.append("Read from bin file\n");
         Object object = ObjectWriter.read("zoe.bin");
-        System.out.append(object.toString() + '\n');
+        if (object != null) {
+            System.out.append(object.toString() + '\n');
+        }
     }
 
     private static void writeToBinFile() {
@@ -98,5 +103,17 @@ public class Main {
         System.out.append('\n');
 
         System.out.append("Math.random(): " + Math.random() + '\n');
+    }
+
+    private static void propertiesExample() {
+        try (final FileInputStream fis = new FileInputStream("server.properties")) {
+            final Properties properties = new Properties();
+            properties.load(fis);
+
+            System.out.println("host: " + properties.getProperty("host"));
+            System.out.println("port: " + properties.getProperty("port"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -25,7 +25,7 @@ public class VFSImpl implements VFS {
 
     private class FileIterator implements Iterator<String> {
 
-        private Queue<File> files = new LinkedList<File>();
+        private Queue<File> files = new LinkedList<>();
 
         public FileIterator(String path) {
             files.add(new File(root + path));
@@ -37,7 +37,7 @@ public class VFSImpl implements VFS {
 
         public String next() {
             File file = files.peek();
-            if (file.isDirectory()) {
+            if (file != null && file.isDirectory()) {
                 for (File subFile : file.listFiles()) {
                     files.add(subFile);
                 }
