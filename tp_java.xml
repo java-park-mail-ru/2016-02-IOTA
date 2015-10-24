@@ -249,7 +249,7 @@
   </inspection_tool>
   <inspection_tool class="StaticVariableNamingConvention" enabled="true" level="WARNING" enabled_by_default="true">
     <option name="checkMutableFinals" value="false" />
-    <option name="m_regex" value="s_[a-z][A-Za-z\d]*" />
+    <option name="m_regex" value="[a-z][A-Za-z\d]*" />
     <option name="m_minLength" value="2" />
     <option name="m_maxLength" value="32" />
   </inspection_tool>
