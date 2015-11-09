@@ -38,7 +38,8 @@ public class SimpleExample {
             System.out.append("Autocommit: " + connection.getAutoCommit() + '\n');
             System.out.append("DB name: " + connection.getMetaData().getDatabaseProductName() + '\n');
             System.out.append("DB version: " + connection.getMetaData().getDatabaseProductVersion() + '\n');
-            System.out.append("Driver: " + connection.getMetaData().getDriverName() + '\n');
+            System.out.append("Driver name: " + connection.getMetaData().getDriverName() + '\n');
+            System.out.append("Driver version: " + connection.getMetaData().getDriverVersion() + '\n');
             connection.close();
         } catch (SQLException e) {
             e.printStackTrace();

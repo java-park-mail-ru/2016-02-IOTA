@@ -13,7 +13,7 @@ public class TExample {
         try {
             exec.execUpdate(connection, "create table users (id bigint auto_increment, user_name varchar(256), primary key (id))");
             System.out.append("Table created\n");
-            exec.execUpdate(connection, "insert into users (user_name) values ('tully')");
+            exec.execUpdate(connection, "insert into users (user_name) values ('test')");
             System.out.append("User added\n");
 
             TExecutor execT = new TExecutor();
