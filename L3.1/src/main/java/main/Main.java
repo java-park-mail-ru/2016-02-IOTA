@@ -1,5 +1,5 @@
 package main;
- 
+
 import java.sql.Connection;
 
 import dao.UsersDAO;
@@ -12,12 +12,12 @@ import examples.TExample;
 
 
 public class Main {
-	public static void main(String[] args) {
-		SimpleExample.connect();
-		//ConnectWithStatements.connect();
-		//PreparedExample.connect();
-		//TExample.connect();
-		//DataSetExample.connect();
-		
-	}
+    public static void main(String[] args) {
+        SimpleExample.connect();
+        ConnectWithStatements.connect();
+        //PreparedExample.connect();
+        //TExample.connect();
+        //DataSetExample.connect();
+
+    }
 }
