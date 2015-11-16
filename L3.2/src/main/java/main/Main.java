@@ -11,7 +11,7 @@ public class Main {
         DBService dbService = new DBServiceImpl();
 
         String status = dbService.getLocalStatus();
-        System.out.println(status);
+        System.out.println("Status: " + status);
 
         dbService.save(new UserDataSet("tully"));
         dbService.save(new UserDataSet("sully"));

@@ -1,8 +1,7 @@
 package base.dataSets;
 
-import java.io.Serializable;
-
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "users")
@@ -21,14 +20,9 @@ public class UserDataSet implements Serializable { // Serializable Important to 
     public UserDataSet() {
     }
 
-    public UserDataSet(long id, String name) {
-        this.setId(id);
-        this.setName(name);
-    }
-
     public UserDataSet(String name) {
-        this.setId(-1);
-        this.setName(name);
+        this.id = -1;
+        this.name = name;
     }
 
     public String getName() {

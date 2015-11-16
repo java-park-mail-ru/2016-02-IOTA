@@ -25,8 +25,8 @@ public class DBServiceImpl implements DBService {
         configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
         configuration.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
         configuration.setProperty("hibernate.connection.url", "jdbc:mysql://localhost:3306/db_example");
-        configuration.setProperty("hibernate.connection.username", "tully");
-        configuration.setProperty("hibernate.connection.password", "tully");
+        configuration.setProperty("hibernate.connection.username", "test");
+        configuration.setProperty("hibernate.connection.password", "test");
         configuration.setProperty("hibernate.show_sql", "true");
         configuration.setProperty("hibernate.hbm2ddl.auto", "create");
 
@@ -34,40 +34,46 @@ public class DBServiceImpl implements DBService {
     }
 
     public String getLocalStatus() {
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        String status = transaction.getLocalStatus().toString();
-        session.close();
+        String status;
+        try (Session session = sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+            status = transaction.getStatus().toString();
+            transaction.commit();
+        }
         return status;
     }
 
     public void save(UserDataSet dataSet) {
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        UserDataSetDAO dao = new UserDataSetDAO(session);
-        dao.save(dataSet);
-        transaction.commit();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+            UserDataSetDAO dao = new UserDataSetDAO(session);
+            dao.save(dataSet);
+            transaction.commit();
+        }
     }
 
     public UserDataSet read(long id) {
-        Session session = sessionFactory.openSession();
-        UserDataSetDAO dao = new UserDataSetDAO(session);
-        return dao.read(id);
+        try (Session session = sessionFactory.openSession()) {
+            UserDataSetDAO dao = new UserDataSetDAO(session);
+            return dao.read(id);
+        }
     }
 
     public UserDataSet readByName(String name) {
-        Session session = sessionFactory.openSession();
-        UserDataSetDAO dao = new UserDataSetDAO(session);
-        return dao.readByName(name);
+        try (Session session = sessionFactory.openSession()) {
+            UserDataSetDAO dao = new UserDataSetDAO(session);
+            return dao.readByName(name);
+        }
     }
 
     public List<UserDataSet> readAll() {
-        Session session = sessionFactory.openSession();
-        UserDataSetDAO dao = new UserDataSetDAO(session);
-        return dao.readAll();
+        try (Session session = sessionFactory.openSession()) {
+            UserDataSetDAO dao = new UserDataSetDAO(session);
+            return dao.readAll();
+        }
     }
 
-    public void shutdown(){
+    public void shutdown() {
         sessionFactory.close();
     }
 

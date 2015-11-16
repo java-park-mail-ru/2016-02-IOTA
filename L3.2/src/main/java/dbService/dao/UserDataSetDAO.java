@@ -16,11 +16,10 @@ public class UserDataSetDAO {
 
     public void save(UserDataSet dataSet) {
         session.save(dataSet);
-        session.close();
     }
 
     public UserDataSet read(long id) {
-        return (UserDataSet) session.load(UserDataSet.class, id);
+        return session.get(UserDataSet.class, id);
     }
 
     public UserDataSet readByName(String name) {
