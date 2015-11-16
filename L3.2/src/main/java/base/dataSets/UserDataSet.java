@@ -9,11 +9,11 @@ public class UserDataSet implements Serializable { // Serializable Important to 
     private static final long serialVersionUID = -8706689714326132798L;
 
     @Id
-    @Column(name = "id")
+    @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "name")
+    @Column(name = "user_name")
     private String name;
 
     //Important to Hibernate!
