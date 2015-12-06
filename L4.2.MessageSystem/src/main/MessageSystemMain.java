@@ -9,7 +9,7 @@ import messageSystem.MessageSystem;
 /**
  * @author e.shubin
  */
-public final class Main {
+public final class MessageSystemMain {
     public static void main(String[] args) {
         final MessageSystem messageSystem = new MessageSystem();
         final Thread accountServiceThread = new Thread(new AccountService(messageSystem));
@@ -28,7 +28,7 @@ public final class Main {
         frontEndThread.start();
 
         final Client[] clients = {
-                new Client(frontEnd, "bob"),
+                new Client(frontEnd, "eva"),
                 new Client(frontEnd, "duke"),
                 new Client(frontEnd, "alice"),
                 new Client(frontEnd, "kate"),

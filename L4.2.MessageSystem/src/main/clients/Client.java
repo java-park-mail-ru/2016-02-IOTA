@@ -16,7 +16,7 @@ public class Client extends Thread {
     private String password;
     private String sessionId = "";
 
-    private State state = State.Register;
+    private State state = State.REGISTER;
 
     public Client(FrontEndService service, String name) {
         this.service = service;
@@ -27,25 +27,27 @@ public class Client extends Thread {
 
     @Override
     public void run() {
-        while (state != State.Finished) {
+        while (state != State.FINISHED) {
             switch (state) {
-                case Register:
+                case REGISTER:
                     register();
                     break;
-                case CheckRegistration:
+                case CHECK_REGISTRATION:
                     checkRegistration();
                     break;
-                case Auth:
+                case AUTH:
                     auth();
                     break;
-                case CheckAuth:
+                case CHECK_AUTH:
                     checkAuth();
                     break;
-                case GetScore:
+                case GET_SCORE:
                     getScore();
                     break;
-                case IncreaseScore:
+                case INCREASE_SCORE:
                     increaseScore();
+                    break;
+                case FINISHED:
                     break;
             }
 
@@ -60,14 +62,14 @@ public class Client extends Thread {
     private void register() {
         System.out.println(name + " is registering...");
         service.register(name, password);
-        state = State.CheckRegistration;
+        state = State.CHECK_REGISTRATION;
     }
 
     private void checkRegistration() {
         final boolean registered = service.isRegistered(name);
         System.out.println(name + " registered: " + registered);
         if (registered) {
-            state = State.Auth;
+            state = State.AUTH;
         }
     }
 
@@ -75,7 +77,7 @@ public class Client extends Thread {
         System.out.println(name + " is authenticating...");
         sessionId = service.authenticate(name, password);
         System.out.println(name + " got sessionId: " + sessionId);
-        state = State.CheckAuth;
+        state = State.CHECK_AUTH;
     }
 
     private void checkAuth() {
@@ -83,7 +85,7 @@ public class Client extends Thread {
         final boolean authenticated = service.isAuthenticated(sessionId);
         System.out.println(name + " is authenticated: " + authenticated);
         if (authenticated) {
-            state = State.GetScore;
+            state = State.GET_SCORE;
         }
     }
 
@@ -93,9 +95,9 @@ public class Client extends Thread {
 
         if (score == GameRules.MAX_SCORE || score == GameRules.MIN_SCORE) {
             System.out.println("==== " + name + " finished with score " + score + " ====");
-            state = State.Finished;
+            state = State.FINISHED;
         } else {
-            state = State.IncreaseScore;
+            state = State.INCREASE_SCORE;
         }
     }
 
@@ -103,16 +105,16 @@ public class Client extends Thread {
         final int delta = RANDOM.nextInt(GameRules.MAX_SCORE) - (GameRules.MAX_SCORE / 2);
         System.out.println(name + " increasing score by " + delta);
         service.updateScore(sessionId, delta);
-        state = State.GetScore;
+        state = State.GET_SCORE;
     }
 
     private enum State {
-        Register,
-        CheckRegistration,
-        Auth,
-        CheckAuth,
-        GetScore,
-        IncreaseScore,
-        Finished
+        REGISTER,
+        CHECK_REGISTRATION,
+        AUTH,
+        CHECK_AUTH,
+        GET_SCORE,
+        INCREASE_SCORE,
+        FINISHED
     }
 }
