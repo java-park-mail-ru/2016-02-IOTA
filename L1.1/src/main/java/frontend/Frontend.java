@@ -1,51 +1,36 @@
 package frontend;
 
-import templater.PageGenerator;
+import com.google.gson.JsonObject;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * @author v.chibrikov
+ * @author esin88
  */
 public class Frontend extends HttpServlet {
 
-    private String login = "";
+    private String lastLogin = "";
 
+    @Override
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
+        final String login = request.getParameter("login");
+        final JsonObject answer = new JsonObject();
 
-        Map<String, Object> pageVariables = new HashMap<>();
-        pageVariables.put("lastLogin", login == null ? "" : login);
-
-        response.getWriter().println(PageGenerator.getPage("authform.html", pageVariables));
-
-        response.setContentType("text/html;charset=utf-8");
-        response.setStatus(HttpServletResponse.SC_OK);
-
-    }
-
-    public void doPost(HttpServletRequest request,
-                       HttpServletResponse response) throws ServletException, IOException {
-
-        login = request.getParameter("login");
-
-        response.setContentType("text/html;charset=utf-8");
-
-        if (login == null || login.isEmpty()) {
+        if(login == null || login.isEmpty()){
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            answer.addProperty("lastLogin", lastLogin);
         } else {
             response.setStatus(HttpServletResponse.SC_OK);
+            answer.addProperty("currentLogin", login);
+            lastLogin = login;
         }
 
-        Map<String, Object> pageVariables = new HashMap<>();
-        pageVariables.put("lastLogin", login == null ? "" : login);
-
-        response.getWriter().println(PageGenerator.getPage("authform.html", pageVariables));
+        response.setContentType("application/json;charset=utf-8");
+        response.getWriter().println(answer.toString());
     }
 }

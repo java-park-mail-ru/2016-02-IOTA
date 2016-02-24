@@ -1,41 +1,53 @@
 package frontend;
 
+import com.google.gson.JsonObject;
 import main.AccountService;
 import main.UserProfile;
-import templater.PageGenerator;
+import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * Created by v.chibrikov on 13.09.2014.
+ * @author esin88
  */
 public class SignUpServlet extends HttpServlet {
-    private AccountService accountService;
+    private final AccountService accountService;
 
     public SignUpServlet(AccountService accountService) {
         this.accountService = accountService;
     }
 
+    @Override
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
-        String name = request.getParameter("name");
-        String password = request.getParameter("password");
+        final String name = request.getParameter("name");
+        final String password = request.getParameter("password");
 
-        Map<String, Object> pageVariables = new HashMap<>();
-        if (accountService.addUser(name, new UserProfile(name, password, ""))) {
-            pageVariables.put("signUpStatus", "New user created");
+        final JsonObject answer = new JsonObject();
+
+        if (!checkCredential(name)) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            answer.addProperty("Status", "Name is empty");
+        } else if (!checkCredential(password)) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            answer.addProperty("Status", "Password is empty");
+        } else if (accountService.addUser(name, new UserProfile(name, password))) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            answer.addProperty("Status", "Ok");
         } else {
-            pageVariables.put("signUpStatus", "User with name: " + name + " already exists");
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            answer.addProperty("Status", "User exists");
         }
 
-        response.getWriter().println(PageGenerator.getPage("signupstatus.html", pageVariables));
-        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("application/json;charset=utf-8");
+        response.getWriter().write(answer.toString());
     }
 
+    private boolean checkCredential(@Nullable String credential) {
+        return credential != null && !credential.isEmpty();
+    }
 }

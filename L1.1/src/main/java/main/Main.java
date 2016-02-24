@@ -6,16 +6,19 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 /**
- * @author v.chibrikov
+ * @author esin88
  */
 public class Main {
+    public static final int PORT = 8080;
+
+    @SuppressWarnings("OverlyBroadThrowsClause")
     public static void main(String[] args) throws Exception {
-        Frontend frontend = new Frontend();
+        final Frontend frontend = new Frontend();
 
-        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        context.addServlet(new ServletHolder(frontend), "/authform");
+        final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context.addServlet(new ServletHolder(frontend), "/login");
 
-        Server server = new Server(8080);
+        final Server server = new Server(PORT);
         server.setHandler(context);
 
         server.start();
