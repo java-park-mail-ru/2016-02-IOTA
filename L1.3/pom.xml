@@ -12,8 +12,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <org.eclipse.jetty.version>9.3.0.M1</org.eclipse.jetty.version>
-        <org.freemarker.version>2.3.20</org.freemarker.version>
+        <org.jetbrains.annotations.version>13.0</org.jetbrains.annotations.version>
+        <org.eclipse.jetty.version>9.3.7.v20160115</org.eclipse.jetty.version>
+        <com.google.gson.version>2.6.1</com.google.gson.version>
     </properties>
 
     <build>
@@ -23,7 +24,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>example.Main</mainClass>
+                            <mainClass>main.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -36,9 +37,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.freemarker</groupId>
-            <artifactId>freemarker</artifactId>
-            <version>${org.freemarker.version}</version>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>${org.jetbrains.annotations.version}</version>
         </dependency>
 
         <dependency>
@@ -46,11 +47,16 @@
             <artifactId>jetty-server</artifactId>
             <version>${org.eclipse.jetty.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-webapp</artifactId>
+            <artifactId>jetty-servlet</artifactId>
             <version>${org.eclipse.jetty.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${com.google.gson.version}</version>
         </dependency>
     </dependencies>
 

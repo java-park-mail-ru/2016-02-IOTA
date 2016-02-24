@@ -1,10 +1,11 @@
 package main;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author esin88
+ */
 public class Main {
     public static void main(String[] args) {
         final List<Long> longList = new ArrayList<>();
@@ -23,7 +24,7 @@ public class Main {
         numberList.forEach(System.out::println);
     }
 
-    private static void testExtends(@NotNull List<? extends Number> list) {
+    private static void testExtends(List<? extends Number> list) {
         final Number number = list.get(0);
         assert number != null;
         //noinspection ObjectToString
@@ -31,8 +32,8 @@ public class Main {
         //list.add(2);
     }
 
-    private static void testSuper(@NotNull List<? super Long> list) {
-        Object o = list.get(0);
+    private static void testSuper(List<? super Long> list) {
+        final Object o = list.get(0);
         assert o != null;
         System.out.println(o + " " + o.getClass());
         //noinspection MagicNumber
