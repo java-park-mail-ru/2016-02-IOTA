@@ -1,12 +1,9 @@
 package main;
 
-import frontend.SignInServlet;
-import frontend.SignUpServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-
-import javax.servlet.Servlet;
+import org.glassfish.jersey.servlet.ServletContainer;
 
 /**
  * @author esin88
@@ -24,18 +21,13 @@ public class Main {
 
         System.out.append("Starting at port: ").append(String.valueOf(port)).append('\n');
 
-        final AccountService accountService = new AccountService();
-
-        final Servlet signin = new SignInServlet(accountService);
-        final Servlet signUp = new SignUpServlet(accountService);
-
-        final ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        contextHandler.addServlet(new ServletHolder(signin), "/api/v1/auth/signin");
-        contextHandler.addServlet(new ServletHolder(signUp), "/api/v1/auth/signup");
-
         final Server server = new Server(port);
-        server.setHandler(contextHandler);
+        final ServletContextHandler contextHandler = new ServletContextHandler(server, "/api/", ServletContextHandler.SESSIONS);
 
+        final ServletHolder servletHolder = new ServletHolder(ServletContainer.class);
+        servletHolder.setInitParameter("javax.ws.rs.Application","main.RestApplication");
+
+        contextHandler.addServlet(servletHolder, "/*");
         server.start();
         server.join();
     }
