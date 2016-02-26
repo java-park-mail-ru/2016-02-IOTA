@@ -22,11 +22,11 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="L1.3" />
+        <module name="IotaBackend" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="L1.3" target="1.8" />
+      <module name="IotaBackend" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
