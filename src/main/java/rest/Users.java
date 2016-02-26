@@ -10,9 +10,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Collection;
 
-/**
- * Created by e.shubin on 25.02.2016.
- */
 @Singleton
 @Path("/user")
 public class Users {
@@ -34,9 +31,9 @@ public class Users {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUserByName(@PathParam("name") String name) {
         final UserProfile user = accountService.getUser(name);
-        if(user == null){
+        if (user == null) {
             return Response.status(Response.Status.FORBIDDEN).build();
-        }else {
+        } else {
             return Response.status(Response.Status.OK).entity(user).build();
         }
     }
@@ -44,8 +41,8 @@ public class Users {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createUser(UserProfile user, @Context HttpHeaders headers){
-        if(accountService.addUser(user.getLogin(), user)){
+    public Response createUser(UserProfile user, @Context HttpHeaders headers) {
+        if (accountService.addUser(user.getLogin(), user)) {
             return Response.status(Response.Status.OK).entity(user.getLogin()).build();
         } else {
             return Response.status(Response.Status.FORBIDDEN).build();

@@ -2,9 +2,6 @@ package rest;
 
 import org.jetbrains.annotations.NotNull;
 
-/**
- * @author esin88
- */
 public class UserProfile {
     @NotNull
     private String login;

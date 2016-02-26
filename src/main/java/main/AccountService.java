@@ -6,9 +6,6 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-/**
- * @author esin88
- */
 public class AccountService {
     private ConcurrentMap<String, UserProfile> users = new ConcurrentHashMap<>();
 
