@@ -1,8 +1,9 @@
-package rest;
+package ru.cdecl.pub.iota.models;
 
 import org.jetbrains.annotations.NotNull;
 
 public class UserProfile {
+
     @NotNull
     private String login;
     @NotNull
@@ -35,4 +36,5 @@ public class UserProfile {
     public void setPassword(@NotNull String password) {
         this.password = password;
     }
+
 }

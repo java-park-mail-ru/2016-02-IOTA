@@ -1,12 +1,13 @@
-package main;
+package ru.cdecl.pub.iota.services;
 
-import rest.UserProfile;
+import ru.cdecl.pub.iota.models.UserProfile;
 
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class AccountService {
+
     private ConcurrentMap<String, UserProfile> users = new ConcurrentHashMap<>();
 
     public AccountService() {
@@ -28,4 +29,5 @@ public class AccountService {
     public UserProfile getUser(String userName) {
         return users.get(userName);
     }
+
 }

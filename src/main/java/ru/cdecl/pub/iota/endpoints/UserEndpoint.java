@@ -1,6 +1,7 @@
-package rest;
+package ru.cdecl.pub.iota.endpoints;
 
-import main.AccountService;
+import ru.cdecl.pub.iota.services.AccountService;
+import ru.cdecl.pub.iota.models.UserProfile;
 
 import javax.inject.Singleton;
 import javax.ws.rs.*;
@@ -12,10 +13,11 @@ import java.util.Collection;
 
 @Singleton
 @Path("/user")
-public class Users {
+public class UserEndpoint {
+
     private AccountService accountService;
 
-    public Users(AccountService accountService) {
+    public UserEndpoint(AccountService accountService) {
         this.accountService = accountService;
     }
 
@@ -48,4 +50,5 @@ public class Users {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
     }
+
 }
