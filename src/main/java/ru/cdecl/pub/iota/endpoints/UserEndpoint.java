@@ -1,6 +1,6 @@
 package ru.cdecl.pub.iota.endpoints;
 
-import ru.cdecl.pub.iota.services.AccountService;
+import ru.cdecl.pub.iota.services.UserProfileService;
 import ru.cdecl.pub.iota.models.UserProfile;
 
 import javax.inject.Singleton;
@@ -15,36 +15,52 @@ import java.util.Collection;
 @Path("/user")
 public class UserEndpoint {
 
-    private AccountService accountService;
+    private UserProfileService userProfileService;
 
-    public UserEndpoint(AccountService accountService) {
-        this.accountService = accountService;
+    public UserEndpoint(UserProfileService userProfileService) {
+        this.userProfileService = userProfileService;
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllUsers() {
-        final Collection<UserProfile> allUsers = accountService.getAllUsers();
-        return Response.status(Response.Status.OK).entity(allUsers.toArray(new UserProfile[allUsers.size()])).build();
+        final Collection<UserProfile> allUsers = userProfileService.getAllUsers();
+
+        return Response.ok(allUsers.toArray(new UserProfile[allUsers.size()])).build();
     }
 
+//    @GET
+//    @Path("{name}")
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public Response getUserByName(@PathParam("name") String name) {
+//        final UserProfile user = userProfileService.getUserByName(name);
+//        if (user == null) {
+//            return Response.status(Response.Status.FORBIDDEN).build();
+//        } else {
+//            return Response.status(Response.Status.OK).entity(user).build();
+//        }
+//    }
+
     @GET
-    @Path("{name}")
+    @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserByName(@PathParam("name") String name) {
-        final UserProfile user = accountService.getUser(name);
-        if (user == null) {
-            return Response.status(Response.Status.FORBIDDEN).build();
-        } else {
-            return Response.status(Response.Status.OK).entity(user).build();
+    public Response getUserById(@PathParam("id") long userId) {
+        // todo: переписать
+        final UserProfile userProfile = userProfileService.getUserById(userId);
+
+        if (userProfile != null) {
+            return Response.ok(userProfile).build();
         }
+
+        return Response.status(Response.Status.FORBIDDEN).build();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createUser(UserProfile user, @Context HttpHeaders headers) {
-        if (accountService.addUser(user.getLogin(), user)) {
+        // TODO: пользователь с таким именем может существовать
+        if (userProfileService.addUser(user.getUserId(), user)) {
             return Response.status(Response.Status.OK).entity(user.getLogin()).build();
         } else {
             return Response.status(Response.Status.FORBIDDEN).build();
