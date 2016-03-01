@@ -1,8 +1,10 @@
 package ru.cdecl.pub.iota.endpoints;
 
 import ru.cdecl.pub.iota.models.UserLoginRequest;
+import ru.cdecl.pub.iota.models.UserLoginResponse;
 import ru.cdecl.pub.iota.models.UserProfile;
 import ru.cdecl.pub.iota.models.base.BaseApiResponse;
+import ru.cdecl.pub.iota.models.base.BaseUserIdResponse;
 import ru.cdecl.pub.iota.services.AuthenticationService;
 import ru.cdecl.pub.iota.services.UserProfileService;
 
@@ -11,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -43,7 +44,7 @@ public class SessionEndpoint {
                         final UserProfile userProfile = userProfileService.getUserById((Long) userId);
 
                         if (userProfile != null) {
-                            return Response.ok(userProfile).build();
+                            return Response.ok(new BaseUserIdResponse(userProfile.getUserId())).build();
                         }
                     }
                 } catch (IllegalStateException ignored) {
@@ -55,13 +56,30 @@ public class SessionEndpoint {
     }
 
     @PUT
-//    public Response doLogin(UserLoginRequest userLoginRequest, @Context HttpServletRequest httpServletRequest) {
-//        // todo
-//
-//        final HttpSession httpSession = httpServletRequest.getSession();
-//
-//        return Response.ok(userLoginRequest).build(); // todo
-//    }
+    public Response doLogin(UserLoginRequest userLoginRequest, @Context HttpServletRequest httpServletRequest) {
+        final HttpSession httpSession = httpServletRequest.getSession();
+
+        final UserProfile userProfile = userProfileService.getUserByLogin(userLoginRequest.getLogin());
+        boolean isPasswordOk = false;
+
+        if (userProfile != null) {
+            isPasswordOk = authenticationService.checkPassword(userProfile.getUserId(), userLoginRequest.getPassword().toCharArray());
+        }
+
+        if (isPasswordOk) {
+            //noinspection SynchronizationOnLocalVariableOrMethodParameter
+            synchronized (httpSession) {
+                try {
+                    httpSession.setAttribute("user_id", userProfile.getUserId());
+
+                    return Response.ok(new UserLoginResponse(userProfile.getUserId())).build();
+                } catch (IllegalStateException ignored){
+                }
+            }
+        }
+
+        return Response.status(Response.Status.BAD_REQUEST).entity(new BaseApiResponse()).build();
+    }
 
     @DELETE
     public Response doLogout(@Context HttpServletRequest httpServletRequest) {

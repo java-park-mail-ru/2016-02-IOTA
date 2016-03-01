@@ -1,6 +1,8 @@
 package ru.cdecl.pub.iota.endpoints;
 
 import ru.cdecl.pub.iota.models.UserCreateRequest;
+import ru.cdecl.pub.iota.models.UserCreateResponse;
+import ru.cdecl.pub.iota.models.base.BaseApiResponse;
 import ru.cdecl.pub.iota.services.AuthenticationService;
 import ru.cdecl.pub.iota.services.UserProfileService;
 import ru.cdecl.pub.iota.models.UserProfile;
@@ -31,22 +33,11 @@ public class UserEndpoint {
 
     @GET
     public Response getAllUsers() {
+        // todo: удалить
         final Collection<UserProfile> allUsers = userProfileService.getAllUsers();
 
         return Response.ok(allUsers.toArray(new UserProfile[allUsers.size()])).build();
     }
-
-//    @GET
-//    @Path("{name}")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Response getUserByName(@PathParam("name") String name) {
-//        final UserProfile user = userProfileService.getUserByName(name);
-//        if (user == null) {
-//            return Response.status(Response.Status.FORBIDDEN).build();
-//        } else {
-//            return Response.status(Response.Status.OK).entity(user).build();
-//        }
-//    }
 
     @GET
     @Path("{id}")
@@ -71,18 +62,24 @@ public class UserEndpoint {
             }
         }
 
-        return Response.status(Response.Status.FORBIDDEN).build();
+        return Response.status(Response.Status.NOT_FOUND).entity(new BaseApiResponse()).build();
     }
 
     @POST
-    public Response createUser(UserCreateRequest userCreateRequest) { // todo
-        if (userProfileService.addUser(userCreateRequest.getUserId(), userCreateRequest)) {
-//            authenticationService.setPasswordForUser(user.getUserId(),);
+    public Response createUser(UserCreateRequest userCreateRequest) {
+        char[] userPassword = userCreateRequest.getPassword().toCharArray();
+        userCreateRequest.eraseSensitiveData();
 
-            return Response.status(Response.Status.OK).entity(userCreateRequest.getLogin()).build();
-        } else {
-            return Response.status(Response.Status.FORBIDDEN).build();
+        if (userProfileService.addUser(userCreateRequest.getUserId(), userCreateRequest)) {
+            authenticationService.setPasswordForUser(userCreateRequest.getUserId(), userPassword);
+
+            return Response.status(Response.Status.OK).entity(new UserCreateResponse(userCreateRequest.getUserId())).build();
         }
+
+        return Response.status(Response.Status.FORBIDDEN).entity(new BaseApiResponse()).build();
     }
+
+    // todo: редактирование пользователя
+    // todo: удаление пользователя
 
 }

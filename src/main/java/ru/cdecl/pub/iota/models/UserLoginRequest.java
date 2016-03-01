@@ -10,8 +10,7 @@ public class UserLoginRequest {
     private String password;
 
     public UserLoginRequest() {
-        login = "";
-        password = "";
+        this("", "");
     }
 
     protected UserLoginRequest(@NotNull String login, @NotNull String password) {

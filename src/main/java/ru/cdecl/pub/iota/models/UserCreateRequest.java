@@ -2,18 +2,24 @@ package ru.cdecl.pub.iota.models;
 
 import org.jetbrains.annotations.NotNull;
 
+import javax.xml.bind.annotation.XmlTransient;
+
 public class UserCreateRequest extends UserProfile {
 
     @NotNull
     private String password;
 
     public UserCreateRequest() {
-        password = "";
+        this("", "", "");
     }
 
     public UserCreateRequest(@NotNull String login, @NotNull String email, @NotNull String password) {
         super(login, email);
         this.password = password;
+    }
+
+    public void eraseSensitiveData() {
+        password = "__erased__";
     }
 
     @NotNull

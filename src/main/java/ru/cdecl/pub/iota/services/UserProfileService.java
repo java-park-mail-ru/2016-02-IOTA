@@ -2,6 +2,7 @@ package ru.cdecl.pub.iota.services;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.cdecl.pub.iota.models.UserCreateRequest;
 import ru.cdecl.pub.iota.models.UserProfile;
 
 import java.util.Collection;
@@ -13,13 +14,14 @@ public class UserProfileService {
     private ConcurrentMap<Long, UserProfile> users = new ConcurrentHashMap<>();
 
     public UserProfileService() {
-        UserProfile[] userProfiles = new UserProfile[]{
-                new UserProfile("admin", "admin@example.com"),
-                new UserProfile("guest", "guest@example.com")
+        // todo: удалить
+        UserCreateRequest[] userCreateRequests = new UserCreateRequest[]{
+                new UserCreateRequest("admin", "admin@example.com", "12345"),
+                new UserCreateRequest("guest", "guest@example.com", "11")
         };
 
-        for (UserProfile userProfile : userProfiles) {
-            users.putIfAbsent(userProfile.getUserId(), userProfile);
+        for (UserCreateRequest userCreateRequest : userCreateRequests) {
+            users.putIfAbsent(userCreateRequest.getUserId(), userCreateRequest);
         }
     }
 

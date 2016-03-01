@@ -2,6 +2,7 @@ package ru.cdecl.pub.iota.models;
 
 import org.jetbrains.annotations.NotNull;
 
+import javax.xml.bind.annotation.XmlElement;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class UserProfile {
@@ -13,18 +14,22 @@ public class UserProfile {
     private String email;
 
     public UserProfile() {
-        userId = ID_GENERATOR.getAndIncrement();
-        login = "";
-        email = "";
+        this("", "");
     }
 
     public UserProfile(@NotNull String login, @NotNull String email) {
+        userId = ID_GENERATOR.getAndIncrement();
         this.login = login;
         this.email = email;
     }
 
+    @XmlElement(name="id")
     public synchronized long getUserId() {
         return userId;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
     }
 
     @NotNull
