@@ -32,14 +32,6 @@ public class UserEndpoint {
     }
 
     @GET
-    public Response getAllUsers() {
-        // todo: удалить
-        final Collection<UserProfile> allUsers = userProfileService.getAllUsers();
-
-        return Response.ok(allUsers.toArray(new UserProfile[allUsers.size()])).build();
-    }
-
-    @GET
     @Path("{id}")
     public Response getUserById(@PathParam("id") long userId, @Context HttpServletRequest httpServletRequest) {
         final HttpSession httpSession = httpServletRequest.getSession(false);
