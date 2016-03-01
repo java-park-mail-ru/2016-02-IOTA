@@ -11,4 +11,5 @@ public class UserLoginResponse extends BaseUserIdResponse {
     public UserLoginResponse(long userId) {
         super(userId);
     }
+
 }

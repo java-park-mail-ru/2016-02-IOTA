@@ -28,4 +28,5 @@ public class UserCreateRequest extends UserProfile {
     public void setPassword(@NotNull String password) {
         this.password = password;
     }
+
 }

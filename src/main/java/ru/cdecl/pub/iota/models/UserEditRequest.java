@@ -47,4 +47,5 @@ public class UserEditRequest {
     public void setPassword(@Nullable String password) {
         this.password = password;
     }
+
 }

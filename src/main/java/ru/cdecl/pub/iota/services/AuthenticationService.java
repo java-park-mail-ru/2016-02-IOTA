@@ -30,4 +30,5 @@ public class AuthenticationService {
     public void deletePasswordForUser(@NotNull Long userId) {
         userPasswords.remove(userId);
     }
+
 }
