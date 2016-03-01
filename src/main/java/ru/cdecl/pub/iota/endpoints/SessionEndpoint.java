@@ -35,18 +35,14 @@ public class SessionEndpoint {
         final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession != null) {
-            synchronized (httpSession.getId().intern()) {
-                try {
-                    final Object userId = httpSession.getAttribute("user_id");
 
-                    if (userId != null && userId instanceof Long) {
-                        final UserProfile userProfile = userProfileService.getUserById((Long) userId);
+            final Object userId = httpSession.getAttribute("user_id");
 
-                        if (userProfile != null) {
-                            return Response.ok(new BaseUserIdResponse(userProfile.getUserId())).build();
-                        }
-                    }
-                } catch (IllegalStateException ignored) {
+            if (userId != null && userId instanceof Long) {
+                final UserProfile userProfile = userProfileService.getUserById((Long) userId);
+
+                if (userProfile != null) {
+                    return Response.ok(new BaseUserIdResponse(userProfile.getUserId())).build();
                 }
             }
         }
@@ -62,18 +58,13 @@ public class SessionEndpoint {
         boolean isPasswordOk = false;
 
         if (userProfile != null) {
-            isPasswordOk = authenticationService.checkPassword(userProfile.getUserId(), userLoginRequest.getPassword().toCharArray());
+            isPasswordOk = authenticationService.checkPassword(userProfile.getUserId(), userLoginRequest.getPassword());
         }
 
         if (isPasswordOk) {
-            synchronized (httpSession.getId().intern()) {
-                try {
-                    httpSession.setAttribute("user_id", userProfile.getUserId());
+            httpSession.setAttribute("user_id", userProfile.getUserId());
 
-                    return Response.ok(new UserLoginResponse(userProfile.getUserId())).build();
-                } catch (IllegalStateException ignored) {
-                }
-            }
+            return Response.ok(new UserLoginResponse(userProfile.getUserId())).build();
         }
 
         return Response.status(Response.Status.BAD_REQUEST).entity(new BaseApiResponse()).build();
@@ -84,12 +75,7 @@ public class SessionEndpoint {
         final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession != null) {
-            synchronized (httpSession.getId().intern()) {
-                try {
-                    httpSession.invalidate();
-                } catch (IllegalStateException ignored) {
-                }
-            }
+            httpSession.invalidate();
         }
 
         return Response.ok(new BaseApiResponse()).build();

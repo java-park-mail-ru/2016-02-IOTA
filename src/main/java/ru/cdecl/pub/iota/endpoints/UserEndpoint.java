@@ -37,18 +37,13 @@ public class UserEndpoint {
         final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession != null) {
-            synchronized (httpSession.getId().intern()) {
-                try {
-                    final Object userIdFromSession = httpSession.getAttribute("user_id");
+            final Object userIdFromSession = httpSession.getAttribute("user_id");
 
-                    if (userIdFromSession != null && userIdFromSession instanceof Long && userId == (long) userIdFromSession) {
-                        final UserProfile userProfile = userProfileService.getUserById(userId);
+            if (userIdFromSession != null && userIdFromSession instanceof Long && userId == (long) userIdFromSession) {
+                final UserProfile userProfile = userProfileService.getUserById(userId);
 
-                        if (userProfile != null) {
-                            return Response.ok(userProfile).build();
-                        }
-                    }
-                } catch (IllegalStateException ignored) {
+                if (userProfile != null) {
+                    return Response.ok(userProfile).build();
                 }
             }
         }
@@ -58,7 +53,7 @@ public class UserEndpoint {
 
     @POST
     public Response createUser(UserCreateRequest userCreateRequest) {
-        final char[] userPassword = userCreateRequest.getPassword().toCharArray();
+        final String userPassword = userCreateRequest.getPassword();
 
         userCreateRequest.eraseSensitiveData();
 
@@ -77,23 +72,18 @@ public class UserEndpoint {
         final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession != null) {
-            synchronized (httpSession.getId().intern()) {
-                try {
-                    final Object userIdFromSession = httpSession.getAttribute("user_id");
+            final Object userIdFromSession = httpSession.getAttribute("user_id");
 
-                    if (userIdFromSession == null || !(userIdFromSession instanceof Long)) {
-                        return Response.status(Response.Status.NOT_FOUND).entity(new BaseApiResponse()).build();
-                    }
+            if (userIdFromSession == null || !(userIdFromSession instanceof Long)) {
+                return Response.status(Response.Status.NOT_FOUND).entity(new BaseApiResponse()).build();
+            }
 
-                    if (userId == (long) userIdFromSession) {
-                        userProfileService.deleteUser(userId);
-                        authenticationService.deletePasswordForUser(userId);
-                        httpSession.invalidate();
+            if (userId == (long) userIdFromSession) {
+                userProfileService.deleteUser(userId);
+                authenticationService.deletePasswordForUser(userId);
+                httpSession.invalidate();
 
-                        return Response.ok(new BaseApiResponse()).build();
-                    }
-                } catch (IllegalStateException ignored) {
-                }
+                return Response.ok(new BaseApiResponse()).build();
             }
         }
 
@@ -106,24 +96,23 @@ public class UserEndpoint {
         final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession != null) {
-            synchronized (httpSession.getId().intern()) {
+            final Object userIdFromSession = httpSession.getAttribute("user_id");
+
+            if (userIdFromSession == null || !(userIdFromSession instanceof Long)) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity(new BaseApiResponse()).build();
+            }
+
+            if (userId == (long) userIdFromSession) {
                 try {
-                    final Object userIdFromSession = httpSession.getAttribute("user_id");
-
-                    if (userIdFromSession == null || !(userIdFromSession instanceof Long)) {
-                        return Response.status(Response.Status.UNAUTHORIZED).entity(new BaseApiResponse()).build();
-                    }
-
-                    if (userId == (long) userIdFromSession) {
-                        userProfileService.updateUser(userId, userEditRequest);
-                        authenticationService.setPasswordForUser(userId, userEditRequest.getPassword());
-                        httpSession.invalidate();
-
-                        return Response.ok(new BaseApiResponse()).build();
-                    }
-
-                } catch (IllegalStateException ignored) {
+                    userProfileService.updateUser(userId, userEditRequest);
+                } catch (IllegalArgumentException ex) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity(new BaseApiResponse()).build();
                 }
+
+                authenticationService.setPasswordForUser(userId, userEditRequest.getPassword());
+                httpSession.invalidate();
+
+                return Response.ok(new BaseApiResponse()).build();
             }
         }
 

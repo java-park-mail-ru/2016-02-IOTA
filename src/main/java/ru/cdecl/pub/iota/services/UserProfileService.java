@@ -7,42 +7,48 @@ import ru.cdecl.pub.iota.models.UserEditRequest;
 import ru.cdecl.pub.iota.models.UserProfile;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public class UserProfileService {
 
-    private final ConcurrentMap<Long, UserProfile> users = new ConcurrentHashMap<>();
+    private final Map<Long, UserProfile> users = new ConcurrentHashMap<>();
+    private final Map<String, UserProfile> nameToProfile = new ConcurrentHashMap<>();
 
     @NotNull
     public Collection<UserProfile> getAllUsers() {
         return users.values();
     }
 
-    public synchronized boolean addUser(@NotNull Long userId, @NotNull UserProfile userProfile) {
+    public boolean addUser(@NotNull Long userId, @NotNull UserProfile userProfile) {
         if (users.containsKey(userId)) {
             return false;
         }
 
-        for (UserProfile aUserProfile : users.values()) {
-            if (aUserProfile.getLogin().equals(userProfile.getLogin())) {
-                return false;
-            }
+        if(nameToProfile.containsKey(userProfile.getLogin())) {
+            return false;
         }
 
         users.put(userId, userProfile);
+        nameToProfile.put(userProfile.getLogin(), userProfile);
 
         return true;
     }
 
-    public synchronized void updateUser(long userId, UserEditRequest userEditRequest) {
+    public void updateUser(long userId, UserEditRequest userEditRequest) {
         UserProfile userProfile = users.get(userId);
 
         if (userProfile != null) {
             String newLogin = userEditRequest.getLogin();
 
             if (newLogin != null) {
+                if (nameToProfile.containsKey(newLogin)) {
+                    throw new IllegalArgumentException("User with this name already exists.");
+                }
+
+                nameToProfile.remove(userProfile.getLogin());
                 userProfile.setLogin(newLogin);
+                nameToProfile.put(newLogin, userProfile);
             }
 
             String newEmail = userEditRequest.getEmail();
@@ -61,13 +67,7 @@ public class UserProfileService {
 
     @Nullable
     public UserProfile getUserByLogin(@NotNull String login) {
-        for (UserProfile userProfile : users.values()) {
-            if (userProfile.getLogin().equals(login)) {
-                return userProfile;
-            }
-        }
-
-        return null;
+        return nameToProfile.get(login);
     }
 
     @Nullable

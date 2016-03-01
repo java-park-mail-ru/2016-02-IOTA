@@ -4,26 +4,22 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public class AuthenticationService {
 
-    private final ConcurrentMap<Long, char[]> userPasswords = new ConcurrentHashMap<>();
+    private final Map<Long, String> userPasswords = new ConcurrentHashMap<>();
 
-    public boolean checkPassword(@NotNull Long userId, @NotNull char[] password) {
-        char[] storedPassword = userPasswords.get(userId);
+    public boolean checkPassword(@NotNull Long userId, @NotNull String password) {
+        String storedPassword = userPasswords.get(userId);
 
-        return storedPassword != null && Arrays.equals(storedPassword, password);
-    }
-
-    public void setPasswordForUser(@NotNull Long userId, @NotNull char[] password) {
-        userPasswords.put(userId, password);
+        return storedPassword != null && storedPassword.equals(password);
     }
 
     public void setPasswordForUser(@NotNull Long userId, @Nullable String password) {
         if (password != null) {
-            setPasswordForUser(userId, password.toCharArray());
+            userPasswords.put(userId, password);
         }
     }
 
