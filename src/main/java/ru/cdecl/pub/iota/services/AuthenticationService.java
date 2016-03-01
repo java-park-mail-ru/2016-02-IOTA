@@ -1,6 +1,7 @@
 package ru.cdecl.pub.iota.services;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,6 +19,12 @@ public class AuthenticationService {
 
     public void setPasswordForUser(@NotNull Long userId, @NotNull char[] password) {
         userPasswords.put(userId, password);
+    }
+
+    public void setPasswordForUser(@NotNull Long userId, @Nullable String password) {
+        if (password != null) {
+            setPasswordForUser(userId, password.toCharArray());
+        }
     }
 
     public void deletePasswordForUser(@NotNull Long userId) {

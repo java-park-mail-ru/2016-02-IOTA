@@ -2,6 +2,7 @@ package ru.cdecl.pub.iota.endpoints;
 
 import ru.cdecl.pub.iota.models.UserCreateRequest;
 import ru.cdecl.pub.iota.models.UserCreateResponse;
+import ru.cdecl.pub.iota.models.UserEditRequest;
 import ru.cdecl.pub.iota.models.base.BaseApiResponse;
 import ru.cdecl.pub.iota.services.AuthenticationService;
 import ru.cdecl.pub.iota.services.UserProfileService;
@@ -94,7 +95,7 @@ public class UserEndpoint {
                         return Response.status(Response.Status.NOT_FOUND).entity(new BaseApiResponse()).build();
                     }
 
-                    if (userId == (long) userId) {
+                    if (userId == (long) userIdFromSession) {
                         userProfileService.deleteUser(userId);
                         authenticationService.deletePasswordForUser(userId);
                         httpSession.invalidate();
@@ -109,6 +110,37 @@ public class UserEndpoint {
         return Response.status(Response.Status.FORBIDDEN).entity(new BaseApiResponse()).build();
     }
 
-    // todo: редактирование пользователя
+    @POST
+    @Path("{id}")
+    public Response editUser(@PathParam("id") long userId, UserEditRequest userEditRequest, @Context HttpServletRequest httpServletRequest) {
+        final HttpSession httpSession = httpServletRequest.getSession(false);
+
+        if (httpSession != null) {
+            //noinspection SynchronizationOnLocalVariableOrMethodParameter
+            synchronized (httpSession) {
+                try {
+                    final Object userIdFromSession = httpSession.getAttribute("user_id");
+
+                    if (userIdFromSession == null || !(userIdFromSession instanceof Long)) {
+                        return Response.status(Response.Status.UNAUTHORIZED).entity(new BaseApiResponse()).build();
+                    }
+
+                    if (userId == (long) userIdFromSession) {
+                        UserProfile userProfile = userProfileService.getUserById(userId);
+
+                        userProfileService.updateUser(userId, userEditRequest);
+                        authenticationService.setPasswordForUser(userId, userEditRequest.getPassword());
+                        httpSession.invalidate();
+
+                        return Response.ok(new BaseApiResponse()).build();
+                    }
+
+                } catch (IllegalStateException ignored) {
+                }
+            }
+        }
+
+        return Response.status(Response.Status.FORBIDDEN).entity(new BaseApiResponse()).build();
+    }
 
 }
