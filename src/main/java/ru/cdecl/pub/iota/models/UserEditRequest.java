@@ -15,7 +15,7 @@ public class UserEditRequest {
         this(null, null, null);
     }
 
-    public UserEditRequest(@Nullable String login, @Nullable String email, @Nullable  String password) {
+    public UserEditRequest(@Nullable String login, @Nullable String email, @Nullable String password) {
         this.login = login;
         this.email = email;
         this.password = password;

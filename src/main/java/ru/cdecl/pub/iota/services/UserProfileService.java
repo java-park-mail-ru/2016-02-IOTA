@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class UserProfileService {
 
-    private ConcurrentMap<Long, UserProfile> users = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Long, UserProfile> users = new ConcurrentHashMap<>();
 
     @NotNull
     public Collection<UserProfile> getAllUsers() {
@@ -35,28 +35,24 @@ public class UserProfileService {
         return true;
     }
 
-    public synchronized boolean updateUser(long userId, UserEditRequest userEditRequest) {
+    public synchronized void updateUser(long userId, UserEditRequest userEditRequest) {
         UserProfile userProfile = users.get(userId);
 
-        if (userProfile == null) {
-            return false;
+        if (userProfile != null) {
+            String newLogin = userEditRequest.getLogin();
+
+            if (newLogin != null) {
+                userProfile.setLogin(newLogin);
+            }
+
+            String newEmail = userEditRequest.getEmail();
+
+            if (newEmail != null) {
+                userProfile.setEmail(newEmail);
+            }
+
+            users.put(userId, userProfile);
         }
-
-        String newLogin = userEditRequest.getLogin();
-
-        if (newLogin != null) {
-            userProfile.setLogin(newLogin);
-        }
-
-        String newEmail = userEditRequest.getEmail();
-
-        if (newEmail != null) {
-            userProfile.setEmail(newEmail);
-        }
-
-        users.put(userId, userProfile);
-
-        return true;
     }
 
     public void deleteUser(long userId) {

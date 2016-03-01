@@ -23,7 +23,7 @@ public class UserProfile {
         this.email = email;
     }
 
-    @XmlElement(name="id")
+    @XmlElement(name = "id")
     public synchronized long getUserId() {
         return userId;
     }

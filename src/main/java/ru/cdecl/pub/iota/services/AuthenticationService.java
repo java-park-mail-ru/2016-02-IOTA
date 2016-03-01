@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class AuthenticationService {
 
-    private ConcurrentMap<Long, char[]> userPasswords = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Long, char[]> userPasswords = new ConcurrentHashMap<>();
 
     public boolean checkPassword(@NotNull Long userId, @NotNull char[] password) {
         char[] storedPassword = userPasswords.get(userId);

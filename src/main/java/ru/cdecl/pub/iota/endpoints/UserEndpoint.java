@@ -23,8 +23,8 @@ import java.util.Collection;
 @Produces(MediaType.APPLICATION_JSON)
 public class UserEndpoint {
 
-    private UserProfileService userProfileService;
-    private AuthenticationService authenticationService;
+    private final UserProfileService userProfileService;
+    private final AuthenticationService authenticationService;
 
     public UserEndpoint(UserProfileService userProfileService, AuthenticationService authenticationService) {
         this.userProfileService = userProfileService;
@@ -126,8 +126,6 @@ public class UserEndpoint {
                     }
 
                     if (userId == (long) userIdFromSession) {
-                        UserProfile userProfile = userProfileService.getUserById(userId);
-
                         userProfileService.updateUser(userId, userEditRequest);
                         authenticationService.setPasswordForUser(userId, userEditRequest.getPassword());
                         httpSession.invalidate();

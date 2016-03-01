@@ -22,8 +22,8 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class SessionEndpoint {
 
-    private UserProfileService userProfileService;
-    private AuthenticationService authenticationService;
+    private final UserProfileService userProfileService;
+    private final AuthenticationService authenticationService;
 
     public SessionEndpoint(UserProfileService userProfileService, AuthenticationService authenticationService) {
         this.userProfileService = userProfileService;
@@ -73,7 +73,7 @@ public class SessionEndpoint {
                     httpSession.setAttribute("user_id", userProfile.getUserId());
 
                     return Response.ok(new UserLoginResponse(userProfile.getUserId())).build();
-                } catch (IllegalStateException ignored){
+                } catch (IllegalStateException ignored) {
                 }
             }
         }
