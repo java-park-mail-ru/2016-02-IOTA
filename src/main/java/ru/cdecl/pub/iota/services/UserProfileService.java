@@ -14,8 +14,8 @@ public class UserProfileService {
 
     public UserProfileService() {
         UserProfile[] userProfiles = new UserProfile[]{
-                new UserProfile("admin", "admin", "admin@example.com"),
-                new UserProfile("guest", "12345", "guest@example.com")
+                new UserProfile("admin", "admin@example.com"),
+                new UserProfile("guest", "guest@example.com")
         };
 
         for (UserProfile userProfile : userProfiles) {
@@ -28,8 +28,31 @@ public class UserProfileService {
         return users.values();
     }
 
-    public boolean addUser(@NotNull Long userId, @NotNull UserProfile userProfile) {
-        return null != users.putIfAbsent(userId, userProfile);
+    public synchronized boolean addUser(@NotNull Long userId, @NotNull UserProfile userProfile) {
+        if (users.containsKey(userId)) {
+            return false;
+        }
+
+        for (UserProfile aUserProfile : users.values()) {
+            if (aUserProfile.getLogin().equals(userProfile.getLogin())) {
+                return false;
+            }
+        }
+
+        users.put(userId, userProfile);
+
+        return true;
+    }
+
+    @Nullable
+    public UserProfile getUserByLogin(@NotNull String login) {
+        for (UserProfile userProfile : users.values()) {
+            if (userProfile.getLogin().equals(login)) {
+                return userProfile;
+            }
+        }
+
+        return null;
     }
 
     @Nullable

@@ -2,6 +2,7 @@ package ru.cdecl.pub.iota.main;
 
 import ru.cdecl.pub.iota.endpoints.SessionEndpoint;
 import ru.cdecl.pub.iota.endpoints.UserEndpoint;
+import ru.cdecl.pub.iota.services.AuthenticationService;
 import ru.cdecl.pub.iota.services.UserProfileService;
 
 import javax.ws.rs.ApplicationPath;
@@ -17,9 +18,10 @@ public class RestApplication extends Application {
         final HashSet<Object> objects = new HashSet<>();
 
         UserProfileService userProfileService = new UserProfileService();
+        AuthenticationService authenticationService = new AuthenticationService();
 
-        objects.add(new UserEndpoint(userProfileService));
-        objects.add(new SessionEndpoint(userProfileService));
+        objects.add(new UserEndpoint(userProfileService, authenticationService));
+        objects.add(new SessionEndpoint(userProfileService, authenticationService));
 
         return objects;
     }

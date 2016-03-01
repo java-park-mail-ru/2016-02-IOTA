@@ -16,8 +16,7 @@ public class AuthenticationService {
         return storedPassword != null && Arrays.equals(storedPassword, password);
     }
 
-    public void addPasswordForUser(@NotNull Long userId, @NotNull char[] password) { // todo: переименовать
-        // todo
-        userPasswords.putIfAbsent(userId, password);
+    public void setPasswordForUser(@NotNull Long userId, @NotNull char[] password) {
+        userPasswords.put(userId, password);
     }
 }

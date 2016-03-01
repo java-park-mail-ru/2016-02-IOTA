@@ -1,9 +1,13 @@
 package ru.cdecl.pub.iota.endpoints;
 
+import ru.cdecl.pub.iota.models.UserCreateRequest;
+import ru.cdecl.pub.iota.services.AuthenticationService;
 import ru.cdecl.pub.iota.services.UserProfileService;
 import ru.cdecl.pub.iota.models.UserProfile;
 
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -13,16 +17,19 @@ import java.util.Collection;
 
 @Singleton
 @Path("/user")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public class UserEndpoint {
 
     private UserProfileService userProfileService;
+    private AuthenticationService authenticationService;
 
-    public UserEndpoint(UserProfileService userProfileService) {
+    public UserEndpoint(UserProfileService userProfileService, AuthenticationService authenticationService) {
         this.userProfileService = userProfileService;
+        this.authenticationService = authenticationService;
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getAllUsers() {
         final Collection<UserProfile> allUsers = userProfileService.getAllUsers();
 
@@ -43,25 +50,36 @@ public class UserEndpoint {
 
     @GET
     @Path("{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserById(@PathParam("id") long userId) {
-        // todo: переписать
-        final UserProfile userProfile = userProfileService.getUserById(userId);
+    public Response getUserById(@PathParam("id") long userId, @Context HttpServletRequest httpServletRequest) {
+        final HttpSession httpSession = httpServletRequest.getSession(false);
 
-        if (userProfile != null) {
-            return Response.ok(userProfile).build();
+        if (httpSession != null) {
+            //noinspection SynchronizationOnLocalVariableOrMethodParameter
+            synchronized (httpSession) {
+                try {
+                    final Object userIdFromSession = httpSession.getAttribute("user_id");
+
+                    if (userIdFromSession != null && userIdFromSession instanceof Long && userId == (long) userIdFromSession) {
+                        final UserProfile userProfile = userProfileService.getUserById(userId);
+
+                        if (userProfile != null) {
+                            return Response.ok(userProfile).build();
+                        }
+                    }
+                } catch (IllegalStateException ignored) {
+                }
+            }
         }
 
         return Response.status(Response.Status.FORBIDDEN).build();
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createUser(UserProfile user, @Context HttpHeaders headers) {
-        // TODO: пользователь с таким именем может существовать
-        if (userProfileService.addUser(user.getUserId(), user)) {
-            return Response.status(Response.Status.OK).entity(user.getLogin()).build();
+    public Response createUser(UserCreateRequest userCreateRequest) { // todo
+        if (userProfileService.addUser(userCreateRequest.getUserId(), userCreateRequest)) {
+//            authenticationService.setPasswordForUser(user.getUserId(),);
+
+            return Response.status(Response.Status.OK).entity(userCreateRequest.getLogin()).build();
         } else {
             return Response.status(Response.Status.FORBIDDEN).build();
         }

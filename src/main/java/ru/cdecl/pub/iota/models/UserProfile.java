@@ -2,10 +2,9 @@ package ru.cdecl.pub.iota.models;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class UserProfile implements Serializable, Cloneable {
+public class UserProfile {
 
     private long userId;
     @NotNull
@@ -19,30 +18,30 @@ public class UserProfile implements Serializable, Cloneable {
         email = "";
     }
 
-    public UserProfile(@NotNull String login, @NotNull String password, @NotNull String email) {
+    public UserProfile(@NotNull String login, @NotNull String email) {
         this.login = login;
         this.email = email;
     }
 
-    public long getUserId() {
+    public synchronized long getUserId() {
         return userId;
     }
 
     @NotNull
-    public String getLogin() {
+    public synchronized String getLogin() {
         return login;
     }
 
-    public void setLogin(@NotNull String login) {
+    public synchronized void setLogin(@NotNull String login) {
         this.login = login;
     }
 
     @NotNull
-    public String getEmail() {
+    public synchronized String getEmail() {
         return email;
     }
 
-    public void setEmail(@NotNull String email) {
+    public synchronized void setEmail(@NotNull String email) {
         this.email = email;
     }
 
