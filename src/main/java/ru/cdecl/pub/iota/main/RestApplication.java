@@ -17,8 +17,8 @@ public class RestApplication extends Application {
     public Set<Object> getSingletons() {
         final HashSet<Object> objects = new HashSet<>();
 
-        UserProfileService userProfileService = new UserProfileService();
-        AuthenticationService authenticationService = new AuthenticationService();
+        final UserProfileService userProfileService = new UserProfileService();
+        final AuthenticationService authenticationService = new AuthenticationService();
 
         objects.add(new UserEndpoint(userProfileService, authenticationService));
         objects.add(new SessionEndpoint(userProfileService, authenticationService));

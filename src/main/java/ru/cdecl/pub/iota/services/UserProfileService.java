@@ -2,7 +2,6 @@ package ru.cdecl.pub.iota.services;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ru.cdecl.pub.iota.models.UserCreateRequest;
 import ru.cdecl.pub.iota.models.UserEditRequest;
 import ru.cdecl.pub.iota.models.UserProfile;
 
@@ -36,10 +35,10 @@ public class UserProfileService {
     }
 
     public void updateUser(long userId, UserEditRequest userEditRequest) {
-        UserProfile userProfile = users.get(userId);
+        final UserProfile userProfile = users.get(userId);
 
         if (userProfile != null) {
-            String newLogin = userEditRequest.getLogin();
+            final String newLogin = userEditRequest.getLogin();
 
             if (newLogin != null) {
                 if (nameToProfile.containsKey(newLogin)) {
@@ -51,7 +50,7 @@ public class UserProfileService {
                 nameToProfile.put(newLogin, userProfile);
             }
 
-            String newEmail = userEditRequest.getEmail();
+            final String newEmail = userEditRequest.getEmail();
 
             if (newEmail != null) {
                 userProfile.setEmail(newEmail);

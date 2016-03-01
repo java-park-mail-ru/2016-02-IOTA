@@ -3,7 +3,6 @@ package ru.cdecl.pub.iota.services;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,7 +11,7 @@ public class AuthenticationService {
     private final Map<Long, String> userPasswords = new ConcurrentHashMap<>();
 
     public boolean checkPassword(@NotNull Long userId, @NotNull String password) {
-        String storedPassword = userPasswords.get(userId);
+        final String storedPassword = userPasswords.get(userId);
 
         return storedPassword != null && storedPassword.equals(password);
     }

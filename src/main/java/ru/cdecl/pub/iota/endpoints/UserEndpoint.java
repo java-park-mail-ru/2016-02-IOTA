@@ -15,7 +15,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Collection;
 
 @Singleton
 @Path("/user")
@@ -103,12 +102,7 @@ public class UserEndpoint {
             }
 
             if (userId == (long) userIdFromSession) {
-                try {
-                    userProfileService.updateUser(userId, userEditRequest);
-                } catch (IllegalArgumentException ex) {
-                    return Response.status(Response.Status.BAD_REQUEST).entity(new BaseApiResponse()).build();
-                }
-
+                userProfileService.updateUser(userId, userEditRequest);
                 authenticationService.setPasswordForUser(userId, userEditRequest.getPassword());
                 httpSession.invalidate();
 

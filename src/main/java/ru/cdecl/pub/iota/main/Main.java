@@ -13,14 +13,16 @@ public class Main {
             System.exit(1);
         }
 
-        int port = FALLBACK_PORT;
+        int port = -1;
 
         try {
             port = Integer.valueOf(args[0]);
         } catch (NumberFormatException ex) {
-            String errorMessage = String.format("Cannot parse port, using fallback port %d.", port);
-            System.err.println(errorMessage);
+            System.err.println("Cannot parse port");
+            System.exit(2);
         }
+
+        assert (port > 0);
 
         System.out.println(String.format("Starting server at port %d.", port));
 
@@ -40,7 +42,5 @@ public class Main {
             e.printStackTrace();
         }
     }
-
-    public static final int FALLBACK_PORT = 8080;
 
 }
