@@ -19,4 +19,8 @@ public class AuthenticationService {
     public void setPasswordForUser(@NotNull Long userId, @NotNull char[] password) {
         userPasswords.put(userId, password);
     }
+
+    public void deletePasswordForUser(@NotNull Long userId) {
+        userPasswords.remove(userId);
+    }
 }

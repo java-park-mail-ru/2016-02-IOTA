@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Collection;
@@ -67,7 +66,8 @@ public class UserEndpoint {
 
     @POST
     public Response createUser(UserCreateRequest userCreateRequest) {
-        char[] userPassword = userCreateRequest.getPassword().toCharArray();
+        final char[] userPassword = userCreateRequest.getPassword().toCharArray();
+
         userCreateRequest.eraseSensitiveData();
 
         if (userProfileService.addUser(userCreateRequest.getUserId(), userCreateRequest)) {
@@ -79,7 +79,36 @@ public class UserEndpoint {
         return Response.status(Response.Status.FORBIDDEN).entity(new BaseApiResponse()).build();
     }
 
+    @DELETE
+    @Path("{id}")
+    public Response deleteUser(@PathParam("id") long userId, @Context HttpServletRequest httpServletRequest) {
+        final HttpSession httpSession = httpServletRequest.getSession(false);
+
+        if (httpSession != null) {
+            //noinspection SynchronizationOnLocalVariableOrMethodParameter
+            synchronized (httpSession) {
+                try {
+                    final Object userIdFromSession = httpSession.getAttribute("user_id");
+
+                    if (userIdFromSession == null || !(userIdFromSession instanceof Long)) {
+                        return Response.status(Response.Status.NOT_FOUND).entity(new BaseApiResponse()).build();
+                    }
+
+                    if (userId == (long) userId) {
+                        userProfileService.deleteUser(userId);
+                        authenticationService.deletePasswordForUser(userId);
+                        httpSession.invalidate();
+
+                        return Response.ok(new BaseApiResponse()).build();
+                    }
+                } catch (IllegalStateException ignored) {
+                }
+            }
+        }
+
+        return Response.status(Response.Status.FORBIDDEN).entity(new BaseApiResponse()).build();
+    }
+
     // todo: редактирование пользователя
-    // todo: удаление пользователя
 
 }

@@ -1,6 +1,5 @@
 package ru.cdecl.pub.iota.models.base;
 
-import org.jetbrains.annotations.NotNull;
 import ru.cdecl.pub.iota.models.base.BaseApiResponse;
 
 import javax.xml.bind.annotation.XmlElement;

@@ -13,18 +13,6 @@ public class UserProfileService {
 
     private ConcurrentMap<Long, UserProfile> users = new ConcurrentHashMap<>();
 
-    public UserProfileService() {
-        // todo: удалить
-        UserCreateRequest[] userCreateRequests = new UserCreateRequest[]{
-                new UserCreateRequest("admin", "admin@example.com", "12345"),
-                new UserCreateRequest("guest", "guest@example.com", "11")
-        };
-
-        for (UserCreateRequest userCreateRequest : userCreateRequests) {
-            users.putIfAbsent(userCreateRequest.getUserId(), userCreateRequest);
-        }
-    }
-
     @NotNull
     public Collection<UserProfile> getAllUsers() {
         return users.values();
@@ -44,6 +32,10 @@ public class UserProfileService {
         users.put(userId, userProfile);
 
         return true;
+    }
+
+    public void deleteUser(long userId) {
+        users.remove(userId);
     }
 
     @Nullable
