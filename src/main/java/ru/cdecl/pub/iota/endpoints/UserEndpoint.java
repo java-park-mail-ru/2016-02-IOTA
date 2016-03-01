@@ -37,8 +37,7 @@ public class UserEndpoint {
         final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession != null) {
-            //noinspection SynchronizationOnLocalVariableOrMethodParameter
-            synchronized (httpSession) {
+            synchronized (httpSession.getId().intern()) {
                 try {
                     final Object userIdFromSession = httpSession.getAttribute("user_id");
 
@@ -78,8 +77,7 @@ public class UserEndpoint {
         final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession != null) {
-            //noinspection SynchronizationOnLocalVariableOrMethodParameter
-            synchronized (httpSession) {
+            synchronized (httpSession.getId().intern()) {
                 try {
                     final Object userIdFromSession = httpSession.getAttribute("user_id");
 
@@ -108,8 +106,7 @@ public class UserEndpoint {
         final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession != null) {
-            //noinspection SynchronizationOnLocalVariableOrMethodParameter
-            synchronized (httpSession) {
+            synchronized (httpSession.getId().intern()) {
                 try {
                     final Object userIdFromSession = httpSession.getAttribute("user_id");
 
