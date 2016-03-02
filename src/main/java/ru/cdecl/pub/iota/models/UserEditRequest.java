@@ -27,7 +27,7 @@ public class UserEditRequest {
     }
 
     public void setLogin(@Nullable String login) {
-        this.login = login;
+        this.login = (login != null) ? login.trim() : null;
     }
 
     @Nullable
@@ -36,7 +36,7 @@ public class UserEditRequest {
     }
 
     public void setEmail(@Nullable String email) {
-        this.email = email;
+        this.email = (email != null) ? email.trim() : null;
     }
 
     @Nullable
@@ -45,7 +45,15 @@ public class UserEditRequest {
     }
 
     public void setPassword(@Nullable String password) {
-        this.password = password;
+        this.password = (password != null) ? password.trim() : null;
     }
 
+    public boolean isValid() {
+        boolean isValid = (login == null || !login.isEmpty());
+
+        isValid = isValid && (email == null || !email.isEmpty());
+        isValid = isValid && (password == null || !password.isEmpty());
+
+        return isValid;
+    }
 }

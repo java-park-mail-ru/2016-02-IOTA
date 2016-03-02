@@ -59,6 +59,10 @@ public class UserEndpoint {
 
     @POST
     public Response createUser(@NotNull UserCreateRequest userCreateRequest) {
+        if (!userCreateRequest.isValid()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(RestApplication.EMPTY_RESPONSE).build();
+        }
+
         if (!userProfileService.isUserPresent(userCreateRequest.getLogin())) {
             @NotNull final UserProfile newUserProfile = userCreateRequest.toUserProfile();
 
@@ -105,6 +109,10 @@ public class UserEndpoint {
 
         if (httpSession == null) {
             return Response.status(Response.Status.EXPECTATION_FAILED).entity(RestApplication.EMPTY_RESPONSE).build();
+        }
+
+        if (!userEditRequest.isValid()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(RestApplication.EMPTY_RESPONSE).build();
         }
 
         @Nullable final Object userIdFromSession = httpSession.getAttribute("user_id");

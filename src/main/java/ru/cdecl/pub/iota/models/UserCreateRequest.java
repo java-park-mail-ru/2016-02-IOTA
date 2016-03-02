@@ -32,7 +32,7 @@ public class UserCreateRequest {
     }
 
     public void setLogin(@NotNull String login) {
-        this.login = login;
+        this.login = login.trim();
     }
 
     @NotNull
@@ -41,7 +41,7 @@ public class UserCreateRequest {
     }
 
     public void setEmail(@NotNull String email) {
-        this.email = email;
+        this.email = email.trim();
     }
 
     @NotNull
@@ -50,7 +50,11 @@ public class UserCreateRequest {
     }
 
     public void setPassword(@NotNull String password) {
-        this.password = password;
+        this.password = password.trim();
+    }
+
+    public boolean isValid() {
+        return !login.isEmpty() && !email.isEmpty() && !password.isEmpty();
     }
 
 }

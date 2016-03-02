@@ -13,12 +13,12 @@ public class AuthenticationService {
     public boolean checkPassword(@NotNull Long userId, @NotNull String password) {
         final String storedPassword = userPasswords.get(userId);
 
-        return storedPassword != null && storedPassword.equals(password);
+        return storedPassword != null && storedPassword.equals(password.trim());
     }
 
     public void setPasswordForUser(@NotNull Long userId, @Nullable String password) {
         if (password != null) {
-            userPasswords.put(userId, password);
+            userPasswords.put(userId, password.trim());
         }
     }
 

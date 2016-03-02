@@ -38,7 +38,7 @@ public class UserProfile {
     }
 
     public synchronized void setLogin(@NotNull String login) {
-        this.login = login;
+        this.login = login.trim();
     }
 
     @NotNull
@@ -47,7 +47,7 @@ public class UserProfile {
     }
 
     public synchronized void setEmail(@NotNull String email) {
-        this.email = email;
+        this.email = email.trim();
     }
 
     private static final AtomicLong ID_GENERATOR = new AtomicLong(0);
