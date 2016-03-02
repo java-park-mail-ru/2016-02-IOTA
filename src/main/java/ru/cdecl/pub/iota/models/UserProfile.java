@@ -24,7 +24,7 @@ public class UserProfile {
     }
 
     @XmlElement(name = "id")
-    public synchronized long getUserId() {
+    public long getUserId() {
         return userId;
     }
 
@@ -33,20 +33,20 @@ public class UserProfile {
     }
 
     @NotNull
-    public synchronized String getLogin() {
+    public String getLogin() {
         return login;
     }
 
-    public synchronized void setLogin(@NotNull String login) {
+    public void setLogin(@NotNull String login) {
         this.login = login.trim();
     }
 
     @NotNull
-    public synchronized String getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public synchronized void setEmail(@NotNull String email) {
+    public void setEmail(@NotNull String email) {
         this.email = email.trim();
     }
 
