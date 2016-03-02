@@ -14,11 +14,6 @@ public class UserProfileService {
     private final Map<Long, UserProfile> users = new ConcurrentHashMap<>();
     private final Map<String, UserProfile> nameToProfile = new ConcurrentHashMap<>();
 
-    @NotNull
-    public Collection<UserProfile> getAllUsers() {
-        return users.values();
-    }
-
     public boolean isUserPresent(@NotNull String login) {
         return nameToProfile.containsKey(login);
     }
