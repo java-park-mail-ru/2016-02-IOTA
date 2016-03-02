@@ -19,12 +19,16 @@ public class UserProfileService {
         return users.values();
     }
 
+    public boolean isUserPresent(@NotNull String login) {
+        return nameToProfile.containsKey(login);
+    }
+
     public boolean addUser(@NotNull Long userId, @NotNull UserProfile userProfile) {
         if (users.containsKey(userId)) {
             return false;
         }
 
-        if(nameToProfile.containsKey(userProfile.getLogin())) {
+        if(isUserPresent(userProfile.getLogin())) {
             return false;
         }
 

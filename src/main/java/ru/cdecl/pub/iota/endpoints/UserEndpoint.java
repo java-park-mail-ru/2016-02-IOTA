@@ -56,14 +56,14 @@ public class UserEndpoint {
 
     @POST
     public Response createUser(@NotNull UserCreateRequest userCreateRequest) {
-        @NotNull final String userPassword = userCreateRequest.getPassword();
+        if (!userProfileService.isUserPresent(userCreateRequest.getLogin())) {
+            @NotNull final UserProfile newUserProfile = userCreateRequest.toUserProfile();
 
-        userCreateRequest.eraseSensitiveData();
+            if (userProfileService.addUser(newUserProfile.getUserId(), newUserProfile)) {
+                authenticationService.setPasswordForUser(newUserProfile.getUserId(), userCreateRequest.getPassword());
 
-        if (userProfileService.addUser(userCreateRequest.getUserId(), userCreateRequest)) {
-            authenticationService.setPasswordForUser(userCreateRequest.getUserId(), userPassword);
-
-            return Response.status(Response.Status.OK).entity(new UserCreateResponse(userCreateRequest.getUserId())).build();
+                return Response.status(Response.Status.OK).entity(new UserCreateResponse(newUserProfile.getUserId())).build();
+            }
         }
 
         return Response.status(Response.Status.FORBIDDEN).entity(RestApplication.EMPTY_RESPONSE).build();

@@ -2,8 +2,12 @@ package ru.cdecl.pub.iota.models;
 
 import org.jetbrains.annotations.NotNull;
 
-public class UserCreateRequest extends UserProfile {
+public class UserCreateRequest {
 
+    @NotNull
+    private String login;
+    @NotNull
+    private String email;
     @NotNull
     private String password;
 
@@ -12,20 +16,40 @@ public class UserCreateRequest extends UserProfile {
     }
 
     public UserCreateRequest(@NotNull String login, @NotNull String email, @NotNull String password) {
-        super(login, email);
+        this.login = login;
+        this.email = email;
         this.password = password;
     }
 
-    public void eraseSensitiveData() {
-        password = "__erased__";
+    @NotNull
+    public UserProfile toUserProfile() {
+        return new UserProfile(login, email);
     }
 
     @NotNull
-    public String getPassword() {
+    public synchronized String getLogin() {
+        return login;
+    }
+
+    public synchronized void setLogin(@NotNull String login) {
+        this.login = login;
+    }
+
+    @NotNull
+    public synchronized String getEmail() {
+        return email;
+    }
+
+    public synchronized void setEmail(@NotNull String email) {
+        this.email = email;
+    }
+
+    @NotNull
+    public synchronized String getPassword() {
         return password;
     }
 
-    public void setPassword(@NotNull String password) {
+    public synchronized void setPassword(@NotNull String password) {
         this.password = password;
     }
 
