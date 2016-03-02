@@ -1,10 +1,8 @@
 package ru.cdecl.pub.iota.models.base;
 
-import ru.cdecl.pub.iota.models.base.BaseApiResponse;
-
 import javax.xml.bind.annotation.XmlElement;
 
-public class BaseUserIdResponse extends BaseApiResponse {
+public class BaseUserIdResponse {
 
     private long userId;
 

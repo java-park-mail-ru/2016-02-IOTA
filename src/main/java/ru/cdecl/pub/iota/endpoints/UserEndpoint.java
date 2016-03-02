@@ -2,10 +2,10 @@ package ru.cdecl.pub.iota.endpoints;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.cdecl.pub.iota.main.RestApplication;
 import ru.cdecl.pub.iota.models.UserCreateRequest;
 import ru.cdecl.pub.iota.models.UserCreateResponse;
 import ru.cdecl.pub.iota.models.UserEditRequest;
-import ru.cdecl.pub.iota.models.base.BaseApiResponse;
 import ru.cdecl.pub.iota.services.AuthenticationService;
 import ru.cdecl.pub.iota.services.UserProfileService;
 import ru.cdecl.pub.iota.models.UserProfile;
@@ -51,7 +51,7 @@ public class UserEndpoint {
             }
         }
 
-        return Response.status(Response.Status.NOT_FOUND).entity(new BaseApiResponse()).build();
+        return Response.status(Response.Status.NOT_FOUND).entity(RestApplication.EMPTY_RESPONSE).build();
     }
 
     @POST
@@ -66,7 +66,7 @@ public class UserEndpoint {
             return Response.status(Response.Status.OK).entity(new UserCreateResponse(userCreateRequest.getUserId())).build();
         }
 
-        return Response.status(Response.Status.FORBIDDEN).entity(new BaseApiResponse()).build();
+        return Response.status(Response.Status.FORBIDDEN).entity(RestApplication.EMPTY_RESPONSE).build();
     }
 
     @DELETE
@@ -78,7 +78,7 @@ public class UserEndpoint {
             @Nullable final Object userIdFromSession = httpSession.getAttribute("user_id");
 
             if (userIdFromSession == null || !(userIdFromSession instanceof Long)) {
-                return Response.status(Response.Status.NOT_FOUND).entity(new BaseApiResponse()).build();
+                return Response.status(Response.Status.NOT_FOUND).entity(RestApplication.EMPTY_RESPONSE).build();
             }
 
             if (userId == (long) userIdFromSession) {
@@ -86,11 +86,11 @@ public class UserEndpoint {
                 authenticationService.deletePasswordForUser(userId);
                 httpSession.invalidate();
 
-                return Response.ok(new BaseApiResponse()).build();
+                return Response.ok(RestApplication.EMPTY_RESPONSE).build();
             }
         }
 
-        return Response.status(Response.Status.FORBIDDEN).entity(new BaseApiResponse()).build();
+        return Response.status(Response.Status.FORBIDDEN).entity(RestApplication.EMPTY_RESPONSE).build();
     }
 
     @POST
@@ -102,7 +102,7 @@ public class UserEndpoint {
             @Nullable final Object userIdFromSession = httpSession.getAttribute("user_id");
 
             if (userIdFromSession == null || !(userIdFromSession instanceof Long)) {
-                return Response.status(Response.Status.UNAUTHORIZED).entity(new BaseApiResponse()).build();
+                return Response.status(Response.Status.UNAUTHORIZED).entity(RestApplication.EMPTY_RESPONSE).build();
             }
 
             if (userId == (long) userIdFromSession) {
@@ -110,11 +110,11 @@ public class UserEndpoint {
                 authenticationService.setPasswordForUser(userId, userEditRequest.getPassword());
                 httpSession.invalidate();
 
-                return Response.ok(new BaseApiResponse()).build();
+                return Response.ok(RestApplication.EMPTY_RESPONSE).build();
             }
         }
 
-        return Response.status(Response.Status.FORBIDDEN).entity(new BaseApiResponse()).build();
+        return Response.status(Response.Status.FORBIDDEN).entity(RestApplication.EMPTY_RESPONSE).build();
     }
 
 }

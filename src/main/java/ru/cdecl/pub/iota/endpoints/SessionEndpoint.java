@@ -2,10 +2,10 @@ package ru.cdecl.pub.iota.endpoints;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.cdecl.pub.iota.main.RestApplication;
 import ru.cdecl.pub.iota.models.UserLoginRequest;
 import ru.cdecl.pub.iota.models.UserLoginResponse;
 import ru.cdecl.pub.iota.models.UserProfile;
-import ru.cdecl.pub.iota.models.base.BaseApiResponse;
 import ru.cdecl.pub.iota.models.base.BaseUserIdResponse;
 import ru.cdecl.pub.iota.services.AuthenticationService;
 import ru.cdecl.pub.iota.services.UserProfileService;
@@ -50,7 +50,7 @@ public class SessionEndpoint {
             }
         }
 
-        return Response.status(Response.Status.UNAUTHORIZED).entity(new BaseApiResponse()).build();
+        return Response.status(Response.Status.UNAUTHORIZED).entity(RestApplication.EMPTY_RESPONSE).build();
     }
 
     @PUT
@@ -70,7 +70,7 @@ public class SessionEndpoint {
             return Response.ok(new UserLoginResponse(userProfile.getUserId())).build();
         }
 
-        return Response.status(Response.Status.BAD_REQUEST).entity(new BaseApiResponse()).build();
+        return Response.status(Response.Status.BAD_REQUEST).entity(RestApplication.EMPTY_RESPONSE).build();
     }
 
     @DELETE
@@ -81,7 +81,7 @@ public class SessionEndpoint {
             httpSession.invalidate();
         }
 
-        return Response.ok(new BaseApiResponse()).build();
+        return Response.ok(RestApplication.EMPTY_RESPONSE).build();
     }
 
 }

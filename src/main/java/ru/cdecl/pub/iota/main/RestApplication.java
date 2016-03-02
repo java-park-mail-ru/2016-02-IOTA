@@ -26,4 +26,6 @@ public class RestApplication extends Application {
         return objects;
     }
 
+    public static final String EMPTY_RESPONSE = "{}";
+
 }
