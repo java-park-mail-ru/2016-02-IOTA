@@ -1,5 +1,7 @@
 package ru.cdecl.pub.iota.endpoints;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.cdecl.pub.iota.models.UserLoginRequest;
 import ru.cdecl.pub.iota.models.UserLoginResponse;
 import ru.cdecl.pub.iota.models.UserProfile;
@@ -22,24 +24,25 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class SessionEndpoint {
 
+    @NotNull
     private final UserProfileService userProfileService;
+    @NotNull
     private final AuthenticationService authenticationService;
 
-    public SessionEndpoint(UserProfileService userProfileService, AuthenticationService authenticationService) {
+    public SessionEndpoint(@NotNull UserProfileService userProfileService, @NotNull AuthenticationService authenticationService) {
         this.userProfileService = userProfileService;
         this.authenticationService = authenticationService;
     }
 
     @GET
     public Response getUserId(@Context HttpServletRequest httpServletRequest) {
-        final HttpSession httpSession = httpServletRequest.getSession(false);
+        @Nullable final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession != null) {
-
-            final Object userId = httpSession.getAttribute("user_id");
+            @Nullable final Object userId = httpSession.getAttribute("user_id");
 
             if (userId != null && userId instanceof Long) {
-                final UserProfile userProfile = userProfileService.getUserById((Long) userId);
+                @Nullable final UserProfile userProfile = userProfileService.getUserById((Long) userId);
 
                 if (userProfile != null) {
                     return Response.ok(new BaseUserIdResponse(userProfile.getUserId())).build();
@@ -51,10 +54,10 @@ public class SessionEndpoint {
     }
 
     @PUT
-    public Response doLogin(UserLoginRequest userLoginRequest, @Context HttpServletRequest httpServletRequest) {
-        final HttpSession httpSession = httpServletRequest.getSession();
+    public Response doLogin(@NotNull UserLoginRequest userLoginRequest, @Context HttpServletRequest httpServletRequest) {
+        @NotNull final HttpSession httpSession = httpServletRequest.getSession();
 
-        final UserProfile userProfile = userProfileService.getUserByLogin(userLoginRequest.getLogin());
+        @Nullable final UserProfile userProfile = userProfileService.getUserByLogin(userLoginRequest.getLogin());
         boolean isPasswordOk = false;
 
         if (userProfile != null) {
@@ -72,7 +75,7 @@ public class SessionEndpoint {
 
     @DELETE
     public Response doLogout(@Context HttpServletRequest httpServletRequest) {
-        final HttpSession httpSession = httpServletRequest.getSession(false);
+        @Nullable final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession != null) {
             httpSession.invalidate();

@@ -1,5 +1,7 @@
 package ru.cdecl.pub.iota.endpoints;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.cdecl.pub.iota.models.UserCreateRequest;
 import ru.cdecl.pub.iota.models.UserCreateResponse;
 import ru.cdecl.pub.iota.models.UserEditRequest;
@@ -22,10 +24,12 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class UserEndpoint {
 
+    @NotNull
     private final UserProfileService userProfileService;
+    @NotNull
     private final AuthenticationService authenticationService;
 
-    public UserEndpoint(UserProfileService userProfileService, AuthenticationService authenticationService) {
+    public UserEndpoint(@NotNull UserProfileService userProfileService, @NotNull AuthenticationService authenticationService) {
         this.userProfileService = userProfileService;
         this.authenticationService = authenticationService;
     }
@@ -33,13 +37,13 @@ public class UserEndpoint {
     @GET
     @Path("{id}")
     public Response getUserById(@PathParam("id") long userId, @Context HttpServletRequest httpServletRequest) {
-        final HttpSession httpSession = httpServletRequest.getSession(false);
+        @Nullable final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession != null) {
-            final Object userIdFromSession = httpSession.getAttribute("user_id");
+            @Nullable final Object userIdFromSession = httpSession.getAttribute("user_id");
 
             if (userIdFromSession != null && userIdFromSession instanceof Long && userId == (long) userIdFromSession) {
-                final UserProfile userProfile = userProfileService.getUserById(userId);
+                @Nullable final UserProfile userProfile = userProfileService.getUserById(userId);
 
                 if (userProfile != null) {
                     return Response.ok(userProfile).build();
@@ -51,8 +55,8 @@ public class UserEndpoint {
     }
 
     @POST
-    public Response createUser(UserCreateRequest userCreateRequest) {
-        final String userPassword = userCreateRequest.getPassword();
+    public Response createUser(@NotNull UserCreateRequest userCreateRequest) {
+        @NotNull final String userPassword = userCreateRequest.getPassword();
 
         userCreateRequest.eraseSensitiveData();
 
@@ -68,10 +72,10 @@ public class UserEndpoint {
     @DELETE
     @Path("{id}")
     public Response deleteUser(@PathParam("id") long userId, @Context HttpServletRequest httpServletRequest) {
-        final HttpSession httpSession = httpServletRequest.getSession(false);
+        @Nullable final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession != null) {
-            final Object userIdFromSession = httpSession.getAttribute("user_id");
+            @Nullable final Object userIdFromSession = httpSession.getAttribute("user_id");
 
             if (userIdFromSession == null || !(userIdFromSession instanceof Long)) {
                 return Response.status(Response.Status.NOT_FOUND).entity(new BaseApiResponse()).build();
@@ -92,10 +96,10 @@ public class UserEndpoint {
     @POST
     @Path("{id}")
     public Response editUser(@PathParam("id") long userId, UserEditRequest userEditRequest, @Context HttpServletRequest httpServletRequest) {
-        final HttpSession httpSession = httpServletRequest.getSession(false);
+        @Nullable final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession != null) {
-            final Object userIdFromSession = httpSession.getAttribute("user_id");
+            @Nullable final Object userIdFromSession = httpSession.getAttribute("user_id");
 
             if (userIdFromSession == null || !(userIdFromSession instanceof Long)) {
                 return Response.status(Response.Status.UNAUTHORIZED).entity(new BaseApiResponse()).build();
