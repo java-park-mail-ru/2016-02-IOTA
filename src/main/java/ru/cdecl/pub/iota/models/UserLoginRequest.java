@@ -19,20 +19,20 @@ public class UserLoginRequest {
     }
 
     @NotNull
-    public synchronized String getLogin() {
+    public String getLogin() {
         return login;
     }
 
-    public synchronized void setLogin(@NotNull String login) {
+    public void setLogin(@NotNull String login) {
         this.login = login;
     }
 
     @NotNull
-    public synchronized String getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public synchronized void setPassword(@NotNull String password) {
+    public void setPassword(@NotNull String password) {
         this.password = password;
     }
 

@@ -27,29 +27,29 @@ public class UserCreateRequest {
     }
 
     @NotNull
-    public synchronized String getLogin() {
+    public String getLogin() {
         return login;
     }
 
-    public synchronized void setLogin(@NotNull String login) {
+    public void setLogin(@NotNull String login) {
         this.login = login;
     }
 
     @NotNull
-    public synchronized String getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public synchronized void setEmail(@NotNull String email) {
+    public void setEmail(@NotNull String email) {
         this.email = email;
     }
 
     @NotNull
-    public synchronized String getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public synchronized void setPassword(@NotNull String password) {
+    public void setPassword(@NotNull String password) {
         this.password = password;
     }
 

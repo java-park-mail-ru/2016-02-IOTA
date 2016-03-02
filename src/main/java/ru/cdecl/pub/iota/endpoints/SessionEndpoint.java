@@ -38,15 +38,17 @@ public class SessionEndpoint {
     public Response getUserId(@Context HttpServletRequest httpServletRequest) {
         @Nullable final HttpSession httpSession = httpServletRequest.getSession(false);
 
-        if (httpSession != null) {
-            @Nullable final Object userId = httpSession.getAttribute("user_id");
+        if (httpSession == null) {
+            return Response.status(Response.Status.EXPECTATION_FAILED).entity(RestApplication.EMPTY_RESPONSE).build();
+        }
 
-            if (userId != null && userId instanceof Long) {
-                @Nullable final UserProfile userProfile = userProfileService.getUserById((Long) userId);
+        @Nullable final Object userId = httpSession.getAttribute("user_id");
 
-                if (userProfile != null) {
-                    return Response.ok(new BaseUserIdResponse(userProfile.getUserId())).build();
-                }
+        if (userId != null && userId instanceof Long) {
+            @Nullable final UserProfile userProfile = userProfileService.getUserById((Long) userId);
+
+            if (userProfile != null) {
+                return Response.ok(new BaseUserIdResponse(userProfile.getUserId())).build();
             }
         }
 
@@ -77,9 +79,11 @@ public class SessionEndpoint {
     public Response doLogout(@Context HttpServletRequest httpServletRequest) {
         @Nullable final HttpSession httpSession = httpServletRequest.getSession(false);
 
-        if (httpSession != null) {
-            httpSession.invalidate();
+        if (httpSession == null) {
+            return Response.status(Response.Status.EXPECTATION_FAILED).entity(RestApplication.EMPTY_RESPONSE).build();
         }
+
+        httpSession.invalidate();
 
         return Response.ok(RestApplication.EMPTY_RESPONSE).build();
     }

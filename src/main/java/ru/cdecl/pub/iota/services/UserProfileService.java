@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 import ru.cdecl.pub.iota.models.UserEditRequest;
 import ru.cdecl.pub.iota.models.UserProfile;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,7 +22,7 @@ public class UserProfileService {
             return false;
         }
 
-        if(isUserPresent(userProfile.getLogin())) {
+        if (isUserPresent(userProfile.getLogin())) {
             return false;
         }
 
@@ -33,30 +32,34 @@ public class UserProfileService {
         return true;
     }
 
-    public void updateUser(long userId, UserEditRequest userEditRequest) {
+    public boolean updateUser(long userId, UserEditRequest userEditRequest) {
         final UserProfile userProfile = users.get(userId);
 
-        if (userProfile != null) {
-            final String newLogin = userEditRequest.getLogin();
-
-            if (newLogin != null) {
-                if (nameToProfile.containsKey(newLogin)) {
-                    throw new IllegalArgumentException("User with this name already exists.");
-                }
-
-                nameToProfile.remove(userProfile.getLogin());
-                userProfile.setLogin(newLogin);
-                nameToProfile.put(newLogin, userProfile);
-            }
-
-            final String newEmail = userEditRequest.getEmail();
-
-            if (newEmail != null) {
-                userProfile.setEmail(newEmail);
-            }
-
-            users.put(userId, userProfile);
+        if (userProfile == null) {
+            return false;
         }
+
+        final String newLogin = userEditRequest.getLogin();
+
+        if (newLogin != null) {
+            if (isUserPresent(newLogin)) {
+                return false;
+            }
+
+            nameToProfile.remove(userProfile.getLogin());
+            userProfile.setLogin(newLogin);
+            nameToProfile.put(newLogin, userProfile);
+        }
+
+        final String newEmail = userEditRequest.getEmail();
+
+        if (newEmail != null) {
+            userProfile.setEmail(newEmail);
+        }
+
+        users.put(userId, userProfile);
+
+        return true;
     }
 
     public void deleteUser(long userId) {
