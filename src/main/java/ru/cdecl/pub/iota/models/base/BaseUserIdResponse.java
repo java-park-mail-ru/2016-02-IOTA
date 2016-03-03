@@ -23,7 +23,7 @@ public class BaseUserIdResponse {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(@Nullable Long userId) {
         this.userId = userId;
     }
 
