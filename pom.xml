@@ -90,6 +90,11 @@
             <artifactId>jersey-media-moxy</artifactId>
             <version>${org.glassfish.jersey.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.ext</groupId>
+            <artifactId>jersey-entity-filtering</artifactId>
+            <version>${org.glassfish.jersey.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
