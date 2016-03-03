@@ -41,7 +41,7 @@ public class UserResource {
 
 
         if (httpSession == null) {
-            return Response.status(Response.Status.EXPECTATION_FAILED).entity(RestApplication.EMPTY_RESPONSE).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(RestApplication.EMPTY_RESPONSE).build();
         }
 
         @Nullable final Object userIdFromSession = httpSession.getAttribute("user_id");
@@ -85,7 +85,7 @@ public class UserResource {
         @Nullable final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession == null) {
-            return Response.status(Response.Status.EXPECTATION_FAILED).entity(RestApplication.EMPTY_RESPONSE).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(RestApplication.EMPTY_RESPONSE).build();
         }
 
         @Nullable final Object userIdFromSession = httpSession.getAttribute("user_id");
@@ -111,7 +111,7 @@ public class UserResource {
         @Nullable final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession == null) {
-            return Response.status(Response.Status.EXPECTATION_FAILED).entity(RestApplication.EMPTY_RESPONSE).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(RestApplication.EMPTY_RESPONSE).build();
         }
 
         if (!userEditRequest.isValid()) {

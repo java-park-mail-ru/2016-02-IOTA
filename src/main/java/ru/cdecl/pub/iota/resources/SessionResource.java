@@ -39,7 +39,7 @@ public class SessionResource {
         @Nullable final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession == null) {
-            return Response.status(Response.Status.EXPECTATION_FAILED).entity(RestApplication.EMPTY_RESPONSE).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(RestApplication.EMPTY_RESPONSE).build();
         }
 
         @Nullable final Object userId = httpSession.getAttribute("user_id");
@@ -80,7 +80,7 @@ public class SessionResource {
         @Nullable final HttpSession httpSession = httpServletRequest.getSession(false);
 
         if (httpSession == null) {
-            return Response.status(Response.Status.EXPECTATION_FAILED).entity(RestApplication.EMPTY_RESPONSE).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(RestApplication.EMPTY_RESPONSE).build();
         }
 
         httpSession.invalidate();
