@@ -31,13 +31,13 @@ public class UserProfileService {
     }
 
     public boolean updateUser(long userId, UserEditRequest userEditRequest) {
-        final UserProfile userProfile = users.get(userId);
+        @Nullable final UserProfile userProfile = users.get(userId);
 
         if (userProfile == null) {
             return false;
         }
 
-        final String newLogin = userEditRequest.getLogin();
+        @Nullable final String newLogin = userEditRequest.getLogin();
 
         if (newLogin != null) {
             if (isUserPresent(newLogin)) {
@@ -49,7 +49,7 @@ public class UserProfileService {
             nameToProfile.put(newLogin, userProfile);
         }
 
-        final String newEmail = userEditRequest.getEmail();
+        @Nullable final String newEmail = userEditRequest.getEmail();
 
         if (newEmail != null) {
             userProfile.setEmail(newEmail);
@@ -61,7 +61,7 @@ public class UserProfileService {
     }
 
     public void deleteUser(long userId) {
-        final UserProfile userProfile = users.get(userId);
+        @Nullable final UserProfile userProfile = users.get(userId);
 
         if(userProfile == null) {
             return;
@@ -81,6 +81,6 @@ public class UserProfileService {
         return users.get(userId);
     }
 
-    private static final AtomicLong ID_GENERATOR = new AtomicLong(0);
+    private static final AtomicLong ID_GENERATOR = new AtomicLong(1);
 
 }
