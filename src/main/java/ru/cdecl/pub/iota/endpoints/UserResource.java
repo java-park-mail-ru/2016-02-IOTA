@@ -66,8 +66,11 @@ public class UserResource {
         if (!userProfileService.isUserPresent(userCreateRequest.getLogin())) {
             @NotNull final UserProfile newUserProfile = userCreateRequest.toUserProfile();
 
-            if (userProfileService.addUser(newUserProfile.getUserId(), newUserProfile)) {
-                authenticationService.setPasswordForUser(newUserProfile.getUserId(), userCreateRequest.getPassword());
+            if (userProfileService.addUser(newUserProfile)) {
+                @Nullable final Long newUserId = newUserProfile.getUserId();
+                assert (newUserId != null);
+
+                authenticationService.setPasswordForUser(newUserId, userCreateRequest.getPassword());
 
                 return Response.status(Response.Status.OK).entity(new UserCreateResponse(newUserProfile.getUserId())).build();
             }

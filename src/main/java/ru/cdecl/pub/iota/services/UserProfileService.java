@@ -7,6 +7,7 @@ import ru.cdecl.pub.iota.models.UserProfile;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class UserProfileService {
 
@@ -17,16 +18,13 @@ public class UserProfileService {
         return nameToProfile.containsKey(login);
     }
 
-    public boolean addUser(@NotNull Long userId, @NotNull UserProfile userProfile) {
-        if (users.containsKey(userId)) {
-            return false;
-        }
-
+    public boolean addUser(@NotNull UserProfile userProfile) {
         if (isUserPresent(userProfile.getLogin())) {
             return false;
         }
 
-        users.put(userId, userProfile);
+        userProfile.setUserId(ID_GENERATOR.getAndIncrement());
+        users.put(userProfile.getUserId(), userProfile);
         nameToProfile.put(userProfile.getLogin(), userProfile);
 
         return true;
@@ -63,6 +61,13 @@ public class UserProfileService {
     }
 
     public void deleteUser(long userId) {
+        final UserProfile userProfile = users.get(userId);
+
+        if(userProfile == null) {
+            return;
+        }
+
+        nameToProfile.remove(userProfile.getLogin());
         users.remove(userId);
     }
 
@@ -75,5 +80,7 @@ public class UserProfileService {
     public UserProfile getUserById(@NotNull Long userId) {
         return users.get(userId);
     }
+
+    private static final AtomicLong ID_GENERATOR = new AtomicLong(0);
 
 }

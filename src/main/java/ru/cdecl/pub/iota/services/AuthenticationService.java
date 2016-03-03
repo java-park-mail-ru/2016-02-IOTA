@@ -10,7 +10,7 @@ public class AuthenticationService {
 
     private final Map<Long, String> userPasswords = new ConcurrentHashMap<>();
 
-    public boolean checkPassword(@NotNull Long userId, @NotNull String password) {
+    public boolean checkPassword(@Nullable Long userId, @NotNull String password) {
         final String storedPassword = userPasswords.get(userId);
 
         return storedPassword != null && storedPassword.equals(password.trim());

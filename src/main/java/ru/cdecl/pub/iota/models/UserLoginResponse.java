@@ -1,5 +1,6 @@
 package ru.cdecl.pub.iota.models;
 
+import org.jetbrains.annotations.Nullable;
 import ru.cdecl.pub.iota.models.base.BaseUserIdResponse;
 
 public class UserLoginResponse extends BaseUserIdResponse {
@@ -8,7 +9,7 @@ public class UserLoginResponse extends BaseUserIdResponse {
         super();
     }
 
-    public UserLoginResponse(long userId) {
+    public UserLoginResponse(@Nullable Long userId) {
         super(userId);
     }
 

@@ -1,21 +1,25 @@
 package ru.cdecl.pub.iota.models.base;
 
+import org.jetbrains.annotations.Nullable;
+
 import javax.xml.bind.annotation.XmlElement;
 
 public class BaseUserIdResponse {
 
-    private long userId;
+    @Nullable
+    private Long userId;
 
     public BaseUserIdResponse() {
-        userId = -1;
+        userId = -1L;
     }
 
-    public BaseUserIdResponse(long userId) {
+    public BaseUserIdResponse(@Nullable Long userId) {
         this.userId = userId;
     }
 
+    @Nullable
     @XmlElement(name="id")
-    public long getUserId() {
+    public Long getUserId() {
         return userId;
     }
 

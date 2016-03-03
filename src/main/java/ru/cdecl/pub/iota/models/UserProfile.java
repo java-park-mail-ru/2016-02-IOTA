@@ -1,13 +1,14 @@
 package ru.cdecl.pub.iota.models;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.xml.bind.annotation.XmlElement;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class UserProfile {
 
-    private long userId;
+    @Nullable
+    private Long userId;
     @NotNull
     private String login;
     @NotNull
@@ -18,17 +19,18 @@ public class UserProfile {
     }
 
     public UserProfile(@NotNull String login, @NotNull String email) {
-        userId = ID_GENERATOR.getAndIncrement();
+        userId = null;
         this.login = login;
         this.email = email;
     }
 
+    @Nullable
     @XmlElement(name = "id")
-    public long getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(@Nullable Long userId) {
         this.userId = userId;
     }
 
@@ -49,7 +51,5 @@ public class UserProfile {
     public void setEmail(@NotNull String email) {
         this.email = email.trim();
     }
-
-    private static final AtomicLong ID_GENERATOR = new AtomicLong(0);
 
 }
