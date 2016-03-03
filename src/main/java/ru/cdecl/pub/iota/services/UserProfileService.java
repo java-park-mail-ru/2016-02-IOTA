@@ -18,6 +18,10 @@ public class UserProfileService {
         return nameToProfile.containsKey(login);
     }
 
+    public boolean isUserPresent(@NotNull Long userId) {
+        return users.containsKey(userId);
+    }
+
     public boolean addUser(@NotNull UserProfile userProfile) {
         if (isUserPresent(userProfile.getLogin())) {
             return false;
@@ -63,7 +67,7 @@ public class UserProfileService {
     public void deleteUser(long userId) {
         @Nullable final UserProfile userProfile = users.get(userId);
 
-        if(userProfile == null) {
+        if (userProfile == null) {
             return;
         }
 

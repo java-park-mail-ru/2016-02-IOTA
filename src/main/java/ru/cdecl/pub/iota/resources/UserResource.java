@@ -39,22 +39,23 @@ public class UserResource {
     public Response getUserById(@PathParam("id") long userId, @Context HttpServletRequest httpServletRequest) {
         @Nullable final HttpSession httpSession = httpServletRequest.getSession(false);
 
-
         if (httpSession == null) {
             return Response.status(Response.Status.FORBIDDEN).entity(RestApplication.EMPTY_RESPONSE).build();
         }
 
         @Nullable final Object userIdFromSession = httpSession.getAttribute("user_id");
 
-        if (userIdFromSession != null && userIdFromSession instanceof Long && userId == (long) userIdFromSession) {
-            @Nullable final UserProfile userProfile = userProfileService.getUserById(userId);
-
-            if (userProfile != null) {
-                return Response.ok(userProfile).build();
-            }
+        if (userIdFromSession == null
+                || !(userIdFromSession instanceof Long)
+                || !userProfileService.isUserPresent((Long) userIdFromSession)) {
+            return Response.status(Response.Status.FORBIDDEN).entity(RestApplication.EMPTY_RESPONSE).build();
         }
 
-        return Response.status(Response.Status.NOT_FOUND).entity(RestApplication.EMPTY_RESPONSE).build();
+        @Nullable final UserProfile userProfile = userProfileService.getUserById(userId);
+
+        return (userProfile != null)
+                ? Response.ok(userProfile).build()
+                : Response.status(Response.Status.NOT_FOUND).entity(RestApplication.EMPTY_RESPONSE).build();
     }
 
     @POST
