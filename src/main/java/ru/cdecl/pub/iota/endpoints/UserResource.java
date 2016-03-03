@@ -22,14 +22,14 @@ import javax.ws.rs.core.Response;
 @Path("/user")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class UserEndpoint {
+public class UserResource {
 
     @NotNull
     private final UserProfileService userProfileService;
     @NotNull
     private final AuthenticationService authenticationService;
 
-    public UserEndpoint(@NotNull UserProfileService userProfileService, @NotNull AuthenticationService authenticationService) {
+    public UserResource(@NotNull UserProfileService userProfileService, @NotNull AuthenticationService authenticationService) {
         this.userProfileService = userProfileService;
         this.authenticationService = authenticationService;
     }

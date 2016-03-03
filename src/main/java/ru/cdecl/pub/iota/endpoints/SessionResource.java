@@ -22,14 +22,14 @@ import javax.ws.rs.core.Response;
 @Path("/session")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class SessionEndpoint {
+public class SessionResource {
 
     @NotNull
     private final UserProfileService userProfileService;
     @NotNull
     private final AuthenticationService authenticationService;
 
-    public SessionEndpoint(@NotNull UserProfileService userProfileService, @NotNull AuthenticationService authenticationService) {
+    public SessionResource(@NotNull UserProfileService userProfileService, @NotNull AuthenticationService authenticationService) {
         this.userProfileService = userProfileService;
         this.authenticationService = authenticationService;
     }

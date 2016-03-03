@@ -1,7 +1,7 @@
 package ru.cdecl.pub.iota.main;
 
-import ru.cdecl.pub.iota.endpoints.SessionEndpoint;
-import ru.cdecl.pub.iota.endpoints.UserEndpoint;
+import ru.cdecl.pub.iota.endpoints.SessionResource;
+import ru.cdecl.pub.iota.endpoints.UserResource;
 import ru.cdecl.pub.iota.services.AuthenticationService;
 import ru.cdecl.pub.iota.services.UserProfileService;
 
@@ -20,8 +20,8 @@ public class RestApplication extends Application {
         final UserProfileService userProfileService = new UserProfileService();
         final AuthenticationService authenticationService = new AuthenticationService();
 
-        objects.add(new UserEndpoint(userProfileService, authenticationService));
-        objects.add(new SessionEndpoint(userProfileService, authenticationService));
+        objects.add(new UserResource(userProfileService, authenticationService));
+        objects.add(new SessionResource(userProfileService, authenticationService));
 
         return objects;
     }
