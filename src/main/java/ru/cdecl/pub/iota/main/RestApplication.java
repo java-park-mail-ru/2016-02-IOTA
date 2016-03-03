@@ -1,7 +1,7 @@
 package ru.cdecl.pub.iota.main;
 
-import ru.cdecl.pub.iota.endpoints.SessionResource;
-import ru.cdecl.pub.iota.endpoints.UserResource;
+import ru.cdecl.pub.iota.resources.SessionResource;
+import ru.cdecl.pub.iota.resources.UserResource;
 import ru.cdecl.pub.iota.services.AuthenticationService;
 import ru.cdecl.pub.iota.services.UserProfileService;
 

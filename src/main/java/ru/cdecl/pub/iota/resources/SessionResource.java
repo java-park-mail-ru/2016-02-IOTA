@@ -1,4 +1,4 @@
-package ru.cdecl.pub.iota.endpoints;
+package ru.cdecl.pub.iota.resources;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
