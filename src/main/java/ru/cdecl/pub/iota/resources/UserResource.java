@@ -2,9 +2,10 @@ package ru.cdecl.pub.iota.resources;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.cdecl.pub.iota.annotations.UserProfileDetailedView;
+import ru.cdecl.pub.iota.annotations.UserProfileIdView;
 import ru.cdecl.pub.iota.main.RestApplication;
 import ru.cdecl.pub.iota.models.UserCreateRequest;
-import ru.cdecl.pub.iota.models.UserCreateResponse;
 import ru.cdecl.pub.iota.models.UserEditRequest;
 import ru.cdecl.pub.iota.services.AuthenticationService;
 import ru.cdecl.pub.iota.services.UserProfileService;
@@ -36,6 +37,7 @@ public class UserResource {
 
     @GET
     @Path("{id}")
+    @UserProfileDetailedView
     public Response getUserById(@PathParam("id") long userId, @Context HttpServletRequest httpServletRequest) {
         @Nullable final HttpSession httpSession = httpServletRequest.getSession(false);
 
@@ -58,6 +60,7 @@ public class UserResource {
     }
 
     @POST
+    @UserProfileIdView
     public Response createUser(@NotNull UserCreateRequest userCreateRequest) {
         if (!userCreateRequest.isValid()) {
             return Response.status(Response.Status.BAD_REQUEST).entity(RestApplication.EMPTY_RESPONSE).build();
@@ -72,7 +75,7 @@ public class UserResource {
 
                 authenticationService.setPasswordForUser(newUserId, userCreateRequest.getPassword());
 
-                return Response.status(Response.Status.OK).entity(new UserCreateResponse(newUserProfile.getUserId())).build();
+                return Response.status(Response.Status.OK).entity(newUserProfile).build();
             }
         }
 

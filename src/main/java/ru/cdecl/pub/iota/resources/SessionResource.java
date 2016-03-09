@@ -2,11 +2,10 @@ package ru.cdecl.pub.iota.resources;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.cdecl.pub.iota.annotations.UserProfileIdView;
 import ru.cdecl.pub.iota.main.RestApplication;
 import ru.cdecl.pub.iota.models.UserLoginRequest;
-import ru.cdecl.pub.iota.models.UserLoginResponse;
 import ru.cdecl.pub.iota.models.UserProfile;
-import ru.cdecl.pub.iota.models.base.BaseUserIdResponse;
 import ru.cdecl.pub.iota.services.AuthenticationService;
 import ru.cdecl.pub.iota.services.UserProfileService;
 
@@ -35,6 +34,7 @@ public class SessionResource {
     }
 
     @GET
+    @UserProfileIdView
     public Response getUserId(@Context HttpServletRequest httpServletRequest) {
         @Nullable final HttpSession httpSession = httpServletRequest.getSession(false);
 
@@ -48,7 +48,7 @@ public class SessionResource {
             @Nullable final UserProfile userProfile = userProfileService.getUserById((Long) userId);
 
             if (userProfile != null) {
-                return Response.ok(new BaseUserIdResponse(userProfile.getUserId())).build();
+                return Response.ok(userProfile).build();
             }
         }
 
@@ -56,6 +56,7 @@ public class SessionResource {
     }
 
     @PUT
+    @UserProfileIdView
     public Response doLogin(@NotNull UserLoginRequest userLoginRequest, @Context HttpServletRequest httpServletRequest) {
         @NotNull final HttpSession httpSession = httpServletRequest.getSession();
 
@@ -69,7 +70,7 @@ public class SessionResource {
         if (isPasswordOk) {
             httpSession.setAttribute("user_id", userProfile.getUserId());
 
-            return Response.ok(new UserLoginResponse(userProfile.getUserId())).build();
+            return Response.ok(userProfile).build();
         }
 
         return Response.status(Response.Status.BAD_REQUEST).entity(RestApplication.EMPTY_RESPONSE).build();
