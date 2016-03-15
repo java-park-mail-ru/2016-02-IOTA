@@ -14,6 +14,16 @@ public class UserProfileService {
     private final Map<Long, UserProfile> users = new ConcurrentHashMap<>();
     private final Map<String, UserProfile> nameToProfile = new ConcurrentHashMap<>();
 
+    public UserProfileService() {
+        this(null);
+    }
+
+    public UserProfileService(@Nullable AtomicLong idGenerator) {
+        this.idGenerator = (idGenerator != null)
+                ? idGenerator
+                : new AtomicLong(0);
+    }
+
     public boolean isUserPresent(@NotNull String login) {
         return nameToProfile.containsKey(login);
     }
@@ -23,7 +33,7 @@ public class UserProfileService {
             return false;
         }
 
-        userProfile.setUserId(ID_GENERATOR.getAndIncrement());
+        userProfile.setUserId(idGenerator.getAndIncrement());
         users.put(userProfile.getUserId(), userProfile);
         nameToProfile.put(userProfile.getLogin(), userProfile);
 
@@ -81,6 +91,6 @@ public class UserProfileService {
         return users.get(userId);
     }
 
-    private static final AtomicLong ID_GENERATOR = new AtomicLong(1);
+    private final AtomicLong idGenerator;
 
 }
