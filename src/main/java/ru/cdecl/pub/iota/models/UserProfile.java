@@ -10,10 +10,13 @@ import javax.xml.bind.annotation.XmlElement;
 public class UserProfile {
 
     @Nullable
+    @UserProfileIdView
     private Long userId;
     @NotNull
+    @UserProfileDetailedView
     private String login;
     @NotNull
+    @UserProfileDetailedView
     private String email;
 
     public UserProfile() {
@@ -28,7 +31,6 @@ public class UserProfile {
 
     @Nullable
     @XmlElement(name = "id")
-    @UserProfileIdView
     public Long getUserId() {
         return userId;
     }
@@ -38,7 +40,6 @@ public class UserProfile {
     }
 
     @NotNull
-    @UserProfileDetailedView
     public String getLogin() {
         return login;
     }
@@ -48,7 +49,6 @@ public class UserProfile {
     }
 
     @NotNull
-    @UserProfileDetailedView
     public String getEmail() {
         return email;
     }
