@@ -1,6 +1,7 @@
 package ru.cdecl.pub.iota.services;
 
 import org.glassfish.hk2.api.Immediate;
+import org.glassfish.hk2.api.Rank;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
 import ru.cdecl.pub.iota.models.UserProfile;
@@ -12,8 +13,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
-@Named
 @Immediate
+@Named
+@Rank(-100)
 public class AccountServiceMapImpl implements AccountService {
 
     private AtomicLong userIdGenerator = new AtomicLong(1L);
