@@ -5,12 +5,14 @@ import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
 import ru.cdecl.pub.iota.models.UserProfile;
 
+import javax.inject.Named;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
+@Named
 @Immediate
 public class AccountServiceMapImpl implements AccountService {
 
