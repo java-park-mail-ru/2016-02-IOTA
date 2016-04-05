@@ -35,6 +35,22 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
         resp.getWriter().println(this.getClass().getCanonicalName() + " : " + String.valueOf(userId));
     }
 
+    @Override
+    @Suspendable
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        final Long userId = getUserIdFromHttpRequest(req);
+        //
+        super.doPost(req, resp);
+    }
+
+    @Override
+    @Suspendable
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        final Long userId = getUserIdFromHttpRequest(req);
+        //
+        super.doDelete(req, resp);
+    }
+
     @Nullable
     private static Long getUserIdFromHttpRequest(HttpServletRequest req) {
         final String requestUri = req.getRequestURI();

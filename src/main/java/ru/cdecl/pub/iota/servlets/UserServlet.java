@@ -25,11 +25,12 @@ public class UserServlet extends FiberHttpServlet {
 
     @Override
     @Suspendable
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             Fiber.sleep(1000);
         } catch (InterruptedException | SuspendExecution ignored) {
         }
         resp.getWriter().println(this.getClass().getCanonicalName());
     }
+
 }

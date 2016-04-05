@@ -33,4 +33,16 @@ public class SessionServlet extends FiberHttpServlet {
         resp.getWriter().println(this.getClass().getCanonicalName());
     }
 
+    @Override
+    @Suspendable
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.doPut(req, resp);
+    }
+
+    @Override
+    @Suspendable
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        super.doDelete(req, resp);
+    }
+
 }
