@@ -4,6 +4,7 @@ import co.paralleluniverse.fibers.Fiber;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.fibers.servlet.FiberHttpServlet;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
 import ru.cdecl.pub.iota.services.AccountService;
@@ -14,6 +15,7 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @Service
@@ -28,6 +30,7 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
     @Suspendable
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final Long userId = getUserIdFromHttpRequest(req);
+        //
         try {
             Fiber.sleep(1000);
         } catch (InterruptedException | SuspendExecution ignored) {
@@ -38,7 +41,12 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
     @Override
     @Suspendable
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        final Long userId = getUserIdFromHttpRequest(req);
+        final HttpSession httpSession = req.getSession(false);
+        final Long userIdFromHttpRequest = getUserIdFromHttpRequest(req);
+        final Long userIdFromHttpSession = getUserIdFromHttpSession(httpSession);
+        if (userIdFromHttpRequest != null && userIdFromHttpRequest.equals(userIdFromHttpSession)) {
+            //
+        }
         //
         super.doPost(req, resp);
     }
@@ -46,19 +54,35 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
     @Override
     @Suspendable
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        final Long userId = getUserIdFromHttpRequest(req);
+        final HttpSession httpSession = req.getSession(false);
+        final Long userIdFromHttpRequest = getUserIdFromHttpRequest(req);
+        final Long userIdFromHttpSession = getUserIdFromHttpSession(httpSession);
+        if (userIdFromHttpRequest != null && userIdFromHttpRequest.equals(userIdFromHttpSession)) {
+            //
+        }
         //
         super.doDelete(req, resp);
     }
 
     @Nullable
-    private static Long getUserIdFromHttpRequest(HttpServletRequest req) {
+    private static Long getUserIdFromHttpRequest(@NotNull HttpServletRequest req) {
         final String requestUri = req.getRequestURI();
         try {
             return Long.parseLong(requestUri.substring(requestUri.lastIndexOf('/') + 1));
         } catch (NumberFormatException | IndexOutOfBoundsException e) {
             return null;
         }
+    }
+
+    @Nullable
+    private static Long getUserIdFromHttpSession(@Nullable HttpSession sess) {
+        if (sess == null) {
+            return null;
+        }
+        final Object userIdAttribute = sess.getAttribute("user_id");
+        return (userIdAttribute instanceof Long)
+                ? (Long) userIdAttribute
+                : null;
     }
 
 }

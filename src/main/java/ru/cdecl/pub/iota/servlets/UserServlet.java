@@ -26,6 +26,7 @@ public class UserServlet extends FiberHttpServlet {
     @Override
     @Suspendable
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        //
         try {
             Fiber.sleep(1000);
         } catch (InterruptedException | SuspendExecution ignored) {
