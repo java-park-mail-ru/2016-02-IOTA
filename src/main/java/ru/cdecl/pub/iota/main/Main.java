@@ -5,6 +5,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
+import ru.cdecl.pub.iota.servlets.ConcreteUserServlet;
 import ru.cdecl.pub.iota.servlets.SessionServlet;
 import ru.cdecl.pub.iota.servlets.UserServlet;
 
@@ -33,6 +34,7 @@ public class Main {
 
         contextHandler.setContextPath("/api");
         contextHandler.addServlet(new ServletHolder(serviceLocator.getService(UserServlet.class)), "/user");
+        contextHandler.addServlet(new ServletHolder(serviceLocator.getService(ConcreteUserServlet.class)), "/user/*");
         contextHandler.addServlet(new ServletHolder(serviceLocator.getService(SessionServlet.class)), "/session");
 
         //noinspection OverlyBroadCatchBlock
@@ -52,4 +54,5 @@ public class Main {
             "|  |(  <_> ) |  |   / __ \\_  /\\    )  ) \n" +
             "|__| \\____/  |__|  (____  /  \\/   /  /  \n" +
             "                        \\/       /__/   ";
+
 }

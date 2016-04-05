@@ -11,6 +11,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Maven: org.jetbrains:annotations:13.0" level="project" />
     <orderEntry type="library" name="Maven: org.glassfish.hk2:hk2:2.5.0-b03" level="project" />
     <orderEntry type="library" name="Maven: org.glassfish.hk2:hk2-utils:2.5.0-b03" level="project" />
     <orderEntry type="library" name="Maven: javax.inject:javax.inject:1" level="project" />
