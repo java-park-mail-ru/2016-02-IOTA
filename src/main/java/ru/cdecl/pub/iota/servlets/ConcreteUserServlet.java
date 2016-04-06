@@ -4,6 +4,7 @@ import co.paralleluniverse.fibers.Fiber;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.fibers.servlet.FiberHttpServlet;
+import jdk.nashorn.internal.ir.debug.JSONWriter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -41,6 +42,9 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
 
             final String email;
             final String login;
+            if (userProfile == null) {
+
+            }
             try {
                 email = userProfile.getEmail();
                 login = userProfile.getLogin();
@@ -77,24 +81,33 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
             final String login = jsonRequest.get("login").toString();
             final String password = jsonRequest.get("password").toString();
             //Long newId = Long.parseLong("2");
-            //UserProfile profile = new UserProfile(newId, "suka", "govno@suka.ru");
+            //UserProfile profile = new UserProfile(newId, "vasya", "vasya@asd.ru");
             //try{
-            //    accountService.createUser(profile, "sukablyat".toCharArray());
+            //    accountService.createUser(profile, "vasya".toCharArray());
             //} catch (UserAlreadyExistsException ex) {
             //    System.out.println("User already exists");
             //} FIXME testinfo
             final UserProfile newProfile = accountService.getUserProfile(userIdFromHttpRequest);
             if (newProfile == null) {
-                System.out.println("No such user in database");
+                System.out.println("Can not get profile from database: no user with id `" + userIdFromHttpRequest + "`found");
                 resp.setStatus(RESP_STATUS_NOT_AUTHORIZED);
                 resp.getWriter().write(EMPTY_RESPONSE);
+                return;
             }
             newProfile.setEmail(email);
             newProfile.setLogin(login);
             try {
                 accountService.editUser(userIdFromHttpRequest, newProfile, password.toCharArray());
-            } catch (UserNotFoundException | UserAlreadyExistsException ex) {
-                //
+            } catch (UserNotFoundException exNotFound) {
+                System.out.println("Can not edit user: no user with login `" + login + "` found");
+                resp.setStatus(RESP_STATUS_NOT_AUTHORIZED);
+                resp.getWriter().write(EMPTY_RESPONSE);
+                return;
+            } catch (UserAlreadyExistsException exAlreadyExists) {
+                System.out.println("Can not edit user: user `" + login + "` already exists");
+                resp.setStatus(RESP_STATUS_NOT_AUTHORIZED);
+                resp.getWriter().write(EMPTY_RESPONSE);
+                return;
             }
 
             final JSONObject jsonResponse = new JSONObject();
@@ -110,7 +123,6 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
             jsonResponse.put("message", "Чужой юзер");
             resp.getWriter().write(jsonResponse.toString());
         }
-        //
     }
 
     @Override
