@@ -6,6 +6,7 @@ import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.fibers.servlet.FiberHttpServlet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
 import org.jvnet.hk2.annotations.Service;
 import ru.cdecl.pub.iota.exceptions.UserNotFoundException;
 import ru.cdecl.pub.iota.models.UserProfile;
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.lang.NullPointerException;
 
 @Service
 @Singleton
@@ -34,9 +36,29 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
         final Long userId = getUserIdFromHttpRequest(req);
         if (userId != null) {
             final UserProfile userProfile = accountService.getUserProfile(userId);
-            //
+
+            final String email;
+            final String login;
+            try {
+                email = userProfile.getEmail();
+                login = userProfile.getLogin();
+            } catch (NullPointerException npe) {
+                System.out.println("No user with user id: " + userId);
+                resp.setStatus(RESP_STATUS_NOT_AUTHORIZED);
+                resp.getWriter().write(EMPTY_RESPONSE);
+                return;
+            }
+            final JSONObject jsonResponse = new JSONObject();
+            jsonResponse.put("id", userId);
+            jsonResponse.put("email", email);
+            jsonResponse.put("login", login);
+
+            resp.setStatus(RESP_STATUS_OK);
+            resp.getWriter().write(jsonResponse.toString());
+            return;
         }
-        //
+        resp.setStatus(RESP_STATUS_NOT_AUTHORIZED);
+        resp.getWriter().write(EMPTY_RESPONSE);
     }
 
     @Override
@@ -48,11 +70,10 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
         if (userIdFromHttpRequest != null && userIdFromHttpRequest.equals(userIdFromHttpSession)) {
             // todo
         } else {
-            resp.setStatus(403);
-            // todo
+            resp.setStatus(RESP_STATUS_FORBIDDEN);
+
         }
         //
-        super.doPost(req, resp);
     }
 
     @Override
@@ -67,7 +88,7 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
             } catch (UserNotFoundException ignored) {
             }
         } else {
-            resp.setStatus(403);
+            resp.setStatus(RESP_STATUS_FORBIDDEN);
             // todo
         }
         //
@@ -94,4 +115,9 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
                 : null;
     }
 
+    private static final int RESP_STATUS_OK = 200;
+    private static final int RESP_STATUS_NOT_AUTHORIZED = 401;
+    private static final int RESP_STATUS_FORBIDDEN = 403;
+    private static final int RESP_STATUS_SERVER_ERROR = 500;
+    private static final String EMPTY_RESPONSE = "{}";
 }
