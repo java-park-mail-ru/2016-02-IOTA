@@ -135,10 +135,24 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
             try {
                 accountService.deleteUser(userIdFromHttpRequest);
             } catch (UserNotFoundException ignored) {
+                System.out.println("Can not delete user: no user with id `" + userIdFromHttpRequest + "`found");
+                resp.setStatus(RESP_STATUS_FORBIDDEN);
+
+                final JSONObject jsonResponse = new JSONObject();
+                jsonResponse.put("status", RESP_STATUS_FORBIDDEN);
+                jsonResponse.put("message", "Чужой юзер");
+                resp.setStatus(RESP_STATUS_FORBIDDEN);
+                resp.getWriter().write(jsonResponse.toString());
+                return;
             }
+            resp.setStatus(RESP_STATUS_OK);
+            resp.getWriter().write(EMPTY_RESPONSE);
         } else {
+            final JSONObject jsonResponse = new JSONObject();
+            jsonResponse.put("status", RESP_STATUS_FORBIDDEN);
+            jsonResponse.put("message", "Чужой юзер");
             resp.setStatus(RESP_STATUS_FORBIDDEN);
-            // todo
+            resp.getWriter().write(jsonResponse.toString());
         }
         //
     }
