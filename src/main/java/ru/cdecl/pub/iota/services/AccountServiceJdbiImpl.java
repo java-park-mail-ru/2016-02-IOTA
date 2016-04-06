@@ -9,17 +9,20 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
 import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 import org.skife.jdbi.v2.util.BooleanMapper;
 import org.skife.jdbi.v2.util.LongMapper;
-import org.skife.jdbi.v2.util.StringMapper;
 import ru.cdecl.pub.iota.exceptions.UserAlreadyExistsException;
 import ru.cdecl.pub.iota.exceptions.UserNotFoundException;
 import ru.cdecl.pub.iota.models.UserProfile;
 
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.sql.DataSource;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,23 +45,39 @@ public class AccountServiceJdbiImpl implements AccountService {
     }
 
     @Override
-    public void createUser(@NotNull UserProfile userProfile, char[] password) throws UserAlreadyExistsException {
+    public long createUser(@NotNull UserProfile userProfile, char[] password) throws UserAlreadyExistsException {
+        final String userLogin = userProfile.getLogin();
+        if (isUserExistent(userLogin)) {
+            throw new UserAlreadyExistsException();
+        }
         // todo
+        return 0L;
     }
 
     @Override
     public void editUser(long userId, @NotNull UserProfile newUserProfile, char[] newPassword) throws UserNotFoundException, UserAlreadyExistsException {
+        if (!isUserExistent(userId)) {
+            throw new UserNotFoundException();
+        }
+        final String newUserLogin = newUserProfile.getLogin();
+        if (isUserExistent(newUserLogin)) {
+            throw new UserAlreadyExistsException();
+        }
         // todo
     }
 
     @Override
     public boolean isUserExistent(long userId) {
-        try (Handle handle = dbi.open()) {
-            return handle.createQuery("select exists(select 1 from user where id = :userId)")
-                    .bind("userId", userId)
-                    .map(BooleanMapper.FIRST)
-                    .first();
-        }
+        final Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("userId", userId);
+        return isUserExistentWhere(" and id = :userId ", queryParams);
+    }
+
+    @Override
+    public boolean isUserExistent(@NotNull String userLogin) {
+        final Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("userLogin", userLogin);
+        return isUserExistentWhere(" and login = :userLogin ", queryParams);
     }
 
     @Override
@@ -111,9 +130,29 @@ public class AccountServiceJdbiImpl implements AccountService {
         }
     }
 
+    private boolean isUserExistentWhere(@NotNull String andWhereClause, @NotNull Map<String, ?> whereParams) {
+        try (Handle handle = dbi.open()) {
+            return handle.createQuery("select exists( select 1 from user where 1 " + andWhereClause + " )")
+                    .bindFromMap(whereParams)
+                    .map(BooleanMapper.FIRST)
+                    .first();
+        }
+    }
+
     @Override
     public boolean isUserPasswordCorrect(long userId, char[] password) throws UserNotFoundException {
+        // todo
         return false;
+    }
+
+    public static byte[] hashPassword(final char[] password, final byte[] salt, final int iterations, final int keyLength) {
+        try {
+            final SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+            final PBEKeySpec keySpec = new PBEKeySpec(password, salt, iterations, keyLength);
+            return secretKeyFactory.generateSecret(keySpec).getEncoded();
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static final String DB_NAME = "iotadb";
