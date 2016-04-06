@@ -30,6 +30,11 @@
             <version>5.1.38</version>
         </dependency>
         <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi</artifactId>
+            <version>2.72</version>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
             <version>9.3.8.v20160314</version>
@@ -52,7 +57,7 @@
         </dependency>
         <dependency>
             <groupId>co.paralleluniverse</groupId>
-            <artifactId>comsat-jdbc</artifactId>
+            <artifactId>comsat-jdbi</artifactId>
             <version>0.6.0</version>
         </dependency>
         <dependency>

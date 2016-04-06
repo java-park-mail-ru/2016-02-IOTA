@@ -29,4 +29,6 @@ public interface AccountService {
 
     boolean isUserPasswordCorrect(long userId, char[] password) throws UserNotFoundException;
 
+    boolean isUserExistent(long userId);
+
 }

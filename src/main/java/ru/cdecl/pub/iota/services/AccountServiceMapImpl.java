@@ -1,6 +1,5 @@
 package ru.cdecl.pub.iota.services;
 
-import org.glassfish.hk2.api.Immediate;
 import org.glassfish.hk2.api.Rank;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,15 +11,16 @@ import ru.cdecl.pub.iota.exceptions.base.SecurityPolicyViolationException;
 import ru.cdecl.pub.iota.models.UserProfile;
 
 import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Service
-@Immediate
-@Named
 @Rank(-100)
+@Named
+@Service
+@Singleton
 public class AccountServiceMapImpl implements AccountService {
 
     private AtomicLong userIdGenerator = new AtomicLong(1L);
@@ -108,6 +108,11 @@ public class AccountServiceMapImpl implements AccountService {
         final boolean isPasswordCorrect = Arrays.equals(password, userPasswords.get(userId));
         Arrays.fill(password, '\0');
         return isPasswordCorrect;
+    }
+
+    @Override
+    public boolean isUserExistent(long userId) {
+        return userProfiles.containsKey(userId);
     }
 
     @SuppressWarnings("OverlyBroadThrowsClause")

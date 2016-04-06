@@ -7,6 +7,8 @@ import co.paralleluniverse.fibers.servlet.FiberHttpServlet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
+import ru.cdecl.pub.iota.exceptions.UserNotFoundException;
+import ru.cdecl.pub.iota.models.UserProfile;
 import ru.cdecl.pub.iota.services.AccountService;
 
 import javax.inject.Inject;
@@ -30,12 +32,11 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
     @Suspendable
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final Long userId = getUserIdFromHttpRequest(req);
-        //
-        try {
-            Fiber.sleep(1000);
-        } catch (InterruptedException | SuspendExecution ignored) {
+        if (userId != null) {
+            final UserProfile userProfile = accountService.getUserProfile(userId);
+            //
         }
-        resp.getWriter().println(this.getClass().getCanonicalName() + " : " + String.valueOf(userId));
+        //
     }
 
     @Override
@@ -45,7 +46,10 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
         final Long userIdFromHttpRequest = getUserIdFromHttpRequest(req);
         final Long userIdFromHttpSession = getUserIdFromHttpSession(httpSession);
         if (userIdFromHttpRequest != null && userIdFromHttpRequest.equals(userIdFromHttpSession)) {
-            //
+            // todo
+        } else {
+            resp.setStatus(403);
+            // todo
         }
         //
         super.doPost(req, resp);
@@ -58,10 +62,15 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
         final Long userIdFromHttpRequest = getUserIdFromHttpRequest(req);
         final Long userIdFromHttpSession = getUserIdFromHttpSession(httpSession);
         if (userIdFromHttpRequest != null && userIdFromHttpRequest.equals(userIdFromHttpSession)) {
-            //
+            try {
+                accountService.deleteUser(userIdFromHttpRequest);
+            } catch (UserNotFoundException ignored) {
+            }
+        } else {
+            resp.setStatus(403);
+            // todo
         }
         //
-        super.doDelete(req, resp);
     }
 
     @Nullable
