@@ -99,10 +99,15 @@ public class AccountServiceJdbiImpl implements AccountService {
 
     private UserProfile getUserProfileWhere(@NotNull String andWhereClause, @NotNull Map<String, ?> whereParams) {
         try (Handle handle = dbi.open()) {
+            //noinspection Convert2Lambda,AnonymousInnerClassMayBeStatic
             return handle.createQuery("select id, login, email from user where 1 " + andWhereClause)
                     .bindFromMap(whereParams)
-                    .map((index, rs, ctx) ->
-                            new UserProfile(rs.getLong("id"), rs.getString("login"), rs.getString("email"))
+                    .map(new ResultSetMapper<UserProfile>() {
+                             @Override
+                             public UserProfile map(int index, ResultSet rs, StatementContext ctx) throws SQLException {
+                                 return new UserProfile(rs.getLong("id"), rs.getString("login"), rs.getString("email"));
+                             }
+                         }
                     ).first();
         }
     }
