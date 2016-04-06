@@ -17,7 +17,6 @@ import org.skife.jdbi.v2.util.LongMapper;
 import org.skife.jdbi.v2.util.StringMapper;
 import ru.cdecl.pub.iota.exceptions.UserAlreadyExistsException;
 import ru.cdecl.pub.iota.exceptions.UserNotFoundException;
-import ru.cdecl.pub.iota.exceptions.base.SecurityPolicyViolationException;
 import ru.cdecl.pub.iota.models.UserProfile;
 
 import javax.sql.DataSource;
@@ -43,12 +42,12 @@ public class AccountServiceJdbiImpl implements AccountService {
     }
 
     @Override
-    public void createUser(@NotNull UserProfile userProfile, char[] password) throws UserAlreadyExistsException, SecurityPolicyViolationException {
+    public void createUser(@NotNull UserProfile userProfile, char[] password) throws UserAlreadyExistsException {
         // todo
     }
 
     @Override
-    public void editUser(long userId, @NotNull UserProfile newUserProfile, char[] newPassword) throws UserNotFoundException, UserAlreadyExistsException, SecurityPolicyViolationException {
+    public void editUser(long userId, @NotNull UserProfile newUserProfile, char[] newPassword) throws UserNotFoundException, UserAlreadyExistsException {
         // todo
     }
 
