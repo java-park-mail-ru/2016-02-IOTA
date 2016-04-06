@@ -15,6 +15,7 @@ public class UserProfile {
     private String email;
 
     public UserProfile(@Nullable Long id, @NotNull String login, @NotNull String email) {
+        this(login, email);
         setId(id);
     }
 
