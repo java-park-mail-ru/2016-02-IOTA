@@ -3,9 +3,13 @@ package ru.cdecl.pub.iota.servlets;
 import co.paralleluniverse.fibers.Fiber;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.fibers.Suspendable;
-import co.paralleluniverse.fibers.servlet.FiberHttpServlet;
+import org.json.JSONObject;
+import org.json.JSONWriter;
 import org.jvnet.hk2.annotations.Service;
+import ru.cdecl.pub.iota.exceptions.UserAlreadyExistsException;
+import ru.cdecl.pub.iota.models.UserProfile;
 import ru.cdecl.pub.iota.services.AccountService;
+import ru.cdecl.pub.iota.servlets.base.JsonApiServlet;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -18,7 +22,7 @@ import java.io.IOException;
 @Service
 @Singleton
 @WebServlet(asyncSupported = true)
-public class UserServlet extends FiberHttpServlet {
+public class UserServlet extends JsonApiServlet {
 
     @Inject
     AccountService accountService;
@@ -26,12 +30,24 @@ public class UserServlet extends FiberHttpServlet {
     @Override
     @Suspendable
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        //
+        final JSONWriter jsonWriter = getJsonWriterForHttpResponse(resp);
+        jsonWriter.object();
+
+        final JSONObject jsonRequest = getJsonObjectFromHttpRequest(req);
+        final UserProfile newUserProfile = new UserProfile(
+                jsonRequest.getString("login"),
+                jsonRequest.getString("email")
+        );
+        final char[] newUserPassword = jsonRequest.getString("password").toCharArray();
+        // todo: validation
         try {
-            Fiber.sleep(1000);
-        } catch (InterruptedException | SuspendExecution ignored) {
+            final long newUserId = accountService.createUser(newUserProfile, newUserPassword);
+            jsonWriter.key("id").value(newUserId);
+        } catch (UserAlreadyExistsException e) {
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
         }
-        resp.getWriter().println(this.getClass().getCanonicalName());
+
+        jsonWriter.endObject();
     }
 
 }

@@ -1,8 +1,5 @@
 package ru.cdecl.pub.iota.main;
 
-import co.paralleluniverse.fibers.jdbc.FiberDataSource;
-import co.paralleluniverse.fibers.jdbc.FiberDataSourceFactory;
-import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
