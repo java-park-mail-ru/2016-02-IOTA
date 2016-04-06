@@ -29,4 +29,6 @@ public interface AccountService {
 
     boolean isUserExistent(long userId);
 
+    boolean isUserExistent(@NotNull String userLogin);
+
 }

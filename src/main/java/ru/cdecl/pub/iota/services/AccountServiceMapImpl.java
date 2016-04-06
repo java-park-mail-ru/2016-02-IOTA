@@ -111,6 +111,11 @@ public class AccountServiceMapImpl implements AccountService {
         return userProfiles.containsKey(userId);
     }
 
+    @Override
+    public boolean isUserExistent(@NotNull String userLogin) {
+        return userIds.containsKey(userLogin);
+    }
+
     public static final int MIN_PASSWORD_LENGTH = 6;
 
 }
