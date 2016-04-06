@@ -70,10 +70,11 @@ public final class ConcreteUserServlet extends JsonApiServlet {
                     jsonRequest.getString("login"),
                     jsonRequest.getString("email")
             );
-            final char[] newUserPassword = jsonRequest.getString("password").trim().toCharArray();
+            final char[] newUserPassword = jsonRequest.getString("password").toCharArray();
             // todo: validation
             try {
                 accountService.editUser(userIdFromHttpRequest, newUserProfile, newUserPassword);
+                httpSession.invalidate();
                 jsonWriter.key("id").value(userIdFromHttpRequest);
             } catch (UserNotFoundException | UserAlreadyExistsException e) {
                 resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

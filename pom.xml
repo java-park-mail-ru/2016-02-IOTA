@@ -199,7 +199,7 @@
                 <configuration>
                     <mainClass>ru.cdecl.pub.iota.main.Main</mainClass>
                     <arguments>
-                        <commandlineArgs>8080</commandlineArgs>
+                        <commandlineArgs>8081</commandlineArgs>
                     </arguments>
                 </configuration>
             </plugin>

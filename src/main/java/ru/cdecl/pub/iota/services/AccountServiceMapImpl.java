@@ -56,10 +56,10 @@ public class AccountServiceMapImpl implements AccountService {
         final char[] oldPassword = userPasswords.get(userId);
         Arrays.fill(oldPassword, '\0');
         userPasswords.replace(userId, newPassword);
-        oldUserProfile.setLogin(newUserLogin);
-        oldUserProfile.setEmail(newUserProfile.getEmail());
         userIds.remove(oldUserProfile.getLogin());
         userIds.put(newUserLogin, userId);
+        oldUserProfile.setLogin(newUserLogin);
+        oldUserProfile.setEmail(newUserProfile.getEmail());
     }
 
     @Override
@@ -116,7 +116,5 @@ public class AccountServiceMapImpl implements AccountService {
     public boolean isUserExistent(@NotNull String userLogin) {
         return userIds.containsKey(userLogin);
     }
-
-    public static final int MIN_PASSWORD_LENGTH = 6;
 
 }

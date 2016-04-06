@@ -39,7 +39,7 @@ public class Main {
         ServiceLocatorUtilities.enableImmediateScope(serviceLocator);
 
         final Server server = new Server(port);
-        final ServletContextHandler contextHandler = new ServletContextHandler();
+        final ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         server.setHandler(contextHandler);
 
         contextHandler.setContextPath("/api");

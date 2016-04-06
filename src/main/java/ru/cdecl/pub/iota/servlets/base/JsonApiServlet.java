@@ -33,6 +33,7 @@ public abstract class JsonApiServlet extends FiberHttpServlet {
     }
 
     protected static JSONWriter getJsonWriterForHttpResponse(HttpServletResponse resp) throws IOException {
+        resp.setContentType("application/json");
         return new JSONWriter(resp.getWriter());
     }
 
