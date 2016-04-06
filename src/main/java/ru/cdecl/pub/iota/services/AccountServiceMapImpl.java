@@ -4,10 +4,8 @@ import org.glassfish.hk2.api.Rank;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
-import ru.cdecl.pub.iota.exceptions.PasswordLengthException;
 import ru.cdecl.pub.iota.exceptions.UserAlreadyExistsException;
 import ru.cdecl.pub.iota.exceptions.UserNotFoundException;
-import ru.cdecl.pub.iota.exceptions.base.SecurityPolicyViolationException;
 import ru.cdecl.pub.iota.models.UserProfile;
 
 import javax.inject.Named;
@@ -29,8 +27,7 @@ public class AccountServiceMapImpl implements AccountService {
     private ConcurrentMap<String, Long> userIds = new ConcurrentHashMap<>();
 
     @Override
-    public void createUser(@NotNull UserProfile userProfile, char[] password) throws UserAlreadyExistsException, SecurityPolicyViolationException {
-        ensurePasswordPolicy(password);
+    public void createUser(@NotNull UserProfile userProfile, char[] password) throws UserAlreadyExistsException {
         final String userLogin = userProfile.getLogin();
         if (userIds.containsKey(userLogin)) {
             throw new UserAlreadyExistsException();
@@ -43,8 +40,7 @@ public class AccountServiceMapImpl implements AccountService {
     }
 
     @Override
-    public void editUser(long userId, @NotNull UserProfile newUserProfile, char[] newPassword) throws UserNotFoundException, UserAlreadyExistsException, SecurityPolicyViolationException {
-        ensurePasswordPolicy(newPassword);
+    public void editUser(long userId, @NotNull UserProfile newUserProfile, char[] newPassword) throws UserNotFoundException, UserAlreadyExistsException {
         final String newUserLogin = newUserProfile.getLogin();
         if (newUserLogin.isEmpty()) {
             return;
@@ -113,13 +109,6 @@ public class AccountServiceMapImpl implements AccountService {
     @Override
     public boolean isUserExistent(long userId) {
         return userProfiles.containsKey(userId);
-    }
-
-    @SuppressWarnings("OverlyBroadThrowsClause")
-    private void ensurePasswordPolicy(char[] password) throws SecurityPolicyViolationException {
-        if (password.length < MIN_PASSWORD_LENGTH) {
-            throw new PasswordLengthException();
-        }
     }
 
     public static final int MIN_PASSWORD_LENGTH = 6;
