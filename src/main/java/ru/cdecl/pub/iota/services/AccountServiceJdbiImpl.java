@@ -1,9 +1,6 @@
 package ru.cdecl.pub.iota.services;
 
-import co.paralleluniverse.fibers.Suspendable;
-import co.paralleluniverse.fibers.jdbc.FiberDataSource;
 import co.paralleluniverse.fibers.jdbi.FiberDBI;
-import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import org.glassfish.hk2.api.Immediate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,17 +14,11 @@ import ru.cdecl.pub.iota.exceptions.UserAlreadyExistsException;
 import ru.cdecl.pub.iota.exceptions.UserNotFoundException;
 import ru.cdecl.pub.iota.models.UserProfile;
 
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
+import javax.inject.Inject;
 import javax.sql.DataSource;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 
 @Service
 @Immediate
@@ -35,13 +26,9 @@ public class AccountServiceJdbiImpl implements AccountService {
 
     private FiberDBI dbi;
 
-    public AccountServiceJdbiImpl() {
-        final MysqlDataSource mysqlDataSource = new MysqlDataSource();
-        mysqlDataSource.setDatabaseName(DB_NAME);
-        mysqlDataSource.setUser(USER_ID);
-        mysqlDataSource.setPassword(PASSWORD);
-
-        dbi = new FiberDBI(mysqlDataSource);
+    @Inject
+    public AccountServiceJdbiImpl(DataSource dataSource) {
+        dbi = new FiberDBI(dataSource);
     }
 
     @Override
@@ -89,7 +76,6 @@ public class AccountServiceJdbiImpl implements AccountService {
 
     @Nullable
     @Override
-    @Suspendable
     public Long getUserId(@NotNull String userLogin) {
         try (Handle handle = dbi.open()) {
             return handle.createQuery("select id from user where login = :userLogin")
@@ -115,6 +101,7 @@ public class AccountServiceJdbiImpl implements AccountService {
         return getUserProfileWhere(" and id = :userId ", queryParams);
     }
 
+    @Nullable
     private UserProfile getUserProfileWhere(@NotNull String andWhereClause, @NotNull Map<String, ?> whereParams) {
         try (Handle handle = dbi.open()) {
             //noinspection Convert2Lambda,AnonymousInnerClassMayBeStatic
@@ -144,19 +131,5 @@ public class AccountServiceJdbiImpl implements AccountService {
         // todo
         return false;
     }
-
-    public static byte[] hashPassword(final char[] password, final byte[] salt, final int iterations, final int keyLength) {
-        try {
-            final SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-            final PBEKeySpec keySpec = new PBEKeySpec(password, salt, iterations, keyLength);
-            return secretKeyFactory.generateSecret(keySpec).getEncoded();
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static final String DB_NAME = "iotadb";
-    public static final String USER_ID = "root";
-    public static final String PASSWORD = "h1w9eyfayl2tn";
 
 }

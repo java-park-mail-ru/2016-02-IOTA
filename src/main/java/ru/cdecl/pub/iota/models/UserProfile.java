@@ -9,14 +9,14 @@ public class UserProfile {
     private Long id;
 
     @NotNull
-    private String login;
+    private String login = "";
 
     @NotNull
-    private String email;
+    private String email = "";
 
     public UserProfile(@Nullable Long id, @NotNull String login, @NotNull String email) {
         this(login, email);
-        setId(id);
+        this.id = id;
     }
 
     public UserProfile(@NotNull String login, @NotNull String email) {
