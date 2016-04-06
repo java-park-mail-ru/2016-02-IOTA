@@ -7,7 +7,9 @@ import co.paralleluniverse.fibers.servlet.FiberHttpServlet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.jvnet.hk2.annotations.Service;
+import ru.cdecl.pub.iota.exceptions.UserAlreadyExistsException;
 import ru.cdecl.pub.iota.exceptions.UserNotFoundException;
 import ru.cdecl.pub.iota.models.UserProfile;
 import ru.cdecl.pub.iota.services.AccountService;
@@ -68,10 +70,45 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
         final Long userIdFromHttpRequest = getUserIdFromHttpRequest(req);
         final Long userIdFromHttpSession = getUserIdFromHttpSession(httpSession);
         if (userIdFromHttpRequest != null && userIdFromHttpRequest.equals(userIdFromHttpSession)) {
-            // todo
+            final JSONTokener tokener = new JSONTokener(req.getInputStream());
+            final JSONObject jsonRequest = new JSONObject(tokener);
+
+            final String email = jsonRequest.get("email").toString();
+            final String login = jsonRequest.get("login").toString();
+            final String password = jsonRequest.get("password").toString();
+            //Long newId = Long.parseLong("2");
+            //UserProfile profile = new UserProfile(newId, "suka", "govno@suka.ru");
+            //try{
+            //    accountService.createUser(profile, "sukablyat".toCharArray());
+            //} catch (UserAlreadyExistsException ex) {
+            //    System.out.println("User already exists");
+            //} FIXME testinfo
+            final UserProfile newProfile = accountService.getUserProfile(userIdFromHttpRequest);
+            if (newProfile == null) {
+                System.out.println("No such user in database");
+                resp.setStatus(RESP_STATUS_NOT_AUTHORIZED);
+                resp.getWriter().write(EMPTY_RESPONSE);
+            }
+            newProfile.setEmail(email);
+            newProfile.setLogin(login);
+            try {
+                accountService.editUser(userIdFromHttpRequest, newProfile, password.toCharArray());
+            } catch (UserNotFoundException | UserAlreadyExistsException ex) {
+                //
+            }
+
+            final JSONObject jsonResponse = new JSONObject();
+            jsonResponse.put("id", userIdFromHttpRequest);
+            resp.setStatus(RESP_STATUS_OK);
+            resp.getWriter().write(jsonResponse.toString());
+
         } else {
             resp.setStatus(RESP_STATUS_FORBIDDEN);
 
+            final JSONObject jsonResponse = new JSONObject();
+            jsonResponse.put("status", RESP_STATUS_FORBIDDEN);
+            jsonResponse.put("message", "Чужой юзер");
+            resp.getWriter().write(jsonResponse.toString());
         }
         //
     }
@@ -118,6 +155,5 @@ public final class ConcreteUserServlet extends FiberHttpServlet {
     private static final int RESP_STATUS_OK = 200;
     private static final int RESP_STATUS_NOT_AUTHORIZED = 401;
     private static final int RESP_STATUS_FORBIDDEN = 403;
-    private static final int RESP_STATUS_SERVER_ERROR = 500;
     private static final String EMPTY_RESPONSE = "{}";
 }
