@@ -27,7 +27,7 @@ public class AccountServiceMapImpl implements AccountService {
     private ConcurrentMap<String, Long> userIds = new ConcurrentHashMap<>();
 
     @Override
-    public void createUser(@NotNull UserProfile userProfile, char[] password) throws UserAlreadyExistsException {
+    public long createUser(@NotNull UserProfile userProfile, char[] password) throws UserAlreadyExistsException {
         final String userLogin = userProfile.getLogin();
         if (userIds.containsKey(userLogin)) {
             throw new UserAlreadyExistsException();
@@ -37,6 +37,7 @@ public class AccountServiceMapImpl implements AccountService {
         userIds.put(userLogin, userId);
         userProfiles.put(userId, userProfile);
         userPasswords.put(userId, password);
+        return userId;
     }
 
     @Override

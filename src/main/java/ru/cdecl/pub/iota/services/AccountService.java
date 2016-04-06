@@ -10,7 +10,7 @@ import ru.cdecl.pub.iota.models.UserProfile;
 @Contract
 public interface AccountService {
 
-    void createUser(@NotNull UserProfile userProfile, char[] password) throws UserAlreadyExistsException;
+    long createUser(@NotNull UserProfile userProfile, char[] password) throws UserAlreadyExistsException;
 
     void editUser(long userId, @NotNull UserProfile newUserProfile, char[] newPassword) throws UserNotFoundException, UserAlreadyExistsException;
 
