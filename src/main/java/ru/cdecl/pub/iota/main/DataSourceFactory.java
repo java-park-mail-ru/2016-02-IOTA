@@ -2,6 +2,7 @@ package ru.cdecl.pub.iota.main;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import org.glassfish.hk2.api.Factory;
+import ru.cdecl.pub.iota.exceptions.InitializationException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -14,7 +15,7 @@ public class DataSourceFactory implements Factory<DataSource> {
         final DataSource dataSource = setUpDataSource();
         try (Connection conn = dataSource.getConnection()) {
             if (!conn.isValid(0)) {
-                throw new AssertionError();
+                throw new InitializationException();
             }
             return dataSource;
         } catch (SQLException e) {

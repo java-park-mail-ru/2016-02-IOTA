@@ -60,7 +60,13 @@ public class AccountServiceJdbiImpl implements AccountService {
         if (isUserExistent(newUserLogin)) {
             throw new UserAlreadyExistsException();
         }
-        // todo
+        try (Handle handle = dbi.open()) {
+            handle.execute("update user set login = ?, email = ?, password = ? where id = ?",
+                    newUserProfile.getLogin(),
+                    newUserProfile.getEmail(),
+                    String.valueOf(newPassword),
+                    userId);
+        }
     }
 
     @Override
