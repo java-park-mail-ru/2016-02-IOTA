@@ -44,16 +44,6 @@
             <artifactId>jetty-servlet</artifactId>
             <version>9.3.8.v20160314</version>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -132,6 +122,20 @@
                     <arguments>
                         <commandlineArgs>8081</commandlineArgs>
                     </arguments>
+                    <systemProperties>
+                        <systemProperty>
+                            <key>db.name</key>
+                            <value>iotadb</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>db.user</key>
+                            <value>root</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>db.password</key>
+                            <value>password</value>
+                        </systemProperty>
+                    </systemProperties>
                 </configuration>
             </plugin>
         </plugins>

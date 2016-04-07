@@ -30,15 +30,11 @@ public class DataSourceFactory implements Factory<DataSource> {
     private DataSource setUpDataSource() {
         final MysqlDataSource dataSource = new MysqlDataSource();
 
-        dataSource.setDatabaseName(DB_NAME);
-        dataSource.setUser(USER_ID);
-        dataSource.setPassword(PASSWORD);
+        dataSource.setDatabaseName(System.getProperty("db.name"));
+        dataSource.setUser(System.getProperty("db.user"));
+        dataSource.setPassword(System.getProperty("db.password"));
 
         return dataSource;
     }
-
-    public static final String DB_NAME = "iotadb";
-    public static final String USER_ID = "root";
-    public static final String PASSWORD = "h1w9eyfayl2tn";
 
 }
