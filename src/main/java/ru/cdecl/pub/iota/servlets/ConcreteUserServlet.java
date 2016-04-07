@@ -67,7 +67,6 @@ public final class ConcreteUserServlet extends JsonApiServlet {
                     jsonRequest.getString("email")
             );
             final char[] newUserPassword = jsonRequest.getString("password").toCharArray();
-            // todo: validation
             try {
                 accountService.editUser(userIdFromHttpRequest, newUserProfile, newUserPassword);
                 httpSession.invalidate();

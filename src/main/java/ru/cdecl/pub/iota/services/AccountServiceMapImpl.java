@@ -21,10 +21,10 @@ import java.util.concurrent.atomic.AtomicLong;
 @Singleton
 public class AccountServiceMapImpl implements AccountService {
 
-    private AtomicLong userIdGenerator = new AtomicLong(1L);
-    private ConcurrentMap<Long, UserProfile> userProfiles = new ConcurrentHashMap<>();
-    private ConcurrentMap<Long, char[]> userPasswords = new ConcurrentHashMap<>();
-    private ConcurrentMap<String, Long> userIds = new ConcurrentHashMap<>();
+    private final AtomicLong userIdGenerator = new AtomicLong(1L);
+    private final ConcurrentMap<Long, UserProfile> userProfiles = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Long, char[]> userPasswords = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Long> userIds = new ConcurrentHashMap<>();
 
     @Override
     public long createUser(@NotNull UserProfile userProfile, char[] password) throws UserAlreadyExistsException {

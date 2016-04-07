@@ -45,7 +45,6 @@ public class SessionServlet extends JsonApiServlet {
         final HttpSession httpSession = req.getSession();
         final JSONObject jsonRequest = getJsonObjectFromHttpRequest(req);
         final Long userId = accountService.getUserId(jsonRequest.getString("login"));
-        // todo: validation
         if (userId != null) {
             try {
                 if (accountService.isUserPasswordCorrect(userId, jsonRequest.getString("password").trim().toCharArray())) {

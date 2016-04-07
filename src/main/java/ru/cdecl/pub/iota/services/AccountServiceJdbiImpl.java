@@ -23,7 +23,7 @@ import java.util.Map;
 @Immediate
 public class AccountServiceJdbiImpl implements AccountService {
 
-    private DBI dbi;
+    private final DBI dbi;
 
     @Inject
     public AccountServiceJdbiImpl(DataSource dataSource) {
