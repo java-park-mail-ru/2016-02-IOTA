@@ -3,35 +3,34 @@ package ru.cdecl.pub.iota.models;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.xml.bind.annotation.XmlElement;
-
 public class UserProfile {
 
     @Nullable
-    private Long userId;
-    @NotNull
-    private String login;
-    @NotNull
-    private String email;
+    private Long id;
 
-    public UserProfile() {
-        this("", "");
+    @NotNull
+    private String login = "";
+
+    @NotNull
+    private String email = "";
+
+    public UserProfile(@Nullable Long id, @NotNull String login, @NotNull String email) {
+        this(login, email);
+        this.id = id;
     }
 
     public UserProfile(@NotNull String login, @NotNull String email) {
-        userId = null;
-        this.login = login;
-        this.email = email;
+        setLogin(login);
+        setEmail(email);
     }
 
     @Nullable
-    @XmlElement(name = "id")
-    public Long getUserId() {
-        return userId;
+    public Long getId() {
+        return id;
     }
 
-    public void setUserId(@Nullable Long userId) {
-        this.userId = userId;
+    public void setId(@Nullable Long id) {
+        this.id = id;
     }
 
     @NotNull
@@ -51,5 +50,5 @@ public class UserProfile {
     public void setEmail(@NotNull String email) {
         this.email = email.trim();
     }
-
+    
 }
