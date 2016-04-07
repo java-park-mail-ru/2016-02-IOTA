@@ -3,16 +3,6 @@
   <component name="EntryPointsManager">
     <entry_points version="2.0" />
   </component>
-  <component name="MavenCompilerTasksManager">
-    <option name="beforeCompileTasks">
-      <set>
-        <MavenCompilerTask>
-          <option name="goal" value="org.glassfish.hk2:hk2-inhabitant-generator:2.4.0-b34:generate-inhabitants" />
-          <option name="projectPath" value="$PROJECT_DIR$/pom.xml" />
-        </MavenCompilerTask>
-      </set>
-    </option>
-  </component>
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
@@ -30,7 +20,7 @@
         </expanded-state>
         <selected-state>
           <State>
-            <id>General</id>
+            <id>Ant inspections</id>
           </State>
         </selected-state>
       </profile-state>
@@ -46,7 +36,7 @@
     <ConfirmationsSetting value="0" id="Add" />
     <ConfirmationsSetting value="0" id="Remove" />
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" assert-keyword="true" jdk-15="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
-    <output url="file://$PROJECT_DIR$/classes" />
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" assert-keyword="true" jdk-15="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>
