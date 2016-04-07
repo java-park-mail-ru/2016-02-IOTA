@@ -11,6 +11,7 @@ import ru.cdecl.pub.iota.servlets.ConcreteUserServlet;
 import ru.cdecl.pub.iota.servlets.SessionServlet;
 import ru.cdecl.pub.iota.servlets.UserServlet;
 
+import javax.servlet.Servlet;
 import javax.sql.DataSource;
 
 public class Main {
@@ -43,9 +44,9 @@ public class Main {
         server.setHandler(contextHandler);
 
         contextHandler.setContextPath("/api");
-        contextHandler.addServlet(new ServletHolder(serviceLocator.getService(UserServlet.class)), "/user");
-        contextHandler.addServlet(new ServletHolder(serviceLocator.getService(ConcreteUserServlet.class)), "/user/*");
-        contextHandler.addServlet(new ServletHolder(serviceLocator.getService(SessionServlet.class)), "/session");
+        contextHandler.addServlet(getServletHolder(serviceLocator, UserServlet.class), "/user");
+        contextHandler.addServlet(getServletHolder(serviceLocator, ConcreteUserServlet.class), "/user/*");
+        contextHandler.addServlet(getServletHolder(serviceLocator, SessionServlet.class), "/session");
 
         //noinspection OverlyBroadCatchBlock
         try {
@@ -55,6 +56,14 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static ServletHolder getServletHolder(ServiceLocator serviceLocator, Class<? extends Servlet> servletClass) {
+        final Servlet servlet = serviceLocator.getService(servletClass);
+        if (servlet == null) {
+            throw new AssertionError(servletClass.getCanonicalName());
+        }
+        return new ServletHolder(servlet);
     }
 
     // -Dco.paralleluniverse.fibers.verifyInstrumentation=true

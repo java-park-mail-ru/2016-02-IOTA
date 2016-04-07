@@ -5,11 +5,11 @@ import org.glassfish.hk2.api.Immediate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.StatementContext;
+import org.skife.jdbi.v2.*;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 import org.skife.jdbi.v2.util.BooleanMapper;
 import org.skife.jdbi.v2.util.LongMapper;
+import org.skife.jdbi.v2.util.StringMapper;
 import ru.cdecl.pub.iota.exceptions.UserAlreadyExistsException;
 import ru.cdecl.pub.iota.exceptions.UserNotFoundException;
 import ru.cdecl.pub.iota.models.UserProfile;
@@ -29,16 +29,27 @@ public class AccountServiceJdbiImpl implements AccountService {
     @Inject
     public AccountServiceJdbiImpl(DataSource dataSource) {
         dbi = new FiberDBI(dataSource);
+        setUpTables();
     }
 
     @Override
     public long createUser(@NotNull UserProfile userProfile, char[] password) throws UserAlreadyExistsException {
         final String userLogin = userProfile.getLogin();
-        if (isUserExistent(userLogin)) {
-            throw new UserAlreadyExistsException();
+        Long insertedUserId = null;
+        try (Handle handle = dbi.open()) {
+            if (AccountServiceJdbiImpl.this.isUserExistent(userLogin)) {
+                throw new UserAlreadyExistsException();
+            }
+            handle.execute("insert into user (login, email, password) values (?, ?, ?)",
+                    userLogin,
+                    userProfile.getEmail(),
+                    String.valueOf(password));
+            insertedUserId = handle.createQuery("select last_insert_id()").map(LongMapper.FIRST).first();
         }
-        // todo
-        return 0L;
+        if (insertedUserId == null) {
+            throw new AssertionError();
+        }
+        return insertedUserId;
     }
 
     @Override
@@ -128,8 +139,24 @@ public class AccountServiceJdbiImpl implements AccountService {
 
     @Override
     public boolean isUserPasswordCorrect(long userId, char[] password) throws UserNotFoundException {
-        // todo
-        return false;
+        if (!isUserExistent(userId)) {
+            throw new UserNotFoundException();
+        }
+        try (Handle handle = dbi.open()) {
+            return handle.createQuery("select exists( select 1 from user where id = :userId and password = :userPassword )")
+                    .bind("userId", userId)
+                    .bind("userPassword", String.valueOf(password))
+                    .map(BooleanMapper.FIRST)
+                    .first();
+        }
+    }
+
+    private void setUpTables() {
+        try (Handle handle = dbi.open()) {
+            handle.execute("create table if not exists user (id bigint(20) primary key not null auto_increment, " +
+                    "login varchar(255) not null, email varchar(255) not null, password varchar(255) not null," +
+                    "unique index ix_login (login))");
+        }
     }
 
 }
