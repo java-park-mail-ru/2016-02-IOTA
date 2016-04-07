@@ -67,8 +67,6 @@ public class Main {
 
     }
 
-    // -Dco.paralleluniverse.fibers.verifyInstrumentation=true
-
     private static final String ASCII_LOGO = "" +
             ".__           __                 ___    \n" +
             "|__|  ____  _/  |_ _____     /\\  \\  \\   \n" +

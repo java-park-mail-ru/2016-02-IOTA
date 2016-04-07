@@ -18,7 +18,7 @@ import java.io.IOException;
 
 @Service
 @Singleton
-@WebServlet(asyncSupported = true)
+@WebServlet
 public class SessionServlet extends JsonApiServlet {
 
     @Inject
