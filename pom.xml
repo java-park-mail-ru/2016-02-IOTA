@@ -45,22 +45,6 @@
             <version>9.3.8.v20160314</version>
         </dependency>
         <dependency>
-            <groupId>co.paralleluniverse</groupId>
-            <artifactId>quasar-core</artifactId>
-            <version>0.7.2</version>
-            <classifier>jdk8</classifier>
-        </dependency>
-        <dependency>
-            <groupId>co.paralleluniverse</groupId>
-            <artifactId>comsat-servlet</artifactId>
-            <version>0.6.0</version>
-        </dependency>
-        <dependency>
-            <groupId>co.paralleluniverse</groupId>
-            <artifactId>comsat-jdbi</artifactId>
-            <version>0.6.0</version>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
@@ -94,59 +78,6 @@
                         <goals>
                             <goal>generate-inhabitants</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <id>instrument-classes</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <property name="ant_classpath" refid="maven.dependency.classpath"/>
-                                <!--suppress MavenModelInspection -->
-                                <taskdef name="instrumentationTask"
-                                         classname="co.paralleluniverse.fibers.instrument.InstrumentationTask"
-                                         classpath="${ant_classpath}"/>
-                                <!-- Use "allowMonitors" to allow instrumenting methods containing synchronization -->
-                                <!-- instrumentationTask allowMonitors="true" -->
-                                <instrumentationTask verbose="true">
-                                    <fileset dir="${project.build.directory}/classes/">
-                                        <include name="**/*.class"/>
-                                    </fileset>
-                                </instrumentationTask>
-                            </tasks>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>instrument-test-classes</id>
-                        <phase>process-test-classes</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <property name="ant_classpath" refid="maven.dependency.classpath"/>
-                                <!--suppress MavenModelInspection -->
-                                <taskdef name="instrumentationTask"
-                                         classname="co.paralleluniverse.fibers.instrument.InstrumentationTask"
-                                         classpath="${ant_classpath}"/>
-                                <!-- Use "allowMonitors" to allow instrumenting methods containing synchronization -->
-                                <!-- instrumentationTask allowMonitors="true" -->
-                                <instrumentationTask verbose="true">
-                                    <fileset dir="${project.build.directory}/test-classes/">
-                                        <include name="**/*.class"/>
-                                    </fileset>
-                                </instrumentationTask>
-                            </tasks>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

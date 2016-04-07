@@ -1,6 +1,5 @@
 package ru.cdecl.pub.iota.services;
 
-import co.paralleluniverse.fibers.jdbi.FiberDBI;
 import org.glassfish.hk2.api.Immediate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,11 +23,11 @@ import java.util.Map;
 @Immediate
 public class AccountServiceJdbiImpl implements AccountService {
 
-    private FiberDBI dbi;
+    private DBI dbi;
 
     @Inject
     public AccountServiceJdbiImpl(DataSource dataSource) {
-        dbi = new FiberDBI(dataSource);
+        dbi = new DBI(dataSource);
         setUpTables();
     }
 

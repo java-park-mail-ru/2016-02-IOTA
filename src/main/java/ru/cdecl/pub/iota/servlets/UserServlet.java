@@ -1,8 +1,5 @@
 package ru.cdecl.pub.iota.servlets;
 
-import co.paralleluniverse.fibers.Fiber;
-import co.paralleluniverse.fibers.SuspendExecution;
-import co.paralleluniverse.fibers.Suspendable;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 import org.jvnet.hk2.annotations.Service;
@@ -28,7 +25,6 @@ public class UserServlet extends JsonApiServlet {
     AccountService accountService;
 
     @Override
-    @Suspendable
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final JSONWriter jsonWriter = getJsonWriterForHttpResponse(resp);
         jsonWriter.object();

@@ -1,6 +1,5 @@
 package ru.cdecl.pub.iota.main;
 
-import co.paralleluniverse.fibers.jdbc.FiberDataSource;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import org.glassfish.hk2.api.Factory;
 
@@ -34,7 +33,7 @@ public class DataSourceFactory implements Factory<DataSource> {
         dataSource.setUser(USER_ID);
         dataSource.setPassword(PASSWORD);
 
-        return FiberDataSource.wrap(dataSource);
+        return dataSource;
     }
 
     public static final String DB_NAME = "iotadb";

@@ -1,6 +1,5 @@
 package ru.cdecl.pub.iota.servlets;
 
-import co.paralleluniverse.fibers.Suspendable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -25,14 +24,13 @@ import java.util.Arrays;
 
 @Service
 @Singleton
-@WebServlet(asyncSupported = true)
+@WebServlet
 public final class ConcreteUserServlet extends JsonApiServlet {
 
     @Inject
     AccountService accountService;
 
     @Override
-    @Suspendable
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final JSONWriter jsonWriter = getJsonWriterForHttpResponse(resp);
         jsonWriter.object();
@@ -55,7 +53,6 @@ public final class ConcreteUserServlet extends JsonApiServlet {
     }
 
     @Override
-    @Suspendable
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final JSONWriter jsonWriter = getJsonWriterForHttpResponse(resp);
         jsonWriter.object();
@@ -91,7 +88,6 @@ public final class ConcreteUserServlet extends JsonApiServlet {
     }
 
     @Override
-    @Suspendable
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final JSONWriter jsonWriter = getJsonWriterForHttpResponse(resp);
         jsonWriter.object();
