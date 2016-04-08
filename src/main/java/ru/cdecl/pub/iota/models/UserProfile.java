@@ -3,6 +3,8 @@ package ru.cdecl.pub.iota.models;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Date;
+
 public class UserProfile {
 
     @Nullable
@@ -13,6 +15,9 @@ public class UserProfile {
 
     @NotNull
     private String email = "";
+
+    @Nullable
+    private Date birthDate = null;
 
     public UserProfile(@Nullable Long id, @NotNull String login, @NotNull String email) {
         this(login, email);
