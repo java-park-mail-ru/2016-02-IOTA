@@ -77,8 +77,8 @@ public class GameServlet extends JsonApiServlet {
                     nPlayers--;
                 }
                 gameSessionId = gameSessionService.spawnGameSessionForPlayers(players);
-                for(Player _p : players) {
-                    _p.sessionId = gameSessionId;
+                for (Player otherPlayer : players) {
+                    otherPlayer.sessionId = gameSessionId;
                 }
                 synchronized (waitingLock) {
                     waitingLock.notifyAll();
@@ -127,23 +127,30 @@ public class GameServlet extends JsonApiServlet {
         if (httpSession != null) {
             final GameSession gameSession = gameSessionService.getGameSessionById((Long) httpSession.getAttribute("game_session_id"));
             if (gameSession != null) {
-                final UserProfile userProfile = accountService.getUserProfile((Long) httpSession.getAttribute("user_id"));
-                if (userProfile != null) {
-                    final JSONObject jsonRequest = getJsonObjectFromHttpRequest(req);
-                    //noinspection OverlyBroadCatchBlock
-                    try {
-                    if (!gameTurn(new Player(userProfile), gameSession, jsonRequest, jsonWriter)) {
-                        resp.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-                        jsonWriter.key("err").value("Unknown error.");
-                    }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                        jsonWriter.key("err").value("Unknown exception.");
+                final Long userIdFromGameSession = gameSession.getCurrentGamePlayer().getPlayer().getUserProfile().getId(); // fixme: unsee it
+                final Long userIdFromHttpSession = (Long) httpSession.getAttribute("user_id");
+                if (userIdFromGameSession != null && userIdFromGameSession.equals(userIdFromHttpSession)) {
+                    final UserProfile userProfile = accountService.getUserProfile(userIdFromHttpSession);
+                    if (userProfile != null) {
+                        final JSONObject jsonRequest = getJsonObjectFromHttpRequest(req);
+                        //noinspection OverlyBroadCatchBlock
+                        try {
+                            if (!gameTurn(new Player(userProfile), gameSession, jsonRequest, jsonWriter)) {
+                                resp.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+                                jsonWriter.key("err").value("Unknown error.");
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                            jsonWriter.key("err").value("Unknown exception.");
+                        }
+                    } else {
+                        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        jsonWriter.key("err").value("User not found.");
                     }
                 } else {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    jsonWriter.key("err").value("User not found.");
+                    jsonWriter.key("err").value("Liar, liar, pants on fire.");
                 }
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -164,11 +171,14 @@ public class GameServlet extends JsonApiServlet {
 //            return false;
 //        }
         final Card[][] newState = toCardArray(jsonRequest);
-        if(!gameSession.updatePlayingField(newState)) {
+        if (!gameSession.updatePlayingField(newState)) {
             return false;
         }
         jsonWriter.key("table").value(toJsonArray(gameSession.playingField.cards));
-        final JSONArray userCardsOld = jsonRequest.getJSONArray("cards");
+        JSONArray userCardsOld = jsonRequest.getJSONArray("cards");
+        if (userCardsOld == null) {
+            userCardsOld = new JSONArray();
+        }
         int userCardsCount = userCardsOld.length();
         final JSONArray newCards = new JSONArray();
         for (; userCardsCount < 4; ++userCardsCount) {
@@ -181,7 +191,7 @@ public class GameServlet extends JsonApiServlet {
         gameSession.endTurn();
         jsonWriter.key("players");
         jsonWriter.array();
-        for(GamePlayer gamePlayer : gameSession.gamePlayers) {
+        for (GamePlayer gamePlayer : gameSession.gamePlayers) {
             final UserProfile userProfile = gamePlayer.getPlayer().getUserProfile();
             jsonWriter.object();
             jsonWriter.key("id").value(userProfile.getId());
@@ -211,7 +221,7 @@ public class GameServlet extends JsonApiServlet {
         arr.forEach(new Consumer<Object>() {
             @Override
             public void accept(Object o) {
-                final JSONObject tableObject = (JSONObject)o;
+                final JSONObject tableObject = (JSONObject) o;
                 final int x = tableObject.getInt("x");
                 final int y = tableObject.getInt("y");
                 final JSONObject cardObjec = tableObject.getJSONObject("card");

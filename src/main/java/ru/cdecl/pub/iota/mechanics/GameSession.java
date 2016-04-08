@@ -75,8 +75,6 @@ public class GameSession {
             return true; // todo
         }
 
-
-
         public static final int CENTER_X = MAX_CARDS_IN_DIMENSION / 2;
         public static final int CENTER_Y = MAX_CARDS_IN_DIMENSION / 2;
     }
