@@ -86,7 +86,7 @@ public class GameServlet extends JsonApiServlet {
                 }
             }
             httpSession.setAttribute("game_session_id", gameSessionId);
-            jsonWriter.key("game_session_id").value(gameSessionId);
+            jsonWriter.key("id").value(gameSessionId);
         }
 
         jsonWriter.endObject();
