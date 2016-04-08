@@ -8,6 +8,7 @@ import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import ru.cdecl.pub.iota.servlets.ConcreteUserServlet;
+import ru.cdecl.pub.iota.servlets.GameServlet;
 import ru.cdecl.pub.iota.servlets.SessionServlet;
 import ru.cdecl.pub.iota.servlets.UserServlet;
 
@@ -47,6 +48,7 @@ public class Main {
         contextHandler.addServlet(getServletHolder(serviceLocator, UserServlet.class), "/user");
         contextHandler.addServlet(getServletHolder(serviceLocator, ConcreteUserServlet.class), "/user/*");
         contextHandler.addServlet(getServletHolder(serviceLocator, SessionServlet.class), "/session");
+        contextHandler.addServlet(getServletHolder(serviceLocator, GameServlet.class), "/game");
 
         //noinspection OverlyBroadCatchBlock
         try {
