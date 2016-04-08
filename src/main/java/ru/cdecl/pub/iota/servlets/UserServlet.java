@@ -25,7 +25,7 @@ public class UserServlet extends JsonApiServlet {
     AccountService accountService;
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final JSONWriter jsonWriter = getJsonWriterForHttpResponse(resp);
         jsonWriter.object();
 
