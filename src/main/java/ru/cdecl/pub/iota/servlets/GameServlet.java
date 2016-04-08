@@ -103,7 +103,7 @@ public class GameServlet extends JsonApiServlet {
             final GameSession gameSession = gameSessionService.getGameSessionById((Long) httpSession.getAttribute("game_session_id"));
             if (gameSession != null) {
                 jsonWriter.key("table").value(toJsonArray(gameSession.playingField.cards));
-                jsonWriter.key("cards");
+                jsonWriter.key("players");
                 jsonWriter.array();
                 for (GamePlayer gamePlayer : gameSession.gamePlayers) {
                     jsonWriter.object();
