@@ -32,6 +32,8 @@ public class SessionServlet extends JsonApiServlet {
         final Long userId = getUserIdFromHttpSession(req.getSession(false));
         if (userId != null && accountService.isUserExistent(userId)) {
             jsonWriter.key("id").value(userId);
+        } else {
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
         }
 
         jsonWriter.endObject();
@@ -50,6 +52,8 @@ public class SessionServlet extends JsonApiServlet {
                 if (accountService.isUserPasswordCorrect(userId, jsonRequest.getString("password").trim().toCharArray())) {
                     httpSession.setAttribute("user_id", userId);
                     jsonWriter.key("id").value(userId);
+                } else {
+                    resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 }
             } catch (UserNotFoundException e) {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
