@@ -191,7 +191,18 @@ public class GameServlet extends JsonApiServlet {
             return false;
         }
         jsonWriter.key("table").value(toJsonArray(gameSession.playingField.cards));
-        final JSONArray userCardsOld = jsonRequest.getJSONArray("cards");
+        JSONArray userCardsOld = null;
+        final JSONArray playersForCards = jsonRequest.getJSONArray("players");
+        for (Object playerForCards : playersForCards) {
+            final JSONObject playerObject = (JSONObject)playerForCards;
+            if (Objects.equals((Long) playerObject.getLong("id"), player.getUserProfile().getId())) {
+                userCardsOld = playerObject.getJSONArray("cards");
+                break;
+            }
+        }
+        if (userCardsOld == null) {
+            return false;
+        }
         int userCardsCount = userCardsOld.length();
         Collection<Card> handCards = gameSession.getCurrentGamePlayer().handCards;
         handCards.clear();
