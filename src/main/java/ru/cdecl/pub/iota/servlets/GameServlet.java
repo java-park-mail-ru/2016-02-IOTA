@@ -1,6 +1,7 @@
 package ru.cdecl.pub.iota.servlets;
 
 import org.eclipse.jetty.util.ArrayQueue;
+import org.eclipse.jetty.util.ConcurrentArrayQueue;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,7 +43,7 @@ public class GameServlet extends JsonApiServlet {
     AccountService accountService;
 
     final Object waitingLock = new Object();
-    final Queue<Player> waitingPlayers = new ArrayQueue<>();
+    final Queue<Player> waitingPlayers = new ConcurrentArrayQueue<>();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -152,7 +153,7 @@ public class GameServlet extends JsonApiServlet {
                         try {
                             if (!gameTurn(new Player(userProfile), gameSession, jsonRequest, jsonWriter)) {
                                 resp.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-                                jsonWriter.key("err").value("Unknown error.");
+                                jsonWriter.key("err").value("Such state, much invalid.");
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -164,7 +165,7 @@ public class GameServlet extends JsonApiServlet {
                         jsonWriter.key("err").value("User not found.");
                     }
                 } else {
-                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
                     jsonWriter.key("err").value("Liar, liar, pants on fire.");
                 }
             } else {
