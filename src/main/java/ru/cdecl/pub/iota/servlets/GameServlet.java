@@ -103,6 +103,21 @@ public class GameServlet extends JsonApiServlet {
             final GameSession gameSession = gameSessionService.getGameSessionById((Long) httpSession.getAttribute("game_session_id"));
             if (gameSession != null) {
                 jsonWriter.key("table").value(toJsonArray(gameSession.playingField.cards));
+                jsonWriter.key("cards");
+                jsonWriter.array();
+                for (GamePlayer gamePlayer : gameSession.gamePlayers) {
+                    jsonWriter.object();
+                    jsonWriter.key("id").value(gamePlayer.getPlayer().getUserProfile().getId());
+                    jsonWriter.key("name").value(gamePlayer.getPlayer().getUserProfile().getLogin());
+                    jsonWriter.key("cards").array();
+                    for (Card card : gamePlayer.handCards) {
+                        jsonWriter.value(cardToJsonObject(card));
+                    }
+                    jsonWriter.endArray();
+                    jsonWriter.endObject();
+                }
+                jsonWriter.endArray();
+                jsonWriter.key("turn_player_id").value(gameSession.getCurrentGamePlayer().getPlayer().getUserProfile().getId());
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 jsonWriter.key("err").value("Game session not found.");
@@ -175,18 +190,29 @@ public class GameServlet extends JsonApiServlet {
             return false;
         }
         jsonWriter.key("table").value(toJsonArray(gameSession.playingField.cards));
-        JSONArray userCardsOld = jsonRequest.getJSONArray("cards");
-        if (userCardsOld == null) {
-            userCardsOld = new JSONArray();
-        }
+        final JSONArray userCardsOld = jsonRequest.getJSONArray("cards");
         int userCardsCount = userCardsOld.length();
+        Collection<Card> handCards = gameSession.getCurrentGamePlayer().handCards;
+        handCards.clear();
+        //noinspection Convert2Lambda,Convert2Lambda
+        userCardsOld.forEach(new Consumer<Object>() {
+            @Override
+            public void accept(Object o) {
+                JSONObject jsonObject = (JSONObject)o;
+                handCards.add(new Card(
+                        getColorFromString(jsonObject.getString("color")),
+                        getShapeFromString(jsonObject.getString("shape")),
+                        jsonObject.getInt("value")));
+            }
+        });
         final JSONArray newCards = new JSONArray();
         for (; userCardsCount < 4; ++userCardsCount) {
             final Card card = gameSession.drawCard();
             newCards.put(cardToJsonObject(card));
             userCardsOld.put(cardToJsonObject(card));
+            handCards.add(card);
         }
-        jsonWriter.key("cards").value(userCardsOld);
+        jsonWriter.key("cards").value(new JSONArray(handCards));
         jsonWriter.key("new_cards").value(newCards);
         gameSession.endTurn();
         jsonWriter.key("players");

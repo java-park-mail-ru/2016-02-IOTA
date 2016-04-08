@@ -10,6 +10,7 @@ import ru.cdecl.pub.iota.services.game.CardDeckService;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.function.Consumer;
@@ -29,8 +30,12 @@ public class GameSession {
         players.forEach(new Consumer<Player>() {
             @Override
             public void accept(Player player) {
-                final GamePlayer gamePlayer = new GamePlayer(player);
-                gamePlayers.add(new GamePlayer(player));
+                final List<Card> handCards = new LinkedList<Card>();
+                for (int i = 0; i < 4; ++i) {
+                    handCards.add(cardDeckService.drawCard());
+                }
+                final GamePlayer gamePlayer = new GamePlayer(player, handCards);
+                gamePlayers.add(gamePlayer);
             }
         });
         playingField = new PlayingField(cardDeckService.drawCard());
