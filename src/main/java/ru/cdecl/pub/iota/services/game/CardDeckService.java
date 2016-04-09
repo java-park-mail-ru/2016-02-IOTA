@@ -39,7 +39,7 @@ public class CardDeckService {
             for (Card.Shape shape : Card.Shape.values()) {
                 for (int value : new int[]{1, 2, 3, 4}) {
                     final Card card = new Card(color, shape, value);
-                    deck.add(card);
+                    cards.add(card);
                 }
             }
         }
