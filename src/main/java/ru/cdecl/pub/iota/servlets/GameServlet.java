@@ -2,6 +2,8 @@ package ru.cdecl.pub.iota.servlets;
 
 import org.eclipse.jetty.util.ArrayQueue;
 import org.eclipse.jetty.util.ConcurrentArrayQueue;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,13 +39,13 @@ import java.util.function.Consumer;
 public class GameServlet extends JsonApiServlet {
 
     @Inject
-    GameSessionService gameSessionService;
+    private GameSessionService gameSessionService;
 
     @Inject
-    AccountService accountService;
+    private AccountService accountService;
 
-    final Object waitingLock = new Object();
-    final Queue<Player> waitingPlayers = new ConcurrentArrayQueue<>();
+    private final Object waitingLock = new Object();
+    private final Queue<Player> waitingPlayers = new ConcurrentArrayQueue<>();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -194,7 +196,7 @@ public class GameServlet extends JsonApiServlet {
         JSONArray userCardsOld = null;
         final JSONArray playersForCards = jsonRequest.getJSONArray("players");
         for (Object playerForCards : playersForCards) {
-            final JSONObject playerObject = (JSONObject)playerForCards;
+            final JSONObject playerObject = (JSONObject) playerForCards;
             if (Objects.equals((Long) playerObject.getLong("id"), player.getUserProfile().getId())) {
                 userCardsOld = playerObject.getJSONArray("cards");
                 break;
@@ -204,18 +206,14 @@ public class GameServlet extends JsonApiServlet {
             return false;
         }
         int userCardsCount = userCardsOld.length();
-        Collection<Card> handCards = gameSession.getCurrentGamePlayer().handCards;
+        final Collection<Card> handCards = gameSession.getCurrentGamePlayer().handCards;
         handCards.clear();
-        //noinspection Convert2Lambda,Convert2Lambda
-        userCardsOld.forEach(new Consumer<Object>() {
-            @Override
-            public void accept(Object o) {
-                JSONObject jsonObject = (JSONObject)o;
-                handCards.add(new Card(
-                        getColorFromString(jsonObject.getString("color")),
-                        getShapeFromString(jsonObject.getString("shape")),
-                        jsonObject.getInt("value")));
-            }
+        userCardsOld.forEach(o -> {
+            final JSONObject jsonObject = (JSONObject) o;
+            handCards.add(new Card(
+                    Card.Color.fromString(jsonObject.getString("color")),
+                    Card.Shape.fromString(jsonObject.getString("shape")),
+                    jsonObject.getInt("value")));
         });
         final JSONArray newCards = new JSONArray();
         for (; userCardsCount < 4; ++userCardsCount) {
@@ -241,13 +239,14 @@ public class GameServlet extends JsonApiServlet {
         return true;
     }
 
+    @Nullable
     private JSONObject cardToJsonObject(Card card) {
         if (card == null) {
             return null;
         }
         final JSONObject cardJsonObject = new JSONObject();
-        cardJsonObject.put("color", getStringFromColor(card.getColor()));
-        cardJsonObject.put("shape", getStringFromShape(card.getShape()));
+        cardJsonObject.put("color", card.getColor());
+        cardJsonObject.put("shape", card.getShape());
         cardJsonObject.put("value", card.getValue());
         return cardJsonObject;
     }
@@ -255,20 +254,16 @@ public class GameServlet extends JsonApiServlet {
     private Card[][] toCardArray(JSONObject json) {
         final JSONArray arr = json.getJSONArray("table");
         final Card[][] cards = new Card[GameSession.PlayingField.MAX_CARDS_IN_DIMENSION][GameSession.PlayingField.MAX_CARDS_IN_DIMENSION];
-        //noinspection Convert2Lambda,AnonymousInnerClassMayBeStatic
-        arr.forEach(new Consumer<Object>() {
-            @Override
-            public void accept(Object o) {
-                final JSONObject tableObject = (JSONObject) o;
-                final int x = tableObject.getInt("x");
-                final int y = tableObject.getInt("y");
-                final JSONObject cardObjec = tableObject.getJSONObject("card");
-                final String shape = cardObjec.getString("shape");
-                final String color = cardObjec.getString("color");
-                final int value = cardObjec.getInt("value");
-                if (shape != null && color != null && value > 0) {
-                    cards[x][y] = new Card(getColorFromString(color), getShapeFromString(shape), value);
-                }
+        arr.forEach(o -> {
+            final JSONObject tableObject = (JSONObject) o;
+            final int x = tableObject.getInt("x");
+            final int y = tableObject.getInt("y");
+            final JSONObject cardObjec = tableObject.getJSONObject("card");
+            final String shape = cardObjec.getString("shape");
+            final String color = cardObjec.getString("color");
+            final int value = cardObjec.getInt("value");
+            if (shape != null && color != null && value > 0) {
+                cards[x][y] = new Card(Card.Color.fromString(color), Card.Shape.fromString(shape), value);
             }
         });
         return cards;
@@ -288,58 +283,6 @@ public class GameServlet extends JsonApiServlet {
             }
         }
         return jsonArray;
-    }
-
-    private Card.Color getColorFromString(String s) {
-        switch (s) {
-            case "r":
-                return Card.Color.RED;
-            case "g":
-                return Card.Color.GREEN;
-            case "y":
-                return Card.Color.YELLOW;
-            default:
-                return Card.Color.BLUE;
-        }
-    }
-
-    private String getStringFromColor(Card.Color color) {
-        switch (color) {
-            case RED:
-                return "r";
-            case GREEN:
-                return "g";
-            case YELLOW:
-                return "y";
-            default:
-                return "b";
-        }
-    }
-
-    private String getStringFromShape(Card.Shape shape) {
-        switch (shape) {
-            case CIRCLE:
-                return "c";
-            case SQUARE:
-                return "r";
-            case TRIANGLE:
-                return "t";
-            default:
-                return "x";
-        }
-    }
-
-    private Card.Shape getShapeFromString(String s) {
-        switch (s) {
-            case "c":
-                return Card.Shape.CIRCLE;
-            case "r":
-                return Card.Shape.SQUARE;
-            case "t":
-                return Card.Shape.TRIANGLE;
-            default:
-                return Card.Shape.CROSS;
-        }
     }
 
 }

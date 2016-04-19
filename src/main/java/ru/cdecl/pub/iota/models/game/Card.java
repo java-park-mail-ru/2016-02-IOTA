@@ -1,5 +1,7 @@
 package ru.cdecl.pub.iota.models.game;
 
+import org.jetbrains.annotations.NotNull;
+
 public class Card {
 
     private Color color;
@@ -38,31 +40,52 @@ public class Card {
         return color;
     }
 
-    public void setColor(Color color) {
-        this.color = color;
-    }
-
     public Shape getShape() {
         return shape;
-    }
-
-    public void setShape(Shape shape) {
-        this.shape = shape;
     }
 
     public int getValue() {
         return value;
     }
 
-    public void setValue(int value) {
-        this.value = value;
-    }
-
-    @SuppressWarnings("EnumeratedConstantNamingConvention")
     public enum Color {
-        RED, GREEN, BLUE, YELLOW
+        RED("r"), GREEN("g"), BLUE("b"), YELLOW("y");
+
+        @NotNull
+        String stringValue;
+
+        Color(@NotNull String stringValue) {
+            this.stringValue = stringValue;
+        }
+
+        public static Color fromString(@NotNull String str) {
+            for (Color color : Color.values()) {
+                if (color.stringValue.equals(str)) {
+                    return color;
+                }
+            }
+            throw new IllegalArgumentException("str");
+        }
     }
 
-    public enum Shape {TRIANGLE, SQUARE, CIRCLE, CROSS}
+    public enum Shape {
+        TRIANGLE("t"), SQUARE("s"), CIRCLE("c"), CROSS("x");
+
+        @NotNull
+        String stringValue;
+
+        Shape(@NotNull String stringValue) {
+            this.stringValue = stringValue;
+        }
+
+        public static Shape fromString(@NotNull String str) { // todo: can I use Share.valueOf(str) ??
+            for (Shape shape : Shape.values()) {
+                if (shape.stringValue.equals(str)) {
+                    return shape;
+                }
+            }
+            throw new IllegalArgumentException("str");
+        }
+    }
 
 }
