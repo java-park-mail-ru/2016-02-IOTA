@@ -56,7 +56,7 @@ public class Main {
             System.out.println(ASCII_LOGO);
             server.join();
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
 
@@ -66,7 +66,6 @@ public class Main {
             throw new AssertionError(servletClass.getCanonicalName());
         }
         return new ServletHolder(servlet);
-
     }
 
     private static final String ASCII_LOGO = "" +
