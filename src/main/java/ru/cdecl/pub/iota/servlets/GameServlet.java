@@ -258,10 +258,10 @@ public class GameServlet extends JsonApiServlet {
             final JSONObject tableObject = (JSONObject) o;
             final int x = tableObject.getInt("x");
             final int y = tableObject.getInt("y");
-            final JSONObject cardObjec = tableObject.getJSONObject("card");
-            final String shape = cardObjec.getString("shape");
-            final String color = cardObjec.getString("color");
-            final int value = cardObjec.getInt("value");
+            final JSONObject cardObject = tableObject.getJSONObject("card");
+            final String shape = cardObject.getString("shape");
+            final String color = cardObject.getString("color");
+            final int value = cardObject.getInt("value");
             if (shape != null && color != null && value > 0) {
                 cards[x][y] = new Card(Card.Color.fromString(color), Card.Shape.fromString(shape), value);
             }
