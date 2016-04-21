@@ -66,6 +66,11 @@ public class Card implements CardDeckItem {
             }
             throw new IllegalArgumentException("str");
         }
+
+        @Override
+        public String toString() {
+            return stringValue;
+        }
     }
 
     public enum Shape {
@@ -85,6 +90,11 @@ public class Card implements CardDeckItem {
                 }
             }
             throw new IllegalArgumentException("str");
+        }
+
+        @Override
+        public String toString() {
+            return stringValue;
         }
     }
 
