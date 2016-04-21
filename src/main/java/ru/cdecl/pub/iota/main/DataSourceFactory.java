@@ -3,12 +3,18 @@ package ru.cdecl.pub.iota.main;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import org.glassfish.hk2.api.Factory;
 import ru.cdecl.pub.iota.exceptions.InitializationException;
+import ru.cdecl.pub.iota.services.ConfigurationService;
 
+import javax.inject.Inject;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 public class DataSourceFactory implements Factory<DataSource> {
+
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+    @Inject
+    private ConfigurationService configurationService;
 
     @Override
     public DataSource provide() {
@@ -30,9 +36,9 @@ public class DataSourceFactory implements Factory<DataSource> {
     private DataSource setUpDataSource() {
         final MysqlDataSource dataSource = new MysqlDataSource();
 
-        dataSource.setDatabaseName(System.getProperty("db.name"));
-        dataSource.setUser(System.getProperty("db.user"));
-        dataSource.setPassword(System.getProperty("db.password"));
+        dataSource.setDatabaseName(configurationService.getProperty("db.name"));
+        dataSource.setUser(configurationService.getProperty("db.user"));
+        dataSource.setPassword(configurationService.getProperty("db.password"));
 
         return dataSource;
     }

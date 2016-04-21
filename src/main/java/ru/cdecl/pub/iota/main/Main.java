@@ -4,9 +4,11 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.hk2.api.Immediate;
+import org.glassfish.hk2.api.MultiException;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
+import ru.cdecl.pub.iota.services.ConfigurationService;
 import ru.cdecl.pub.iota.servlets.ConcreteUserServlet;
 import ru.cdecl.pub.iota.servlets.GameServlet;
 import ru.cdecl.pub.iota.servlets.SessionServlet;
@@ -14,23 +16,12 @@ import ru.cdecl.pub.iota.servlets.UserServlet;
 
 import javax.servlet.Servlet;
 import javax.sql.DataSource;
+import java.io.FileInputStream;
+import java.util.Properties;
 
 public class Main {
 
-    public static void main(String[] args) {
-        if (args.length != 1) {
-            System.err.println("Not enough arguments: no port specified.");
-            System.exit(1);
-        }
-
-        int port = -1;
-        try {
-            port = Integer.valueOf(args[0]);
-        } catch (NumberFormatException ex) {
-            System.err.println("Cannot parse port");
-            System.exit(2);
-        }
-
+    public static void main(String[] args) throws Exception, InterruptedException, MultiException {
         final ServiceLocator serviceLocator = ServiceLocatorUtilities.createAndPopulateServiceLocator();
         ServiceLocatorUtilities.bind(serviceLocator, new AbstractBinder() {
             @Override
@@ -39,6 +30,16 @@ public class Main {
             }
         });
         ServiceLocatorUtilities.enableImmediateScope(serviceLocator);
+
+        final ConfigurationService configurationService = serviceLocator.getService(ConfigurationService.class);
+
+        int port = -1;
+        try {
+            port = Integer.valueOf(configurationService.getProperty("port"));
+        } catch (NumberFormatException ex) {
+            System.err.println("Cannot parse port");
+            System.exit(2);
+        }
 
         final Server server = new Server(port);
         final ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -50,14 +51,9 @@ public class Main {
         contextHandler.addServlet(getServletHolder(serviceLocator, SessionServlet.class), "/session");
         contextHandler.addServlet(getServletHolder(serviceLocator, GameServlet.class), "/game");
 
-        //noinspection OverlyBroadCatchBlock
-        try {
-            server.start();
-            System.out.println(ASCII_LOGO);
-            server.join();
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-        }
+        server.start();
+        System.out.println(ASCII_LOGO);
+        server.join();
     }
 
     private static ServletHolder getServletHolder(ServiceLocator serviceLocator, Class<? extends Servlet> servletClass) {

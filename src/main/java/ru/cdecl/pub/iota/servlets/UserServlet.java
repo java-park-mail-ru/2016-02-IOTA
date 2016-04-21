@@ -22,7 +22,7 @@ import java.io.IOException;
 public class UserServlet extends JsonApiServlet {
 
     @Inject
-    AccountService accountService;
+    private AccountService accountService;
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

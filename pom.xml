@@ -131,23 +131,6 @@
                 </executions>
                 <configuration>
                     <mainClass>ru.cdecl.pub.iota.main.Main</mainClass>
-                    <arguments>
-                        <commandlineArgs>8081</commandlineArgs>
-                    </arguments>
-                    <systemProperties>
-                        <systemProperty>
-                            <key>db.name</key>
-                            <value>iotadb</value>
-                        </systemProperty>
-                        <systemProperty>
-                            <key>db.user</key>
-                            <value>root</value>
-                        </systemProperty>
-                        <systemProperty>
-                            <key>db.password</key>
-                            <value>password</value>
-                        </systemProperty>
-                    </systemProperties>
                 </configuration>
             </plugin>
         </plugins>

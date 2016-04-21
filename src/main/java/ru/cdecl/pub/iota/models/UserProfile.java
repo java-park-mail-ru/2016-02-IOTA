@@ -55,5 +55,20 @@ public class UserProfile {
     public void setEmail(@NotNull String email) {
         this.email = email.trim();
     }
-    
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UserProfile that = (UserProfile) o;
+
+        return login.equals(that.login);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return login.hashCode();
+    }
 }

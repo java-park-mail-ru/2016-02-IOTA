@@ -2,17 +2,20 @@ package ru.cdecl.pub.iota.mechanics;
 
 import org.eclipse.jetty.util.ArrayQueue;
 import org.glassfish.hk2.api.PerLookup;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
+import ru.cdecl.pub.iota.exceptions.base.GameException;
+import ru.cdecl.pub.iota.exceptions.game.NoCardsInDeckException;
+import ru.cdecl.pub.iota.models.UserProfile;
 import ru.cdecl.pub.iota.models.game.Card;
-import ru.cdecl.pub.iota.models.game.Player;
+import ru.cdecl.pub.iota.models.game.CardDeckItem;
+import ru.cdecl.pub.iota.models.game.Wildcard;
 import ru.cdecl.pub.iota.services.game.CardDeckService;
+import ru.cdecl.pub.iota.services.game.PlayingFieldService;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.function.Consumer;
 
 @Service
@@ -20,37 +23,30 @@ import java.util.function.Consumer;
 public class GameSession {
 
     @Inject
-    CardDeckService cardDeckService;
+    private CardDeckService cardDeckService;
 
-    public Queue<GamePlayer> gamePlayers = new ArrayQueue<>();
+    @Inject
+    private PlayingFieldService playingFieldService;
 
-    public PlayingField playingField;
+    private Queue<GamePlayer> gamePlayers = new ArrayQueue<>();
 
-    public void setPlayers(Iterable<Player> players) {
-        players.forEach(new Consumer<Player>() {
-            @Override
-            public void accept(Player player) {
-                final List<Card> handCards = new LinkedList<Card>();
-                for (int i = 0; i < 4; ++i) {
-                    handCards.add(cardDeckService.drawCard());
-                }
-                final GamePlayer gamePlayer = new GamePlayer(player, handCards);
-                gamePlayers.add(gamePlayer);
+    public void setPlayers(Iterable<UserProfile> players) {
+        try {
+            setPlayersInternal(players);
+        } catch (NoCardsInDeckException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    private void setPlayersInternal(Iterable<UserProfile> players) throws NoCardsInDeckException {
+        for (UserProfile player : players) {
+            final List<CardDeckItem> handCards = new LinkedList<>();
+            for (int i = 0; i < 4; ++i) {
+                handCards.add(cardDeckService.drawCard());
             }
-        });
-        playingField = new PlayingField(cardDeckService.drawCard());
-    }
-
-    public GamePlayer getCurrentGamePlayer() {
-        return gamePlayers.peek();
-    }
-
-    public boolean updatePlayingField(Card[][] cargs) {
-        return playingField.updateCards(cargs);
-    }
-
-    public Card drawCard() {
-        return cardDeckService.drawCard();
+            gamePlayers.add(new GamePlayer(player, handCards));
+        }
+        playingFieldService.setInitialCard(cardDeckService.drawCard());
     }
 
     public void endTurn() {
@@ -58,30 +54,20 @@ public class GameSession {
         gamePlayers.add(gamePlayer);
     }
 
-    public static class PlayingField {
+    public GamePlayer getCurrentGamePlayer() {
+        return gamePlayers.peek();
+    }
 
-        public static final int MAX_CARDS_IN_DIMENSION = 34;
+    public Collection<GamePlayer> getGamePlayers() {
+        return Collections.unmodifiableCollection(gamePlayers);
+    }
 
-        public Card[][] cards = new Card[MAX_CARDS_IN_DIMENSION][MAX_CARDS_IN_DIMENSION];
+    public CardDeckService getCardDeckService() {
+        return cardDeckService;
+    }
 
-        public PlayingField(Card initialCard) {
-            cards[CENTER_X][CENTER_Y] = initialCard;
-        }
-
-        public boolean updateCards(Card[][] cards) {
-            if (!isValid(cards)) {
-                return false;
-            }
-            this.cards = cards;
-            return true;
-        }
-
-        private static boolean isValid(Card[][] field) {
-            return true; // todo
-        }
-
-        public static final int CENTER_X = MAX_CARDS_IN_DIMENSION / 2;
-        public static final int CENTER_Y = MAX_CARDS_IN_DIMENSION / 2;
+    public PlayingFieldService getPlayingFieldService() {
+        return playingFieldService;
     }
 
 }

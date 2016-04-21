@@ -2,13 +2,13 @@ package ru.cdecl.pub.iota.models.game;
 
 import org.jetbrains.annotations.NotNull;
 
-public class Card {
+public class Card implements CardDeckItem {
 
-    private Color color;
-    private Shape shape;
-    private int value;
+    private final Color color;
+    private final Shape shape;
+    private final int value;
 
-    public Card(Color color, Shape shape, int value) {
+    public Card(@NotNull Color color, @NotNull Shape shape, int value) {
         this.color = color;
         this.shape = shape;
         this.value = value;
@@ -78,7 +78,7 @@ public class Card {
             this.stringValue = stringValue;
         }
 
-        public static Shape fromString(@NotNull String str) { // todo: can I use Share.valueOf(str) ??
+        public static Shape fromString(@NotNull String str) { // todo: can I use Shape.valueOf(str) ??
             for (Shape shape : Shape.values()) {
                 if (shape.stringValue.equals(str)) {
                     return shape;

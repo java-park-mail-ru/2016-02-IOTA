@@ -1,7 +1,8 @@
 package ru.cdecl.pub.iota.mechanics;
 
+import ru.cdecl.pub.iota.models.UserProfile;
 import ru.cdecl.pub.iota.models.game.Card;
-import ru.cdecl.pub.iota.models.game.Player;
+import ru.cdecl.pub.iota.models.game.CardDeckItem;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,21 +11,31 @@ import java.util.List;
 
 public class GamePlayer {
 
-    Player player;
+    private UserProfile userProfile;
 
-    public Collection<Card> handCards = new LinkedList<>();
+    private Collection<CardDeckItem> handCards = new ArrayList<>();
 
-    public GamePlayer(Player player, Collection<Card> handCards) {
-        this.player = player;
+    public GamePlayer(UserProfile userProfile, Collection<CardDeckItem> handCards) {
+        this.userProfile = userProfile;
         this.handCards.clear();
         this.handCards.addAll(handCards);
     }
 
-    public Player getPlayer() {
-        return player;
+    public UserProfile getUserProfile() {
+        return userProfile;
     }
 
-    public void setPlayer(Player player) {
-        this.player = player;
+    public Collection<CardDeckItem> getHandCards() {
+        return handCards;
     }
+
+    public void setHandCards(Collection<CardDeckItem> handCards) {
+        this.handCards = handCards;
+    }
+
+    public boolean isConnected() {
+        // todo
+        return true;
+    }
+
 }
