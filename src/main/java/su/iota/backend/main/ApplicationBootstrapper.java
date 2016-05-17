@@ -3,7 +3,10 @@ package su.iota.backend.main;
 import co.paralleluniverse.comsat.webactors.servlet.WebActorInitializer;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.SuspendableRunnable;
+import com.esotericsoftware.minlog.Log;
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.component.AbstractLifeCycle;
 import org.eclipse.jetty.util.component.LifeCycle;
@@ -12,11 +15,14 @@ import org.glassfish.hk2.api.Immediate;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
 import org.jvnet.hk2.annotations.Service;
-import su.iota.backend.common.SettingsService;
+import su.iota.backend.settings.SettingsService;
 import su.iota.backend.misc.ServiceUtils;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Service
 @Immediate
@@ -30,11 +36,11 @@ public final class ApplicationBootstrapper implements SuspendableRunnable {
 
     @Override
     public void run() throws SuspendExecution, InterruptedException {
-        ServiceUtils.setupServiceUtils(serviceLocator);
-        WebActorInitializer.setUserClassLoader(ClassLoader.getSystemClassLoader());
-
         final Server server = new Server(settingsService.getServerPortSetting());
         final ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+
+        ServiceUtils.setupServiceUtils(serviceLocator);
+        WebActorInitializer.setUserClassLoader(ClassLoader.getSystemClassLoader());
 
         server.setHandler(contextHandler);
         contextHandler.setContextPath(settingsService.getServerContextPathSetting());

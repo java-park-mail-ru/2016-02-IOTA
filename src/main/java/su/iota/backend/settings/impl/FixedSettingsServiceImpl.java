@@ -1,7 +1,7 @@
-package su.iota.backend.services;
+package su.iota.backend.settings.impl;
 
 import org.jvnet.hk2.annotations.Service;
-import su.iota.backend.common.SettingsService;
+import su.iota.backend.settings.SettingsService;
 
 import javax.inject.Singleton;
 

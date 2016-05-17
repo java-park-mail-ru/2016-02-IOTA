@@ -13,7 +13,7 @@ public final class ServiceUtils {
 
     private static final String ACTOR_NAME = "__aux_ServiceUtilsActor";
 
-    private ServiceUtils() throws SuspendExecution {
+    private ServiceUtils() {
     }
 
     public static void setupServiceUtils(final ServiceLocator serviceLocator) throws SuspendExecution {
