@@ -54,8 +54,9 @@ public final class FrontendActor extends BasicActor<Object, Void> {
             if (message instanceof WebMessage) {
                 handleWebMessage((WebMessage) message);
             } else if (message instanceof OutgoingMessage) {
+                final WebMessage jsonMessage = new WebDataMessage(self(), getGson().toJson(message));
                 webSockets.stream().forEach(rethrowConsumer(ws -> {
-                    ws.send(new WebDataMessage(self(), getGson().toJson(message)));
+                    ws.send(jsonMessage);
                 }));
             }
             checkCodeSwap();

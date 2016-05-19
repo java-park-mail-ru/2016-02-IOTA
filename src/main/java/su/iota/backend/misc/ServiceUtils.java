@@ -17,14 +17,14 @@ public final class ServiceUtils {
     }
 
     public static void setupServiceUtils(final ServiceLocator serviceLocator) throws SuspendExecution {
-        final ServerHandler<Object, ServiceLocator, Void> serverHandler = new AbstractServerHandler<Object, ServiceLocator, Void>() {
+        final ServerHandler<Void, ServiceLocator, Void> serverHandler = new AbstractServerHandler<Void, ServiceLocator, Void>() {
             @Override
-            public ServiceLocator handleCall(ActorRef<?> from, Object id, Object m) throws SuspendExecution {
+            public ServiceLocator handleCall(ActorRef<?> from, Object id, Void m) throws SuspendExecution {
                 return serviceLocator;
             }
         };
         //noinspection resource
-        final ServerActor<Object, ServiceLocator, Void> actor = new ServerActor<>(ACTOR_NAME, serverHandler);
+        final ServerActor<Void, ServiceLocator, Void> actor = new ServerActor<>(ACTOR_NAME, serverHandler);
         actor.spawn();
         actor.register();
     }
