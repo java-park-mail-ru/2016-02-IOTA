@@ -4,6 +4,7 @@ A [Parallel Universe Quasar](http://www.paralleluniverse.co/quasar/) Maven test 
 
 
 ```
-mvn test
-mvn clean compile dependency:properties exec:exec
+mvn clean
+mvn hk2-inhabitant-generator:generate-inhabitants
+mvn compile dependency:properties exec:exec
 ```
