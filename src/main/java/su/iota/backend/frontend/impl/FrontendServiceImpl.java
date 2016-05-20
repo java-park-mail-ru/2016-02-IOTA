@@ -69,6 +69,7 @@ public class FrontendServiceImpl implements FrontendService {
         try {
             if (accountService.isUserPasswordCorrect(userId, password)) {
                 signedInUser = accountService.getUserProfile(userId);
+                return true;
             }
         } catch (UserNotFoundException ignored) {
         }
