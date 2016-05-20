@@ -172,7 +172,7 @@ public final class FrontendActor extends BasicActor<Object, Void> {
     }
 
     private void handleHttpUserRequest(HttpRequest httpRequest) throws SuspendExecution {
-        if (!httpRequest.getMethod().equals("POST")) {
+        if (!httpRequest.getMethod().equals("PUT")) {
             respondWithError(httpRequest, SC_METHOD_NOT_ALLOWED);
             return;
         }
@@ -199,13 +199,13 @@ public final class FrontendActor extends BasicActor<Object, Void> {
         final JsonObject jsonObject = new JsonObject();
         switch (httpRequest.getMethod()) {
             case "GET":
-                handleHttpConcreteUserGet(httpRequest, jsonObject);
+                handleHttpConcreteUserGet(httpRequest, jsonObject, userId);
                 break;
             case "POST":
-                handleHttpConcreteUserPost(httpRequest, jsonObject);
+                handleHttpConcreteUserPost(httpRequest, jsonObject, userId);
                 break;
             case "DELETE":
-                handleHttpConcreteUserDelete(httpRequest, jsonObject);
+                handleHttpConcreteUserDelete(httpRequest, jsonObject, userId);
                 break;
             default:
                 respondWithError(httpRequest, SC_METHOD_NOT_ALLOWED);
@@ -213,10 +213,11 @@ public final class FrontendActor extends BasicActor<Object, Void> {
         }
     }
 
-    private void handleHttpConcreteUserGet(HttpRequest httpRequest, JsonObject jsonObject) throws SuspendExecution {
+    private void handleHttpConcreteUserGet(HttpRequest httpRequest, JsonObject jsonObject, Long userId) throws SuspendExecution {
         try {
             final Gson gson = getGson();
-            final UserProfile userProfile = gson.fromJson(httpRequest.getStringBody(), UserProfile.class);
+            final UserProfile userProfile = new UserProfile();
+            userProfile.setId(userId);
             final boolean isGetUserDetailsOk = frontendService.getUserDetails(userProfile);
             if (isGetUserDetailsOk) {
                 gson.toJsonTree(userProfile).getAsJsonObject().entrySet().stream().forEach(e -> jsonObject.add(e.getKey(), e.getValue()));
@@ -228,7 +229,7 @@ public final class FrontendActor extends BasicActor<Object, Void> {
         }
     }
 
-    private void handleHttpConcreteUserPost(HttpRequest httpRequest, JsonObject jsonObject) throws SuspendExecution {
+    private void handleHttpConcreteUserPost(HttpRequest httpRequest, JsonObject jsonObject, Long userId) throws SuspendExecution {
         try {
             final UserProfile userProfile = getGson().fromJson(httpRequest.getStringBody(), UserProfile.class);
             jsonObject.addProperty("__ok", frontendService.editProfile(userProfile));
@@ -238,7 +239,7 @@ public final class FrontendActor extends BasicActor<Object, Void> {
         }
     }
 
-    private void handleHttpConcreteUserDelete(HttpRequest httpRequest, JsonObject jsonObject) throws SuspendExecution {
+    private void handleHttpConcreteUserDelete(HttpRequest httpRequest, JsonObject jsonObject, Long userId) throws SuspendExecution {
         try {
             final UserProfile userProfile = getGson().fromJson(httpRequest.getStringBody(), UserProfile.class);
             jsonObject.addProperty("__ok", frontendService.deleteUser(userProfile));
