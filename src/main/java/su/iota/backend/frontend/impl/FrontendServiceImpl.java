@@ -101,11 +101,11 @@ public class FrontendServiceImpl implements FrontendService {
         if (userProfile == null) {
             return false;
         }
-        final String login = userProfile.getLogin();
-        if (login == null) {
+        final Long userId = userProfile.getId();
+        if (userId == null) {
             return false;
         }
-        final UserProfile storedUserProfile = accountService.getUserProfile(login);
+        final UserProfile storedUserProfile = accountService.getUserProfile(userId);
         if (storedUserProfile == null) {
             return false;
         }
