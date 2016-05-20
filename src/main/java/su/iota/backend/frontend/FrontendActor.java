@@ -32,7 +32,6 @@ public final class FrontendActor extends BasicActor<Object, Void> {
     private boolean isInitialized = false;
     private String contextPath;
     private FrontendService frontendService;
-    private UserProfile authenticatedUser;
     private Set<ActorRef<WebMessage>> webSockets = new HashSet<>();
 
     private void init() throws InterruptedException, SuspendExecution {
@@ -140,22 +139,26 @@ public final class FrontendActor extends BasicActor<Object, Void> {
     }
 
     private void handleHttpBusinessSessionGet(HttpRequest httpRequest, JsonObject jsonObject) throws SuspendExecution {
-        if (authenticatedUser != null) {
-            jsonObject.addProperty("id", authenticatedUser.getId());
+        final UserProfile signedInUser = frontendService.getSignedInUser();
+        if (signedInUser != null) {
+            jsonObject.addProperty("id", signedInUser.getId());
         }
-        jsonObject.addProperty("__ok", authenticatedUser != null);
+        jsonObject.addProperty("__ok", signedInUser != null);
         respondWithJson(httpRequest, jsonObject);
     }
 
     private void handleHttpBusinessSessionPut(HttpRequest httpRequest, JsonObject jsonObject) throws SuspendExecution {
         try {
             final UserProfile userProfile = new Gson().fromJson(httpRequest.getStringBody(), UserProfile.class);
-            final boolean isSignedIn = frontendService.checkSignIn(userProfile);
+            final boolean isSignedIn = frontendService.signIn(userProfile);
             if (isSignedIn) {
-                authenticatedUser = userProfile;
-                jsonObject.addProperty("id", authenticatedUser.getId());
+                final UserProfile signedInUser = frontendService.getSignedInUser();
+                if (signedInUser == null) {
+                    throw new AssertionError();
+                }
+                jsonObject.addProperty("id", frontendService.getSignedInUser().getId());
             }
-            jsonObject.addProperty("__ok", authenticatedUser != null);
+            jsonObject.addProperty("__ok", isSignedIn);
             respondWithJson(httpRequest, jsonObject);
         } catch (JsonSyntaxException ex) {
             respondWithError(httpRequest, SC_BAD_REQUEST, ex);
@@ -163,17 +166,17 @@ public final class FrontendActor extends BasicActor<Object, Void> {
     }
 
     private void handleHttpBusinessSessionDelete(HttpRequest httpRequest, JsonObject jsonObject) throws SuspendExecution {
-        authenticatedUser = null;
+        frontendService.signOut();
         jsonObject.addProperty("__ok", true);
         respondWithJson(httpRequest, jsonObject);
     }
 
     private void handleHttpUserRequest(HttpRequest httpRequest) throws SuspendExecution {
-        final JsonObject jsonObject = new JsonObject();
         if (!httpRequest.getMethod().equals("POST")) {
             respondWithError(httpRequest, SC_METHOD_NOT_ALLOWED);
             return;
         }
+        final JsonObject jsonObject = new JsonObject();
         try {
             final UserProfile userProfile = new Gson().fromJson(httpRequest.getStringBody(), UserProfile.class);
             final boolean isSignedUp = frontendService.signUp(userProfile);
@@ -188,7 +191,61 @@ public final class FrontendActor extends BasicActor<Object, Void> {
     }
 
     private void handleHttpConcreteUserRequest(HttpRequest httpRequest) throws SuspendExecution {
-        respondWithError(httpRequest, SC_NOT_IMPLEMENTED); // todo
+        final Long userId = getUserIdFromResourceUri(getResourceUri(httpRequest));
+        if (userId == null) {
+            respondWithError(httpRequest, SC_BAD_REQUEST, new AssertionError());
+            return;
+        }
+        final JsonObject jsonObject = new JsonObject();
+        switch (httpRequest.getMethod()) {
+            case "GET":
+                handleHttpConcreteUserGet(httpRequest, jsonObject);
+                break;
+            case "POST":
+                handleHttpConcreteUserPost(httpRequest, jsonObject);
+                break;
+            case "DELETE":
+                handleHttpConcreteUserDelete(httpRequest, jsonObject);
+                break;
+            default:
+                respondWithError(httpRequest, SC_METHOD_NOT_ALLOWED);
+                break;
+        }
+    }
+
+    private void handleHttpConcreteUserGet(HttpRequest httpRequest, JsonObject jsonObject) throws SuspendExecution {
+        try {
+            final Gson gson = getGson();
+            final UserProfile userProfile = gson.fromJson(httpRequest.getStringBody(), UserProfile.class);
+            final boolean isGetUserDetailsOk = frontendService.getUserDetails(userProfile);
+            if (isGetUserDetailsOk) {
+                gson.toJsonTree(userProfile).getAsJsonObject().entrySet().stream().forEach(e -> jsonObject.add(e.getKey(), e.getValue()));
+            }
+            jsonObject.addProperty("__ok", isGetUserDetailsOk);
+            respondWithJson(httpRequest, jsonObject);
+        } catch (JsonSyntaxException ex) {
+            respondWithError(httpRequest, SC_BAD_REQUEST, ex);
+        }
+    }
+
+    private void handleHttpConcreteUserPost(HttpRequest httpRequest, JsonObject jsonObject) throws SuspendExecution {
+        try {
+            final UserProfile userProfile = getGson().fromJson(httpRequest.getStringBody(), UserProfile.class);
+            jsonObject.addProperty("__ok", frontendService.editProfile(userProfile));
+            respondWithJson(httpRequest, jsonObject);
+        } catch (JsonSyntaxException ex) {
+            respondWithError(httpRequest, SC_BAD_REQUEST, ex);
+        }
+    }
+
+    private void handleHttpConcreteUserDelete(HttpRequest httpRequest, JsonObject jsonObject) throws SuspendExecution {
+        try {
+            final UserProfile userProfile = getGson().fromJson(httpRequest.getStringBody(), UserProfile.class);
+            jsonObject.addProperty("__ok", frontendService.deleteUser(userProfile));
+            respondWithJson(httpRequest, jsonObject);
+        } catch (JsonSyntaxException ex) {
+            respondWithError(httpRequest, SC_BAD_REQUEST, ex);
+        }
     }
 
     private Gson getGson() {

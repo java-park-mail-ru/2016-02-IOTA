@@ -5,6 +5,7 @@ import co.paralleluniverse.fibers.SuspendExecution;
 import com.esotericsoftware.minlog.Log;
 import org.apache.commons.beanutils.BeanUtils;
 import org.glassfish.hk2.api.PerLookup;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
 import su.iota.backend.accounts.AccountService;
@@ -30,10 +31,7 @@ public class FrontendServiceImpl implements FrontendService {
     @Inject
     AccountService accountService;
 
-    @Override
-    public ActorRef<IncomingMessage> getGameSession(UserProfile userProfile, ActorRef<OutgoingMessage> frontend) throws SuspendExecution, InterruptedException {
-        return matchmakingService.getGameSession(userProfile, frontend);
-    }
+    private UserProfile signedInUser;
 
     @Override
     public boolean signUp(@Nullable UserProfile userProfile) throws SuspendExecution {
@@ -55,7 +53,7 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
-    public boolean checkSignIn(@Nullable UserProfile userProfile) throws SuspendExecution {
+    public boolean signIn(@Nullable UserProfile userProfile) throws SuspendExecution {
         if (userProfile == null) {
             return false;
         }
@@ -70,26 +68,62 @@ public class FrontendServiceImpl implements FrontendService {
         }
         try {
             if (accountService.isUserPasswordCorrect(userId, password)) {
-                BeanUtils.copyProperties(userProfile, accountService.getUserProfile(userId));
-                return true;
+                signedInUser = accountService.getUserProfile(userId);
             }
-        } catch (InvocationTargetException | IllegalAccessException e) {
-            e.printStackTrace();
         } catch (UserNotFoundException ignored) {
         }
         return false;
     }
 
     @Override
-    public boolean editUser(@Nullable UserProfile userProfile) throws SuspendExecution {
+    public void signOut() throws SuspendExecution {
+        signedInUser = null;
+    }
+
+    @Override
+    public @Nullable UserProfile getSignedInUser() throws SuspendExecution {
+        return signedInUser;
+    }
+
+    @Override
+    public boolean editProfile(@Nullable UserProfile userProfile) throws SuspendExecution {
+        return false; // todo
+    }
+
+    @Override
+    public boolean deleteUser(@Nullable UserProfile userProfile) throws SuspendExecution {
         return false; // todo
     }
 
     @Override
     public boolean getUserDetails(@Nullable UserProfile userProfile) throws SuspendExecution {
-        return false; // todo
+        if (userProfile == null) {
+            return false;
+        }
+        final String login = userProfile.getLogin();
+        if (login == null) {
+            return false;
+        }
+        final UserProfile storedUserProfile = accountService.getUserProfile(login);
+        if (storedUserProfile == null) {
+            return false;
+        }
+        try {
+            BeanUtils.copyProperties(userProfile, storedUserProfile);
+        } catch (IllegalAccessException | InvocationTargetException ex) {
+            Log.error(null, ex);
+            return false;
+        }
+        return true;
     }
 
-    //
+    @Override
+    public @Nullable ActorRef<IncomingMessage> getGameSession(@NotNull ActorRef<OutgoingMessage> frontend) throws SuspendExecution {
+        if (signedInUser == null) {
+            return null;
+        }
+        // todo
+        return null;
+    }
 
 }
