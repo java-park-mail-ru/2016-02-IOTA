@@ -20,6 +20,8 @@ import javax.inject.Inject;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static su.iota.backend.misc.SuspendableUtils.rethrowConsumer;
+
 @Service
 @PerLookup
 public final class GameSessionActor extends BasicActor<IncomingMessage, GameResultMessage> {
@@ -50,14 +52,22 @@ public final class GameSessionActor extends BasicActor<IncomingMessage, GameResu
     }
 
     private void handlePlayerActionMessage(PlayerActionMessage message) throws SuspendExecution {
-        final PlayerActionMessage actionMessage = (PlayerActionMessage) message;
         //noinspection unchecked
-        final ActorRef<Object> sender = (ActorRef<Object>) actionMessage.getFrom();
-        Log.info("Player " + actionMessage.getFrom() + " is ready: " + actionMessage.getReady());
-        final PlayerActionResultMessage actionResultMessage = new PlayerActionResultMessage();
-        actionResultMessage.setOk(true);
-        actionResultMessage.setPayload(self().toString());
-        sender.send(actionResultMessage);
+        final ActorRef<Object> frontend = (ActorRef<Object>) message.getFrom();
+        if (frontend == null) {
+            throw new AssertionError();
+        }
+        final UserProfile userProfile = players.get(frontend);
+        if (userProfile == null) {
+            throw new AssertionError();
+        }
+        Log.info("Player " + userProfile.getLogin() + " is ready: " + message.getReady());
+        players.entrySet().stream().forEach(rethrowConsumer(e -> {
+            final PlayerActionResultMessage resultMessage = new PlayerActionResultMessage();
+            resultMessage.setOk(true);
+            resultMessage.setPayload(userProfile.getId() + " :: " + userProfile.getLogin() + " :: ready: " + message.getReady());
+            e.getKey().send(resultMessage);
+        }));
     }
 
     @Override
