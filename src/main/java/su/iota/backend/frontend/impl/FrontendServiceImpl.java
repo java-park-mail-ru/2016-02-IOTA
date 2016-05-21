@@ -122,10 +122,29 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
-    public void performPlayerAction(@NotNull ActorRef<Object> frontend, @Nullable PlayerActionMessage playerActionMessage) throws SuspendExecution {
+    public void performPlayerAction(@NotNull PlayerActionMessage playerActionMessage) throws SuspendExecution {
+        //noinspection unchecked
+        final ActorRef<Object> frontend = (ActorRef<Object>) playerActionMessage.getFrom();
         final PlayerActionResultMessage resultMessage = new PlayerActionResultMessage();
-        resultMessage.setOk(signedInUser != null);
-        resultMessage.setPayload(signedInUser);
-        frontend.send(resultMessage); // todo
+        if (signedInUser == null) {
+            resultMessage.setOk(false);
+            frontend.send(resultMessage);
+            return;
+        }
+        if (gameSessionActor == null) {
+            try {
+                gameSessionActor = matchmakingService.getGameSession(signedInUser, frontend);
+            } catch (InterruptedException ex) {
+                Log.info("Interrupted when waiting for game session", ex);
+            }
+            if (gameSessionActor == null) {
+                resultMessage.setOk(false);
+                frontend.send(resultMessage);
+                Log.info("Could not get game session for " + frontend.toString());
+                return;
+            }
+        }
+        gameSessionActor.send(playerActionMessage);
     }
+
 }

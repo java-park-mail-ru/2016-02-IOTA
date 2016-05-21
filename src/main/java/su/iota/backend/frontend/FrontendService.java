@@ -27,6 +27,6 @@ public interface FrontendService {
 
     boolean getUserDetails(@Nullable UserProfile userProfile) throws SuspendExecution;
 
-    @Nullable void performPlayerAction(@NotNull ActorRef<Object> frontend, @Nullable PlayerActionMessage playerActionMessage) throws SuspendExecution;
+    void performPlayerAction(@NotNull PlayerActionMessage playerActionMessage) throws SuspendExecution;
 
 }

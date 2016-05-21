@@ -11,6 +11,8 @@ import org.jvnet.hk2.annotations.Service;
 import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.GameResultMessage;
+import su.iota.backend.messages.game.PlayerActionMessage;
+import su.iota.backend.messages.game.PlayerActionResultMessage;
 import su.iota.backend.messages.internal.GameSessionInitMessage;
 import su.iota.backend.models.UserProfile;
 
@@ -25,7 +27,7 @@ public final class GameSessionActor extends BasicActor<IncomingMessage, GameResu
     @Inject
     GameMechanics gameMechanics;
 
-    private Map<UserProfile, ActorRef<OutgoingMessage>> players;
+    private Map<ActorRef<Object>, UserProfile> players;
 
     @Override
     protected GameResultMessage doRun() throws InterruptedException, SuspendExecution {
@@ -40,13 +42,22 @@ public final class GameSessionActor extends BasicActor<IncomingMessage, GameResu
                     this.players = initMessage.getPlayers();
                     RequestReplyHelper.reply(initMessage, true);
                 }
-            } else {
-                if (message != null) {
-                    Log.info(message.toString()); // todo
-                }
+            } else if (message instanceof PlayerActionMessage) {
+                handlePlayerActionMessage((PlayerActionMessage) message);
             }
             checkCodeSwap();
         }
+    }
+
+    private void handlePlayerActionMessage(PlayerActionMessage message) throws SuspendExecution {
+        final PlayerActionMessage actionMessage = (PlayerActionMessage) message;
+        //noinspection unchecked
+        final ActorRef<Object> sender = (ActorRef<Object>) actionMessage.getFrom();
+        Log.info("Player " + actionMessage.getFrom() + " is ready: " + actionMessage.getReady());
+        final PlayerActionResultMessage actionResultMessage = new PlayerActionResultMessage();
+        actionResultMessage.setOk(true);
+        actionResultMessage.setPayload(self().toString());
+        sender.send(actionResultMessage);
     }
 
     @Override
