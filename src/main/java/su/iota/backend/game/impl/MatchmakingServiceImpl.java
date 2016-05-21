@@ -9,12 +9,11 @@ import su.iota.backend.game.GameSessionActor;
 import su.iota.backend.game.MatchmakingService;
 import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.OutgoingMessage;
-import su.iota.backend.messages.game.GameSessionInitMessage;
+import su.iota.backend.messages.internal.GameSessionInitMessage;
 import su.iota.backend.models.UserProfile;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 

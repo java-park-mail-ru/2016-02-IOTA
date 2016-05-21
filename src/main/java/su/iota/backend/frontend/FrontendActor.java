@@ -12,6 +12,7 @@ import org.glassfish.hk2.api.ServiceLocator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.iota.backend.messages.OutgoingMessage;
+import su.iota.backend.messages.game.PlayerActionMessage;
 import su.iota.backend.settings.SettingsService;
 import su.iota.backend.misc.ServiceUtils;
 import su.iota.backend.models.UserProfile;
@@ -67,10 +68,10 @@ public final class FrontendActor extends BasicActor<Object, Void> {
             final HttpRequest httpRequest = (HttpRequest) message;
             routeHttpRequest(httpRequest);
         } else if (message instanceof WebSocketOpened) {
-            final ActorRef<? extends WebMessage> webSocketActor = message.getFrom();
-            watch(webSocketActor);
             //noinspection unchecked
-            webSockets.add((ActorRef<WebMessage>) webSocketActor);
+            final ActorRef<WebMessage> webSocketActor = (ActorRef<WebMessage>) message.getFrom();
+            watch(webSocketActor);
+            webSockets.add(webSocketActor);
         } else if (message instanceof WebDataMessage) {
             //noinspection SuspiciousMethodCalls
             if (!webSockets.contains(message.getFrom())) {
@@ -92,16 +93,17 @@ public final class FrontendActor extends BasicActor<Object, Void> {
         return result;
     }
 
-    private void handleWebSocketMessage(WebDataMessage message) {
+    private void handleWebSocketMessage(WebDataMessage message) throws SuspendExecution {
         if (message.isBinary()) {
-            Log.warn("Got binary message: " + message.getFrom().toString());
+            Log.warn("Got binary message from " + message.getFrom().toString());
             return;
         }
+        final Gson gson = getGson();
         try {
-            final JsonObject jsonMessage = new JsonParser().parse(message.getStringBody()).getAsJsonObject();
-            Log.info(jsonMessage.toString()); // todo
-        } catch (JsonSyntaxException | IllegalStateException ex) {
-            Log.warn("Cannot deserialize message:", ex);
+            final PlayerActionMessage actionMessage = gson.fromJson(message.getStringBody(), PlayerActionMessage.class);
+            frontendService.performPlayerAction(self(), actionMessage);
+        } catch (JsonSyntaxException ex) {
+            Log.warn("Cannot (de)serialize WS message", ex);
         }
     }
 

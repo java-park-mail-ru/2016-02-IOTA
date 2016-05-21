@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Contract;
 import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.OutgoingMessage;
+import su.iota.backend.messages.game.PlayerActionMessage;
 import su.iota.backend.models.UserProfile;
 
 @Contract
@@ -26,6 +27,6 @@ public interface FrontendService {
 
     boolean getUserDetails(@Nullable UserProfile userProfile) throws SuspendExecution;
 
-    ActorRef<IncomingMessage> getGameSession(@NotNull ActorRef<OutgoingMessage> frontend) throws SuspendExecution;
+    @Nullable void performPlayerAction(@NotNull ActorRef<Object> frontend, @Nullable PlayerActionMessage playerActionMessage) throws SuspendExecution;
 
 }

@@ -8,11 +8,10 @@ import com.esotericsoftware.minlog.Log;
 import org.glassfish.hk2.api.PerLookup;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
-import su.iota.backend.game.GameMechanics;
 import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.GameResultMessage;
-import su.iota.backend.messages.game.GameSessionInitMessage;
+import su.iota.backend.messages.internal.GameSessionInitMessage;
 import su.iota.backend.models.UserProfile;
 
 import javax.inject.Inject;

@@ -15,6 +15,8 @@ import su.iota.backend.frontend.FrontendService;
 import su.iota.backend.game.MatchmakingService;
 import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.OutgoingMessage;
+import su.iota.backend.messages.game.PlayerActionMessage;
+import su.iota.backend.messages.game.PlayerActionResultMessage;
 import su.iota.backend.models.UserProfile;
 
 import javax.inject.Inject;
@@ -32,6 +34,7 @@ public class FrontendServiceImpl implements FrontendService {
     AccountService accountService;
 
     private UserProfile signedInUser;
+    private ActorRef<IncomingMessage> gameSessionActor;
 
     @Override
     public boolean signUp(@Nullable UserProfile userProfile) throws SuspendExecution {
@@ -119,12 +122,10 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
-    public @Nullable ActorRef<IncomingMessage> getGameSession(@NotNull ActorRef<OutgoingMessage> frontend) throws SuspendExecution {
-        if (signedInUser == null) {
-            return null;
-        }
-        // todo
-        return null;
+    public void performPlayerAction(@NotNull ActorRef<Object> frontend, @Nullable PlayerActionMessage playerActionMessage) throws SuspendExecution {
+        final PlayerActionResultMessage resultMessage = new PlayerActionResultMessage();
+        resultMessage.setOk(signedInUser != null);
+        resultMessage.setPayload(signedInUser);
+        frontend.send(resultMessage); // todo
     }
-
 }

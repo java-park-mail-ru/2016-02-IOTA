@@ -28,43 +28,43 @@ public class UserProfile {
         this.email = email;
     }
 
-    public synchronized @Nullable Long getId() {
+    public @Nullable Long getId() {
         return id;
     }
 
-    public synchronized void setId(@Nullable Long id) {
+    public void setId(@Nullable Long id) {
         this.id = id;
     }
 
-    public synchronized @Nullable String getLogin() {
+    public @Nullable String getLogin() {
         return login;
     }
 
-    public synchronized void setLogin(@Nullable String login) {
+    public void setLogin(@Nullable String login) {
         this.login = login;
     }
 
-    public synchronized @Nullable String getEmail() {
+    public @Nullable String getEmail() {
         return email;
     }
 
-    public synchronized void setEmail(@Nullable String email) {
+    public void setEmail(@Nullable String email) {
         this.email = email;
     }
 
-    public synchronized @Nullable String getPassword() {
+    public @Nullable String getPassword() {
         return password;
     }
 
-    public synchronized void setPassword(@Nullable String password) {
+    public void setPassword(@Nullable String password) {
         this.password = password;
     }
 
-    public synchronized @Nullable DateTime getBirthDate() {
+    public @Nullable DateTime getBirthDate() {
         return birthDate;
     }
 
-    public synchronized void setBirthDate(@Nullable DateTime birthDate) {
+    public void setBirthDate(@Nullable DateTime birthDate) {
         this.birthDate = birthDate;
     }
 

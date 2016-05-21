@@ -1,4 +1,4 @@
-package su.iota.backend.messages.game;
+package su.iota.backend.messages.internal;
 
 import co.paralleluniverse.actors.ActorRef;
 import co.paralleluniverse.actors.behaviors.RequestMessage;
