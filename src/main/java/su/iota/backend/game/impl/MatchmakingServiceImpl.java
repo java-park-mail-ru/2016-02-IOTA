@@ -42,15 +42,16 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
 
     @Override
     public void makeMatch(@NotNull UserProfile player, @NotNull ActorRef<Object> frontend) throws SuspendExecution {
-        buckets.removeIf(b -> b.getGameSession() != null);
-        final Optional<PlayerBucket> bucket = buckets.stream().filter(e -> e.tryPut(frontend, player)).findFirst();
-        if (!bucket.isPresent()) {
+        if (!buckets.isEmpty()) {
+            if (!buckets.stream().anyMatch(bucket -> bucket.tryPut(frontend, player))) {
+                Log.info("MM: tryPut() failed for all possible buckets for player " + player.getLogin());
+            }
+        } else {
             final PlayerBucket newBucket = new PlayerBucket(2);
             if (!newBucket.tryPut(frontend, player)) {
                 throw new AssertionError();
             }
             buckets.add(newBucket);
-            makeMatch(player, frontend);
         }
         buckets.stream().filter(PlayerBucket::isFull).forEach(rethrowConsumer(b -> {
             final Map<ActorRef<Object>, UserProfile> players = b.getPlayers();
@@ -58,6 +59,7 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
             b.setGameSession(gameSession);
             players.keySet().stream().forEach(rethrowConsumer(a -> a.send(gameSession)));
         }));
+        buckets.removeIf(b -> b.getGameSession() != null);
     }
 
     private @NotNull ActorRef<IncomingMessage> createGameSession(@NotNull Map<ActorRef<Object>, UserProfile> players) throws SuspendExecution {

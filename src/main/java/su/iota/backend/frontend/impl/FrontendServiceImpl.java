@@ -144,5 +144,5 @@ public class FrontendServiceImpl implements FrontendService {
         resultMessage.setPayload(gameSessionActor.toString());
         frontend.send(resultMessage);
     }
-    
+
 }
