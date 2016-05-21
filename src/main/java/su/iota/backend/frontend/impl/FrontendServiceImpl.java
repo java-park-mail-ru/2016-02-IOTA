@@ -124,17 +124,19 @@ public class FrontendServiceImpl implements FrontendService {
     public void performPlayerAction(@NotNull PlayerActionMessage playerActionMessage) throws SuspendExecution {
         //noinspection unchecked
         final ActorRef<Object> frontend = (ActorRef<Object>) playerActionMessage.getFrom();
+        final PlayerActionResultMessage resultMessage = new PlayerActionResultMessage();
         if (signedInUser != null) {
             if (gameSessionActor == null) {
                 matchmakingService.makeMatch(signedInUser, frontend);
+                resultMessage.setOk(true);
             } else {
                 gameSessionActor.send(playerActionMessage);
+                return;
             }
         } else {
-            final PlayerActionResultMessage resultMessage = new PlayerActionResultMessage();
             resultMessage.setOk(false);
-            frontend.send(resultMessage);
         }
+        frontend.send(resultMessage);
     }
 
     @Override

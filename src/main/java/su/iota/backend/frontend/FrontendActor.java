@@ -26,7 +26,6 @@ import java.util.function.Function;
 import static co.paralleluniverse.comsat.webactors.HttpResponse.error;
 import static co.paralleluniverse.comsat.webactors.HttpResponse.ok;
 import static javax.servlet.http.HttpServletResponse.*;
-import static su.iota.backend.misc.SuspendableUtils.rethrowConsumer;
 
 @WebActor(httpUrlPatterns = {"/session", "/user/*"}, webSocketUrlPatterns = {"/ws"})
 public final class FrontendActor extends BasicActor<Object, Void> {
@@ -58,9 +57,9 @@ public final class FrontendActor extends BasicActor<Object, Void> {
             } else if (message instanceof OutgoingMessage) {
                 Log.info("Received outgoing message " + message.toString());
                 final WebMessage jsonMessage = new WebDataMessage(self(), getGson().toJson(message));
-                webSockets.stream().forEach(rethrowConsumer(ws -> {
-                    ws.send(jsonMessage);
-                }));
+                for (ActorRef<WebMessage> webSocket : webSockets) {
+                    webSocket.send(jsonMessage);
+                }
             } else if (message instanceof ActorRef<?>) {
                 //noinspection unchecked
                 final ActorRef<IncomingMessage> gameSessionActor = (ActorRef<IncomingMessage>) message;

@@ -13,6 +13,7 @@ import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.GameResultMessage;
 import su.iota.backend.messages.game.PlayerActionMessage;
 import su.iota.backend.messages.game.PlayerActionResultMessage;
+import su.iota.backend.messages.internal.GameSessionDropPlayerMessage;
 import su.iota.backend.messages.internal.GameSessionInitMessage;
 import su.iota.backend.messages.internal.GameSessionTerminateMessage;
 import su.iota.backend.models.UserProfile;
@@ -20,8 +21,6 @@ import su.iota.backend.models.UserProfile;
 import javax.inject.Inject;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-
-import static su.iota.backend.misc.SuspendableUtils.rethrowConsumer;
 
 @Service
 @PerLookup
@@ -46,10 +45,12 @@ public final class GameSessionActor extends BasicActor<IncomingMessage, GameResu
                     this.players.keySet().forEach(this::watch);
                     RequestReplyHelper.reply(initMessage, true);
                 }
-            } else if (message instanceof PlayerActionMessage) {
-                handlePlayerActionMessage((PlayerActionMessage) message);
             } else if (message instanceof GameSessionTerminateMessage) {
                 return new GameResultMessage(); // todo
+            } else if (message instanceof GameSessionDropPlayerMessage) {
+                // todo
+            } else if (message instanceof PlayerActionMessage) {
+                handlePlayerActionMessage((PlayerActionMessage) message);
             }
             checkCodeSwap();
         }
@@ -66,12 +67,12 @@ public final class GameSessionActor extends BasicActor<IncomingMessage, GameResu
             throw new AssertionError();
         }
         Log.info("Player " + userProfile.getLogin() + " is ready: " + message.getReady());
-        players.entrySet().stream().forEach(rethrowConsumer(e -> {
+        for (ActorRef<Object> playerFrontend : players.keySet()) {
             final PlayerActionResultMessage resultMessage = new PlayerActionResultMessage();
             resultMessage.setOk(true);
             resultMessage.setPayload(userProfile.getId() + " :: " + userProfile.getLogin() + " :: ready: " + message.getReady());
-            e.getKey().send(resultMessage);
-        }));
+            playerFrontend.send(resultMessage);
+        }
     }
 
     @Override
