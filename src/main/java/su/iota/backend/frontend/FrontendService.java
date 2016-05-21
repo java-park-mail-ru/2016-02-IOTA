@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Contract;
 import su.iota.backend.messages.IncomingMessage;
-import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.PlayerActionMessage;
 import su.iota.backend.models.UserProfile;
 
@@ -29,4 +28,6 @@ public interface FrontendService {
 
     void performPlayerAction(@NotNull PlayerActionMessage playerActionMessage) throws SuspendExecution;
 
+    void setGameSession(@NotNull ActorRef<Object> frontend, @NotNull ActorRef<IncomingMessage> gameSessionActor) throws SuspendExecution;
+    
 }

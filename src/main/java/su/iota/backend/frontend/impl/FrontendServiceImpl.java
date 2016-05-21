@@ -14,13 +14,11 @@ import su.iota.backend.accounts.exceptions.UserNotFoundException;
 import su.iota.backend.frontend.FrontendService;
 import su.iota.backend.game.MatchmakingService;
 import su.iota.backend.messages.IncomingMessage;
-import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.PlayerActionMessage;
 import su.iota.backend.messages.game.PlayerActionResultMessage;
 import su.iota.backend.models.UserProfile;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.lang.reflect.InvocationTargetException;
 
 @Service
@@ -125,26 +123,26 @@ public class FrontendServiceImpl implements FrontendService {
     public void performPlayerAction(@NotNull PlayerActionMessage playerActionMessage) throws SuspendExecution {
         //noinspection unchecked
         final ActorRef<Object> frontend = (ActorRef<Object>) playerActionMessage.getFrom();
-        final PlayerActionResultMessage resultMessage = new PlayerActionResultMessage();
-        if (signedInUser == null) {
+        if (signedInUser != null) {
+            if (gameSessionActor == null) {
+                matchmakingService.makeMatch(signedInUser, frontend);
+            } else {
+                gameSessionActor.send(playerActionMessage);
+            }
+        } else {
+            final PlayerActionResultMessage resultMessage = new PlayerActionResultMessage();
             resultMessage.setOk(false);
             frontend.send(resultMessage);
-            return;
         }
-        if (gameSessionActor == null) {
-            try {
-                gameSessionActor = matchmakingService.getGameSession(signedInUser, frontend);
-            } catch (InterruptedException ex) {
-                Log.info("Interrupted when waiting for game session", ex);
-            }
-            if (gameSessionActor == null) {
-                resultMessage.setOk(false);
-                frontend.send(resultMessage);
-                Log.info("Could not get game session for " + frontend.toString());
-                return;
-            }
-        }
-        gameSessionActor.send(playerActionMessage);
     }
 
+    @Override
+    public void setGameSession(@NotNull ActorRef<Object> frontend, @NotNull ActorRef<IncomingMessage> gameSessionActor) throws SuspendExecution {
+        this.gameSessionActor = gameSessionActor;
+        final PlayerActionResultMessage resultMessage = new PlayerActionResultMessage();
+        resultMessage.setOk(true);
+        resultMessage.setPayload(gameSessionActor.toString());
+        frontend.send(resultMessage);
+    }
+    
 }

@@ -11,6 +11,7 @@ import com.google.gson.*;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.PlayerActionMessage;
 import su.iota.backend.settings.SettingsService;
@@ -59,6 +60,9 @@ public final class FrontendActor extends BasicActor<Object, Void> {
                 webSockets.stream().forEach(rethrowConsumer(ws -> {
                     ws.send(jsonMessage);
                 }));
+            } else if (message instanceof ActorRef<?>) {
+                //noinspection unchecked
+                frontendService.setGameSession(self(), (ActorRef<IncomingMessage>) message);
             }
             checkCodeSwap();
         }
