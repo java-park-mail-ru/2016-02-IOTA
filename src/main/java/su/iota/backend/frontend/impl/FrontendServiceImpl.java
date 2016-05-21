@@ -16,6 +16,7 @@ import su.iota.backend.game.MatchmakingService;
 import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.game.PlayerActionMessage;
 import su.iota.backend.messages.game.PlayerActionResultMessage;
+import su.iota.backend.messages.internal.GameSessionTerminateMessage;
 import su.iota.backend.models.UserProfile;
 
 import javax.inject.Inject;
@@ -143,6 +144,12 @@ public class FrontendServiceImpl implements FrontendService {
         resultMessage.setOk(true);
         resultMessage.setPayload(gameSessionActor.toString());
         frontend.send(resultMessage);
+    }
+
+    @Override
+    public void resetGameSession() throws SuspendExecution {
+        this.gameSessionActor.send(new GameSessionTerminateMessage());
+        this.gameSessionActor = null;
     }
 
 }

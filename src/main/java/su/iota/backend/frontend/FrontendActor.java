@@ -35,6 +35,7 @@ public final class FrontendActor extends BasicActor<Object, Void> {
     private String contextPath;
     private FrontendService frontendService;
     private Set<ActorRef<WebMessage>> webSockets = new HashSet<>();
+    private Object gameSessionWatch;
 
     private void init() throws InterruptedException, SuspendExecution {
         final ServiceLocator serviceLocator = ServiceUtils.getServiceLocator();
@@ -62,7 +63,18 @@ public final class FrontendActor extends BasicActor<Object, Void> {
                 }));
             } else if (message instanceof ActorRef<?>) {
                 //noinspection unchecked
-                frontendService.setGameSession(self(), (ActorRef<IncomingMessage>) message);
+                final ActorRef<IncomingMessage> gameSessionActor = (ActorRef<IncomingMessage>) message;
+                gameSessionWatch = watch(gameSessionActor);
+                frontendService.setGameSession(self(), gameSessionActor);
+            } else if (message instanceof ExitMessage) {
+                final ExitMessage exitMessage = (ExitMessage) message;
+                final ActorRef dyingActor = exitMessage.getActor();
+                if (webSockets.contains(dyingActor)) {
+                    webSockets.remove(dyingActor);
+                } else if (exitMessage.getWatch().equals(gameSessionWatch)) {
+                    gameSessionWatch = null;
+                    frontendService.resetGameSession();
+                }
             }
             checkCodeSwap();
         }
@@ -88,14 +100,10 @@ public final class FrontendActor extends BasicActor<Object, Void> {
 
     @Override
     protected Object handleLifecycleMessage(LifecycleMessage m) {
-        final Object result = super.handleLifecycleMessage(m);
         if (m instanceof ExitMessage) {
-            final ActorRef dyingActor = ((ExitMessage) m).getActor();
-            if (webSockets.contains(dyingActor)) {
-                webSockets.remove(dyingActor);
-            }
+            return m;
         }
-        return result;
+        return super.handleLifecycleMessage(m);
     }
 
     private void handleWebSocketMessage(WebDataMessage message) throws SuspendExecution {

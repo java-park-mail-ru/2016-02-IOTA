@@ -14,6 +14,7 @@ import su.iota.backend.messages.game.GameResultMessage;
 import su.iota.backend.messages.game.PlayerActionMessage;
 import su.iota.backend.messages.game.PlayerActionResultMessage;
 import su.iota.backend.messages.internal.GameSessionInitMessage;
+import su.iota.backend.messages.internal.GameSessionTerminateMessage;
 import su.iota.backend.models.UserProfile;
 
 import javax.inject.Inject;
@@ -42,10 +43,13 @@ public final class GameSessionActor extends BasicActor<IncomingMessage, GameResu
                     RequestReplyHelper.reply(initMessage, false);
                 } else {
                     this.players = initMessage.getPlayers();
+                    this.players.keySet().forEach(this::watch);
                     RequestReplyHelper.reply(initMessage, true);
                 }
             } else if (message instanceof PlayerActionMessage) {
                 handlePlayerActionMessage((PlayerActionMessage) message);
+            } else if (message instanceof GameSessionTerminateMessage) {
+                return new GameResultMessage(); // todo
             }
             checkCodeSwap();
         }
