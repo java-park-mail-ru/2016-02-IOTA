@@ -1,6 +1,7 @@
 package su.iota.backend.frontend.impl;
 
 import co.paralleluniverse.actors.ActorRef;
+import co.paralleluniverse.actors.behaviors.Server;
 import co.paralleluniverse.fibers.SuspendExecution;
 import com.esotericsoftware.minlog.Log;
 import org.apache.commons.beanutils.BeanUtils;
@@ -14,8 +15,9 @@ import su.iota.backend.accounts.exceptions.UserNotFoundException;
 import su.iota.backend.frontend.FrontendService;
 import su.iota.backend.game.MatchmakingService;
 import su.iota.backend.messages.IncomingMessage;
+import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.PlayerActionMessage;
-import su.iota.backend.messages.game.PlayerActionResultMessage;
+import su.iota.backend.messages.game.GameStateMessage;
 import su.iota.backend.messages.internal.GameSessionTerminateMessage;
 import su.iota.backend.models.UserProfile;
 
@@ -33,7 +35,7 @@ public class FrontendServiceImpl implements FrontendService {
     AccountService accountService;
 
     private UserProfile signedInUser;
-    private ActorRef<IncomingMessage> gameSessionActor;
+    private Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession;
 
     @Override
     public boolean signUp(@Nullable UserProfile userProfile) throws SuspendExecution {
@@ -83,6 +85,7 @@ public class FrontendServiceImpl implements FrontendService {
 
     @Override
     public void signOut() throws SuspendExecution {
+        resetGameSession();
         signedInUser = null;
     }
 
@@ -124,37 +127,42 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
-    public void performPlayerAction(@NotNull PlayerActionMessage playerActionMessage) throws SuspendExecution {
-        //noinspection unchecked
-        final ActorRef<Object> frontend = (ActorRef<Object>) playerActionMessage.getFrom();
-        final PlayerActionResultMessage resultMessage = new PlayerActionResultMessage();
-        if (signedInUser != null) {
-            if (gameSessionActor == null) {
-                matchmakingService.makeMatch(signedInUser, frontend);
-                resultMessage.setOk(true);
-            } else {
-                gameSessionActor.send(playerActionMessage);
-                return;
-            }
-        } else {
-            resultMessage.setOk(false);
+    public @Nullable PlayerActionMessage.ResultMessage performPlayerAction(@NotNull PlayerActionMessage playerActionMessage) throws SuspendExecution, InterruptedException {
+        if (signedInUser == null || gameSession == null) {
+            return null;
         }
-        frontend.send(resultMessage);
+        final OutgoingMessage result = gameSession.call(playerActionMessage);
+        if (!(result instanceof PlayerActionMessage.ResultMessage)) {
+            throw new AssertionError();
+        }
+        return (PlayerActionMessage.ResultMessage) result;
     }
 
     @Override
-    public void setGameSession(@NotNull ActorRef<Object> frontend, @NotNull ActorRef<IncomingMessage> gameSessionActor) throws SuspendExecution {
-        this.gameSessionActor = gameSessionActor;
-        final PlayerActionResultMessage resultMessage = new PlayerActionResultMessage();
-        resultMessage.setOk(true);
-        resultMessage.setPayload(gameSessionActor.toString());
-        frontend.send(resultMessage);
+    public boolean askGameStateUpdate(ActorRef<Object> frontend) throws SuspendExecution, InterruptedException {
+        if (signedInUser == null) {
+            return false;
+        }
+        if (gameSession != null) {
+            gameSession.cast(frontend);
+        } else {
+            matchmakingService.makeMatch(signedInUser, frontend);
+        }
+        return true;
+    }
+
+    @Override
+    public void setGameSession(@NotNull ActorRef<Object> frontend, Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession) throws SuspendExecution, InterruptedException {
+        this.gameSession = gameSession;
+        if (!askGameStateUpdate(frontend)) {
+            throw new AssertionError();
+        }
     }
 
     @Override
     public void resetGameSession() throws SuspendExecution {
-        this.gameSessionActor.send(new GameSessionTerminateMessage());
-        this.gameSessionActor = null;
+
+        gameSession = null;
     }
 
 }

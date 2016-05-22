@@ -12,6 +12,6 @@ import su.iota.backend.models.UserProfile;
 @Contract
 public interface MatchmakingService {
 
-    void makeMatch(@NotNull UserProfile player, @NotNull ActorRef<Object> frontend) throws SuspendExecution;
+    void makeMatch(@NotNull UserProfile player, @NotNull ActorRef<Object> frontend) throws SuspendExecution, InterruptedException;
 
 }

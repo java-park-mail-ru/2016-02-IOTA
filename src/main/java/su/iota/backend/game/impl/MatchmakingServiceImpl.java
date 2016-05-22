@@ -2,7 +2,7 @@ package su.iota.backend.game.impl;
 
 import co.paralleluniverse.actors.ActorRef;
 import co.paralleluniverse.actors.behaviors.ProxyServerActor;
-import co.paralleluniverse.actors.behaviors.RequestReplyHelper;
+import co.paralleluniverse.actors.behaviors.Server;
 import co.paralleluniverse.fibers.SuspendExecution;
 import com.esotericsoftware.minlog.Log;
 import org.eclipse.jetty.util.ArrayQueue;
@@ -12,6 +12,7 @@ import org.jvnet.hk2.annotations.Service;
 import su.iota.backend.game.GameSessionActor;
 import su.iota.backend.game.MatchmakingService;
 import su.iota.backend.messages.IncomingMessage;
+import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.internal.GameSessionInitMessage;
 import su.iota.backend.models.UserProfile;
 
@@ -37,7 +38,7 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
     }
 
     @Override
-    public void makeMatch(@NotNull UserProfile player, @NotNull ActorRef<Object> frontend) throws SuspendExecution {
+    public void makeMatch(@NotNull UserProfile player, @NotNull ActorRef<Object> frontend) throws SuspendExecution, InterruptedException {
         if (!buckets.isEmpty()) {
             if (!buckets.stream().anyMatch(bucket -> bucket.tryPut(frontend, player))) {
                 Log.info("MM: tryPut() failed for all possible buckets for player " + player.getLogin());
@@ -53,7 +54,7 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
         final List<PlayerBucket> fullBuckets = buckets.stream().filter(PlayerBucket::isFull).collect(Collectors.toList());
         for (PlayerBucket fullBucket : fullBuckets) {
             final Map<ActorRef<Object>, UserProfile> players = fullBucket.getPlayers();
-            final ActorRef<IncomingMessage> gameSession = createGameSession(players);
+            final Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession = createGameSession(players);
             fullBucket.setGameSession(gameSession);
             for (ActorRef<Object> playerFrontend : players.keySet()) {
                 playerFrontend.send(gameSession);
@@ -62,18 +63,14 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
         buckets.removeIf(b -> b.getGameSession() != null);
     }
 
-    private @NotNull ActorRef<IncomingMessage> createGameSession(@NotNull Map<ActorRef<Object>, UserProfile> players) throws SuspendExecution {
+    private Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> createGameSession(@NotNull Map<ActorRef<Object>, UserProfile> players) throws SuspendExecution, InterruptedException {
         Log.info("Making match for players (" + players.values().stream().map(UserProfile::getLogin).collect(Collectors.joining(";")) + ")!");
-        final ActorRef<IncomingMessage> gameSessionActor = serviceLocator.getService(GameSessionActor.class).spawn();
-        try {
-            final Boolean ok = RequestReplyHelper.call(gameSessionActor, new GameSessionInitMessage(players));
-            if (!ok) {
-                throw new AssertionError();
-            }
-        } catch (InterruptedException ex) {
-            throw new RuntimeException(ex);
+        final Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession = serviceLocator.getService(GameSessionActor.class).spawn();
+        final GameSessionInitMessage.Result result = (GameSessionInitMessage.Result) gameSession.call(new GameSessionInitMessage(players));
+        if (!result.isOk()) {
+            throw new AssertionError();
         }
-        return gameSessionActor;
+        return gameSession;
     }
 
     private static class PlayerBucket {
@@ -82,7 +79,7 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
 
         private int capacity;
         private Map<ActorRef<Object>, UserProfile> players;
-        private ActorRef<IncomingMessage> gameSession;
+        private Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession;
 
         PlayerBucket(int capacity) {
             this.capacity = capacity;
@@ -101,14 +98,13 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
             return players;
         }
 
-        public ActorRef<IncomingMessage> getGameSession() {
+        public Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> getGameSession() {
             return gameSession;
         }
 
-        public void setGameSession(ActorRef<IncomingMessage> gameSession) {
+        public void setGameSession(Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession) {
             this.gameSession = gameSession;
         }
-
     }
 
 }

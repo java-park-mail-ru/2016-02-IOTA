@@ -4,6 +4,7 @@ import co.paralleluniverse.actors.ActorRef;
 import co.paralleluniverse.actors.BasicActor;
 import co.paralleluniverse.actors.ExitMessage;
 import co.paralleluniverse.actors.LifecycleMessage;
+import co.paralleluniverse.actors.behaviors.Server;
 import co.paralleluniverse.comsat.webactors.*;
 import co.paralleluniverse.fibers.SuspendExecution;
 import com.esotericsoftware.minlog.Log;
@@ -27,7 +28,7 @@ import static co.paralleluniverse.comsat.webactors.HttpResponse.error;
 import static co.paralleluniverse.comsat.webactors.HttpResponse.ok;
 import static javax.servlet.http.HttpServletResponse.*;
 
-@WebActor(httpUrlPatterns = {"/session", "/user/*", "/highscore"}, webSocketUrlPatterns = {"/ws"})
+@WebActor(httpUrlPatterns = {"/session", "/user/*", "/game", "/highscore"}, webSocketUrlPatterns = {"/ws"})
 public final class FrontendActor extends BasicActor<Object, Void> {
 
     private boolean isInitialized = false;
@@ -44,7 +45,7 @@ public final class FrontendActor extends BasicActor<Object, Void> {
     }
 
     @Override
-    protected Void doRun() throws InterruptedException, SuspendExecution {
+    protected Void doRun() throws SuspendExecution, InterruptedException {
         if (!isInitialized) {
             init();
             isInitialized = true;
@@ -59,11 +60,12 @@ public final class FrontendActor extends BasicActor<Object, Void> {
                 for (ActorRef<WebMessage> webSocket : webSockets) {
                     webSocket.send(jsonMessage);
                 }
-            } else if (message instanceof ActorRef<?>) {
+            } else if (message instanceof Server) {
                 //noinspection unchecked
-                final ActorRef<IncomingMessage> gameSessionActor = (ActorRef<IncomingMessage>) message;
-                gameSessionWatch = watch(gameSessionActor);
-                frontendService.setGameSession(self(), gameSessionActor);
+                final Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession =
+                        (Server<IncomingMessage, OutgoingMessage, ActorRef<Object>>) message;
+                gameSessionWatch = watch(gameSession);
+                frontendService.setGameSession(self(), gameSession);
             } else if (message instanceof ExitMessage) {
                 final ExitMessage exitMessage = (ExitMessage) message;
                 final ActorRef dyingActor = exitMessage.getActor();
@@ -78,7 +80,7 @@ public final class FrontendActor extends BasicActor<Object, Void> {
         }
     }
 
-    private void handleWebMessage(WebMessage message) throws SuspendExecution {
+    private void handleWebMessage(WebMessage message) throws SuspendExecution, InterruptedException {
         if (message instanceof HttpRequest) {
             final HttpRequest httpRequest = (HttpRequest) message;
             routeHttpRequest(httpRequest);
@@ -87,12 +89,6 @@ public final class FrontendActor extends BasicActor<Object, Void> {
             final ActorRef<WebMessage> webSocketActor = (ActorRef<WebMessage>) message.getFrom();
             watch(webSocketActor);
             webSockets.add(webSocketActor);
-        } else if (message instanceof WebDataMessage) {
-            //noinspection SuspiciousMethodCalls
-            if (!webSockets.contains(message.getFrom())) {
-                throw new AssertionError();
-            }
-            handleWebSocketMessage((WebDataMessage) message);
         }
     }
 
@@ -104,24 +100,7 @@ public final class FrontendActor extends BasicActor<Object, Void> {
         return super.handleLifecycleMessage(m);
     }
 
-    private void handleWebSocketMessage(WebDataMessage message) throws SuspendExecution {
-        if (message.isBinary()) {
-            Log.warn("Got binary message from " + message.getFrom().toString());
-            return;
-        }
-        final Gson gson = getGson();
-        try {
-            final PlayerActionMessage actionMessage = gson.fromJson(message.getStringBody(), PlayerActionMessage.class);
-            if (actionMessage != null) {
-                actionMessage.setFrom(self());
-                frontendService.performPlayerAction(actionMessage);
-            }
-        } catch (JsonSyntaxException ex) {
-            Log.warn("Cannot deserialize WebSocket message", ex);
-        }
-    }
-
-    private void routeHttpRequest(HttpRequest httpRequest) throws SuspendExecution {
+    private void routeHttpRequest(HttpRequest httpRequest) throws SuspendExecution, InterruptedException {
         final String resourceUri = getResourceUri(httpRequest);
         if (resourceUri.startsWith("/session")) {
             handleHttpSessionRequest(httpRequest);
@@ -129,10 +108,34 @@ public final class FrontendActor extends BasicActor<Object, Void> {
             handleHttpConcreteUserRequest(httpRequest);
         } else if (resourceUri.startsWith("/user")) {
             handleHttpUserRequest(httpRequest);
+        } else if (resourceUri.startsWith("/game")) {
+            handleHttpGameRequest(httpRequest);
         } else if (resourceUri.startsWith("/highscore")) {
             handleHttpHighscoreRequest(httpRequest);
         } else {
             throw new AssertionError(resourceUri);
+        }
+    }
+
+    private void handleHttpGameRequest(HttpRequest httpRequest) throws SuspendExecution, InterruptedException {
+
+        if (httpRequest.getMethod().equals("GET")) {
+            final JsonObject response = new JsonObject();
+            response.addProperty("__ok", frontendService.askGameStateUpdate(self()));
+            respondWithJson(httpRequest, response);
+        } else if (httpRequest.getMethod().equals("POST")) {
+            try {
+                final PlayerActionMessage actionMessage = getGson().fromJson(httpRequest.getStringBody(), PlayerActionMessage.class);
+                if (actionMessage != null) {
+                    actionMessage.setFrom(self());
+                    respondWithJson(httpRequest, frontendService.performPlayerAction(actionMessage));
+                    return;
+                }
+            } catch (JsonSyntaxException ignored) {
+            }
+            respondWithError(httpRequest, SC_BAD_REQUEST);
+        } else {
+            respondWithError(httpRequest, SC_METHOD_NOT_ALLOWED);
         }
     }
 
@@ -283,11 +286,11 @@ public final class FrontendActor extends BasicActor<Object, Void> {
         return gsonBuilder.excludeFieldsWithoutExposeAnnotation().create();
     }
 
-    private void respondWithJson(HttpRequest httpRequest, Object object) throws SuspendExecution {
+    private void respondWithJson(HttpRequest httpRequest, @Nullable Object object) throws SuspendExecution {
         respondWithJson(httpRequest, object, this::defaultGsonBuilderFunction);
     }
 
-    private void respondWithJson(HttpRequest httpRequest, Object object, Function<GsonBuilder, Gson> gsonFunction) throws SuspendExecution {
+    private void respondWithJson(HttpRequest httpRequest, @Nullable Object object, Function<GsonBuilder, Gson> gsonFunction) throws SuspendExecution {
         final Gson gson = gsonFunction.apply(new GsonBuilder());
         httpRequest.getFrom().send(ok(self(), httpRequest, gson.toJson(object)).setContentType("application/json").build());
     }

@@ -21,4 +21,21 @@ public class GameSessionInitMessage extends RequestMessage<Boolean> implements I
         return players;
     }
 
+    public static class Result implements OutgoingMessage {
+
+        private boolean ok;
+
+        public Result(boolean ok) {
+            this.ok = ok;
+        }
+
+        public boolean isOk() {
+            return ok;
+        }
+
+        public void setOk(boolean ok) {
+            this.ok = ok;
+        }
+    }
+
 }
