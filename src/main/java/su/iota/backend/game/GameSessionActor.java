@@ -9,7 +9,6 @@ import org.glassfish.hk2.api.PerLookup;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
 import su.iota.backend.messages.IncomingMessage;
-import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.GameResultMessage;
 import su.iota.backend.messages.game.PlayerActionMessage;
 import su.iota.backend.messages.game.PlayerActionResultMessage;

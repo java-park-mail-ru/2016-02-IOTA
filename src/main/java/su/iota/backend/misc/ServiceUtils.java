@@ -31,7 +31,7 @@ public final class ServiceUtils {
 
     public static ServiceLocator getServiceLocator() throws SuspendExecution, InterruptedException {
         //noinspection unchecked
-        return ((Server<Object, ServiceLocator, Void>) ActorRegistry.getActor(ACTOR_NAME)).call(null);
+        return ((Server<Void, ServiceLocator, Void>) ActorRegistry.getActor(ACTOR_NAME)).call(null);
     }
 
 }

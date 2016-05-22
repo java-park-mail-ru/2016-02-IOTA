@@ -27,7 +27,7 @@ import static co.paralleluniverse.comsat.webactors.HttpResponse.error;
 import static co.paralleluniverse.comsat.webactors.HttpResponse.ok;
 import static javax.servlet.http.HttpServletResponse.*;
 
-@WebActor(httpUrlPatterns = {"/session", "/user/*"}, webSocketUrlPatterns = {"/ws"})
+@WebActor(httpUrlPatterns = {"/session", "/user/*", "/highscore"}, webSocketUrlPatterns = {"/ws"})
 public final class FrontendActor extends BasicActor<Object, Void> {
 
     private boolean isInitialized = false;
@@ -130,6 +130,8 @@ public final class FrontendActor extends BasicActor<Object, Void> {
             handleHttpConcreteUserRequest(httpRequest);
         } else if (resourceUri.startsWith("/user")) {
             handleHttpUserRequest(httpRequest);
+        } else if (resourceUri.startsWith("/highscore")) {
+            handleHttpHighscoreRequest(httpRequest);
         } else {
             throw new AssertionError(resourceUri);
         }
@@ -264,6 +266,14 @@ public final class FrontendActor extends BasicActor<Object, Void> {
         } catch (JsonSyntaxException ex) {
             respondWithError(httpRequest, SC_BAD_REQUEST, ex);
         }
+    }
+
+    private void handleHttpHighscoreRequest(HttpRequest httpRequest) throws SuspendExecution {
+        if (!httpRequest.getMethod().equals("GET")) {
+            respondWithError(httpRequest, SC_METHOD_NOT_ALLOWED);
+            return;
+        }
+        respondWithError(httpRequest, SC_NOT_IMPLEMENTED); // todo
     }
 
     private Gson getGson() {

@@ -14,8 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-//@Rank(-100)
-@Named
 @Service
 @Singleton
 public class AccountServiceMapImpl implements AccountService {
@@ -42,7 +40,7 @@ public class AccountServiceMapImpl implements AccountService {
     @Override
     public void editUser(long userId, @NotNull UserProfile newUserProfile) throws UserNotFoundException, UserAlreadyExistsException {
         final String newUserLogin = newUserProfile.getLogin();
-        if (newUserLogin.isEmpty()) {
+        if (newUserLogin == null || newUserLogin.isEmpty()) {
             return;
         }
         if (userIds.containsKey(newUserLogin)) {
@@ -52,7 +50,10 @@ public class AccountServiceMapImpl implements AccountService {
         if (oldUserProfile == null) {
             throw new UserNotFoundException();
         }
-        userPasswords.replace(userId, newUserProfile.getPassword());
+        final String password = newUserProfile.getPassword();
+        if (password != null) {
+            userPasswords.replace(userId, newUserProfile.getPassword());
+        }
         userIds.remove(oldUserProfile.getLogin());
         userIds.put(newUserLogin, userId);
         oldUserProfile.setLogin(newUserLogin);

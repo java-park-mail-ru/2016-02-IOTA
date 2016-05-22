@@ -48,6 +48,9 @@ public class FrontendServiceImpl implements FrontendService {
         try {
             final long userId = accountService.createUser(userProfile);
             userProfile.setId(userId);
+            if (!signIn(userProfile)) {
+                throw new AssertionError();
+            }
             return true;
         } catch (UserAlreadyExistsException ignored) {
         }
