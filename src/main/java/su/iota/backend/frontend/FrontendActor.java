@@ -55,7 +55,6 @@ public final class FrontendActor extends BasicActor<Object, Void> {
             if (message instanceof WebMessage) {
                 handleWebMessage((WebMessage) message);
             } else if (message instanceof OutgoingMessage) {
-                Log.info("Received outgoing message " + message.toString());
                 final WebMessage jsonMessage = new WebDataMessage(self(), getGson().toJson(message));
                 for (ActorRef<WebMessage> webSocket : webSockets) {
                     webSocket.send(jsonMessage);
@@ -118,7 +117,7 @@ public final class FrontendActor extends BasicActor<Object, Void> {
                 frontendService.performPlayerAction(actionMessage);
             }
         } catch (JsonSyntaxException ex) {
-            Log.warn("Cannot (de)serialize WS message", ex);
+            Log.warn("Cannot deserialize WebSocket message", ex);
         }
     }
 

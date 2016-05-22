@@ -32,7 +32,6 @@ public final class GameSessionActor extends BasicActor<IncomingMessage, GameResu
 
     @Override
     protected GameResultMessage doRun() throws InterruptedException, SuspendExecution {
-        //noinspection InfiniteLoopStatement
         while (true) {
             final IncomingMessage message = receive(3, TimeUnit.SECONDS);
             if (message instanceof GameSessionInitMessage) {
