@@ -41,6 +41,13 @@ public class PlayerActionMessage implements IncomingMessage, FromMessage {
         @Expose
         private boolean broadcast = false;
 
+        public ResultMessage() {
+        }
+
+        public ResultMessage(@Nullable Boolean isOk) {
+            this.isOk = isOk;
+        }
+
         public boolean isBroadcastTrigger() {
             return broadcast;
         }

@@ -17,8 +17,6 @@ import su.iota.backend.game.MatchmakingService;
 import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.PlayerActionMessage;
-import su.iota.backend.messages.game.GameStateMessage;
-import su.iota.backend.messages.internal.GameSessionTerminateMessage;
 import su.iota.backend.models.UserProfile;
 
 import javax.inject.Inject;
@@ -127,9 +125,9 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
-    public @Nullable PlayerActionMessage.ResultMessage performPlayerAction(@NotNull PlayerActionMessage playerActionMessage) throws SuspendExecution, InterruptedException {
+    public @NotNull PlayerActionMessage.ResultMessage performPlayerAction(@NotNull PlayerActionMessage playerActionMessage) throws SuspendExecution, InterruptedException {
         if (signedInUser == null || gameSession == null) {
-            return null;
+            return new PlayerActionMessage.ResultMessage(false);
         }
         final OutgoingMessage result = gameSession.call(playerActionMessage);
         if (!(result instanceof PlayerActionMessage.ResultMessage)) {
@@ -161,7 +159,6 @@ public class FrontendServiceImpl implements FrontendService {
 
     @Override
     public void resetGameSession() throws SuspendExecution {
-
         gameSession = null;
     }
 

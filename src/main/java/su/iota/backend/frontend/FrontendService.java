@@ -28,7 +28,7 @@ public interface FrontendService {
 
     boolean getUserDetails(@Nullable UserProfile userProfile) throws SuspendExecution;
 
-    @Nullable PlayerActionMessage.ResultMessage performPlayerAction(@NotNull PlayerActionMessage playerActionMessage) throws SuspendExecution, InterruptedException;
+    @NotNull PlayerActionMessage.ResultMessage performPlayerAction(@NotNull PlayerActionMessage playerActionMessage) throws SuspendExecution, InterruptedException;
 
     void setGameSession(@NotNull ActorRef<Object> frontend, Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSessionActor) throws SuspendExecution, InterruptedException;
 

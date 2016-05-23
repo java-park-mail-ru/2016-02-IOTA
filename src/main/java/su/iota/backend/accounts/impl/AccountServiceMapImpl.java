@@ -1,5 +1,6 @@
 package su.iota.backend.accounts.impl;
 
+import co.paralleluniverse.actors.behaviors.ProxyServerActor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
@@ -8,20 +9,22 @@ import su.iota.backend.accounts.exceptions.UserAlreadyExistsException;
 import su.iota.backend.accounts.exceptions.UserNotFoundException;
 import su.iota.backend.models.UserProfile;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Singleton
-public class AccountServiceMapImpl implements AccountService {
+public class AccountServiceMapImpl extends ProxyServerActor implements AccountService {
 
-    private final AtomicLong userIdGenerator = new AtomicLong(1L);
-    private final ConcurrentMap<Long, UserProfile> userProfiles = new ConcurrentHashMap<>();
-    private final ConcurrentMap<Long, String> userPasswords = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, Long> userIds = new ConcurrentHashMap<>();
+    private long nextUserId = 1L;
+    private final Map<Long, UserProfile> userProfiles = new HashMap<>();
+    private final Map<Long, String> userPasswords = new HashMap<>();
+    private final Map<String, Long> userIds = new HashMap<>();
+
+    public AccountServiceMapImpl() {
+        super(true);
+    }
 
     @Override
     public long createUser(@NotNull UserProfile userProfile) throws UserAlreadyExistsException {
@@ -29,7 +32,7 @@ public class AccountServiceMapImpl implements AccountService {
         if (userIds.containsKey(userLogin)) {
             throw new UserAlreadyExistsException();
         }
-        final long userId = userIdGenerator.getAndIncrement();
+        final long userId = nextUserId++;
         userProfile.setId(userId);
         userIds.put(userLogin, userId);
         userProfiles.put(userId, userProfile);

@@ -20,6 +20,7 @@ import su.iota.backend.misc.ServiceUtils;
 import su.iota.backend.models.UserProfile;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -241,7 +242,9 @@ public final class FrontendActor extends BasicActor<Object, Void> {
             userProfile.setId(userId);
             final boolean isGetUserDetailsOk = frontendService.getUserDetails(userProfile);
             if (isGetUserDetailsOk) {
-                gson.toJsonTree(userProfile).getAsJsonObject().entrySet().stream().forEach(e -> jsonObject.add(e.getKey(), e.getValue()));
+                for (Map.Entry<String, JsonElement> property : gson.toJsonTree(userProfile).getAsJsonObject().entrySet()) {
+                    jsonObject.add(property.getKey(), property.getValue());
+                }
             }
             jsonObject.addProperty("__ok", isGetUserDetailsOk);
             respondWithJson(httpRequest, jsonObject);
@@ -253,16 +256,24 @@ public final class FrontendActor extends BasicActor<Object, Void> {
     private void handleHttpConcreteUserPost(HttpRequest httpRequest, JsonObject jsonObject, Long userId) throws SuspendExecution {
         try {
             final UserProfile userProfile = getGson().fromJson(httpRequest.getStringBody(), UserProfile.class);
-            jsonObject.addProperty("__ok", frontendService.editProfile(userProfile));
-            respondWithJson(httpRequest, jsonObject);
-        } catch (JsonSyntaxException ex) {
-            respondWithError(httpRequest, SC_BAD_REQUEST, ex);
+            if (userProfile != null) {
+                final @Nullable Long someId = userProfile.getId();
+                if (someId == null || someId <= 0) {
+                    userProfile.setId(userId);
+                    jsonObject.addProperty("__ok", frontendService.editProfile(userProfile));
+                    respondWithJson(httpRequest, jsonObject);
+                    return;
+                }
+            }
+        } catch (JsonSyntaxException ignored) {
         }
+        respondWithError(httpRequest, SC_BAD_REQUEST);
     }
 
     private void handleHttpConcreteUserDelete(HttpRequest httpRequest, JsonObject jsonObject, Long userId) throws SuspendExecution {
         try {
-            final UserProfile userProfile = getGson().fromJson(httpRequest.getStringBody(), UserProfile.class);
+            final UserProfile userProfile = new UserProfile();
+            userProfile.setId(userId);
             jsonObject.addProperty("__ok", frontendService.deleteUser(userProfile));
             respondWithJson(httpRequest, jsonObject);
         } catch (JsonSyntaxException ex) {
