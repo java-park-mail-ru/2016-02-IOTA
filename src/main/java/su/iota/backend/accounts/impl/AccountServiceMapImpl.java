@@ -1,6 +1,7 @@
 package su.iota.backend.accounts.impl;
 
 import co.paralleluniverse.actors.behaviors.ProxyServerActor;
+import org.glassfish.hk2.api.Rank;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
@@ -9,10 +10,13 @@ import su.iota.backend.accounts.exceptions.UserAlreadyExistsException;
 import su.iota.backend.accounts.exceptions.UserNotFoundException;
 import su.iota.backend.models.UserProfile;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 
+@Named
+@Rank(-100)
 @Service
 @Singleton
 public class AccountServiceMapImpl extends ProxyServerActor implements AccountService {

@@ -21,7 +21,7 @@ public interface AccountService {
 
     @Nullable UserProfile getUserProfile(@NotNull String userLogin) throws SuspendExecution;
 
-    @Nullable UserProfile getUserProfile(long userId);
+    @Nullable UserProfile getUserProfile(long userId) throws SuspendExecution;
 
     boolean isUserPasswordCorrect(long userId, @NotNull String password) throws SuspendExecution, UserNotFoundException;
 

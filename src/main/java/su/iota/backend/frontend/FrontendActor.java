@@ -39,10 +39,9 @@ public final class FrontendActor extends BasicActor<Object, Void> {
     private Object gameSessionWatch;
 
     private void init() throws InterruptedException, SuspendExecution {
-        final ServiceLocator serviceLocator = ServiceUtils.getServiceLocator();
-        final SettingsService settingsService = serviceLocator.getService(SettingsService.class);
+        final SettingsService settingsService = ServiceUtils.getService(SettingsService.class);
         contextPath = settingsService.getServerContextPathSetting();
-        frontendService = serviceLocator.getService(FrontendService.class);
+        frontendService = ServiceUtils.getService(FrontendService.class);
     }
 
     @Override

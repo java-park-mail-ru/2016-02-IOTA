@@ -1,5 +1,7 @@
 package su.iota.backend.accounts.impl;
 
+import co.paralleluniverse.fibers.SuspendExecution;
+import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.fibers.jdbi.FiberDBI;
 import org.glassfish.hk2.api.Immediate;
 import org.glassfish.hk2.api.Rank;
@@ -19,7 +21,6 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
-@Rank(-100)
 @Service
 @Immediate
 public class AccountServiceJdbiImpl implements AccountService {
@@ -33,11 +34,14 @@ public class AccountServiceJdbiImpl implements AccountService {
     }
 
     @Override
-    public long createUser(@NotNull UserProfile userProfile) throws UserAlreadyExistsException {
+    public long createUser(@NotNull UserProfile userProfile) throws SuspendExecution, UserAlreadyExistsException {
         final String userLogin = userProfile.getLogin();
+        if (userLogin == null) {
+            throw new AssertionError();
+        }
         final Long insertedUserId;
         try (Handle handle = dbi.open()) {
-            if (AccountServiceJdbiImpl.this.isUserExistent(userLogin)) {
+            if (isUserExistent(userLogin)) {
                 throw new UserAlreadyExistsException();
             }
             handle.execute("insert into user (login, email, password) values (?, ?, ?)",
@@ -53,11 +57,14 @@ public class AccountServiceJdbiImpl implements AccountService {
     }
 
     @Override
-    public void editUser(long userId, @NotNull UserProfile newUserProfile) throws UserNotFoundException, UserAlreadyExistsException {
+    public void editUser(long userId, @NotNull UserProfile newUserProfile) throws SuspendExecution, UserNotFoundException, UserAlreadyExistsException {
         if (!isUserExistent(userId)) {
             throw new UserNotFoundException();
         }
         final String newUserLogin = newUserProfile.getLogin();
+        if (newUserLogin == null) {
+            throw new AssertionError();
+        }
         if (isUserExistent(newUserLogin)) {
             throw new UserAlreadyExistsException();
         }
@@ -71,28 +78,28 @@ public class AccountServiceJdbiImpl implements AccountService {
     }
 
     @Override
-    public boolean isUserExistent(long userId) {
+    public boolean isUserExistent(long userId) throws SuspendExecution {
         final Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("userId", userId);
         return isUserExistentWhere(" and id = :userId ", queryParams);
     }
 
     @Override
-    public boolean isUserExistent(@NotNull String userLogin) {
+    public boolean isUserExistent(@NotNull String userLogin) throws SuspendExecution {
         final Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("userLogin", userLogin);
         return isUserExistentWhere(" and login = :userLogin ", queryParams);
     }
 
     @Override
-    public void deleteUser(long userId) throws UserNotFoundException {
+    public void deleteUser(long userId) throws SuspendExecution, UserNotFoundException {
         try (Handle handle = dbi.open()) {
             handle.execute("delete from user where id = ?", userId);
         }
     }
 
     @Override
-    public @Nullable Long getUserId(@NotNull String userLogin) {
+    public @Nullable Long getUserId(@NotNull String userLogin) throws SuspendExecution {
         try (Handle handle = dbi.open()) {
             return handle.createQuery("select id from user where login = :userLogin")
                     .bind("userLogin", userLogin)
@@ -102,20 +109,20 @@ public class AccountServiceJdbiImpl implements AccountService {
     }
 
     @Override
-    public @Nullable UserProfile getUserProfile(@NotNull String userLogin) {
+    public @Nullable UserProfile getUserProfile(@NotNull String userLogin) throws SuspendExecution {
         final Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("userLogin", userLogin);
         return getUserProfileWhere(" and login = :userLogin ", queryParams);
     }
 
     @Override
-    public @Nullable UserProfile getUserProfile(long userId) {
+    public @Nullable UserProfile getUserProfile(long userId) throws SuspendExecution {
         final Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("userId", userId);
         return getUserProfileWhere(" and id = :userId ", queryParams);
     }
 
-    private @Nullable UserProfile getUserProfileWhere(@NotNull String andWhereClause, @NotNull Map<String, ?> whereParams) {
+    private @Nullable UserProfile getUserProfileWhere(@NotNull String andWhereClause, @NotNull Map<String, ?> whereParams) throws SuspendExecution {
         try (Handle handle = dbi.open()) {
             return handle.createQuery("select id, login, email, birth_date from user where 1 " + andWhereClause)
                     .bindFromMap(whereParams)
@@ -125,7 +132,7 @@ public class AccountServiceJdbiImpl implements AccountService {
         }
     }
 
-    private boolean isUserExistentWhere(@NotNull String andWhereClause, @NotNull Map<String, ?> whereParams) {
+    private boolean isUserExistentWhere(@NotNull String andWhereClause, @NotNull Map<String, ?> whereParams) throws SuspendExecution {
         try (Handle handle = dbi.open()) {
             return handle.createQuery("select exists( select 1 from user where 1 " + andWhereClause + " )")
                     .bindFromMap(whereParams)
@@ -135,7 +142,7 @@ public class AccountServiceJdbiImpl implements AccountService {
     }
 
     @Override
-    public boolean isUserPasswordCorrect(long userId, @NotNull String password) throws UserNotFoundException {
+    public boolean isUserPasswordCorrect(long userId, @NotNull String password) throws SuspendExecution, UserNotFoundException {
         if (!isUserExistent(userId)) {
             throw new UserNotFoundException();
         }
@@ -148,10 +155,11 @@ public class AccountServiceJdbiImpl implements AccountService {
         }
     }
 
+    @Suspendable
     private void setupTables() {
         try (Handle handle = dbi.open()) {
             handle.execute("create table if not exists user (id bigint(20) primary key not null auto_increment, " +
-                    "login varchar(255) not null, email varchar(255) not null, password varchar(255) not null," +
+                    "login varchar(255) not null, email varchar(255) not null, password varchar(255) not null, birth_date datetime," +
                     "unique index ix_login (login))");
         }
     }
