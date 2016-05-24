@@ -103,26 +103,13 @@ public class FrontendServiceImpl implements FrontendService {
         return false; // todo
     }
 
+    @Nullable
     @Override
-    public boolean getUserDetails(@Nullable UserProfile userProfile) throws SuspendExecution {
-        if (userProfile == null) {
-            return false;
+    public UserProfile getUserById(long userId) throws SuspendExecution {
+        if (!accountService.isUserExistent(userId)) {
+            return null;
         }
-        final Long userId = userProfile.getId();
-        if (userId == null) {
-            return false;
-        }
-        final UserProfile storedUserProfile = accountService.getUserProfile(userId);
-        if (storedUserProfile == null) {
-            return false;
-        }
-        try {
-            BeanUtils.copyProperties(userProfile, storedUserProfile);
-        } catch (IllegalAccessException | InvocationTargetException ex) {
-            Log.error(null, ex);
-            return false;
-        }
-        return true;
+        return accountService.getUserProfile(userId);
     }
 
     @NotNull

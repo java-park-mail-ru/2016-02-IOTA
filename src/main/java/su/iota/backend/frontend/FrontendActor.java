@@ -234,16 +234,15 @@ public final class FrontendActor extends BasicActor<Object, Void> {
 
     private void handleHttpConcreteUserGet(HttpRequest httpRequest, JsonObject jsonObject, Long userId) throws SuspendExecution {
         try {
-            final Gson gson = getGson();
-            final UserProfile userProfile = new UserProfile();
-            userProfile.setId(userId);
-            final boolean isGetUserDetailsOk = frontendService.getUserDetails(userProfile);
-            if (isGetUserDetailsOk) {
-                for (Map.Entry<String, JsonElement> property : gson.toJsonTree(userProfile).getAsJsonObject().entrySet()) {
+            final UserProfile userProfile = frontendService.getUserById(userId);
+            final JsonElement jsonResponse = getGson().toJsonTree(userProfile);
+            final boolean isOk = jsonResponse != null && jsonResponse.isJsonObject();
+            if (isOk) {
+                for (Map.Entry<String, JsonElement> property : jsonResponse.getAsJsonObject().entrySet()) {
                     jsonObject.add(property.getKey(), property.getValue());
                 }
             }
-            jsonObject.addProperty("__ok", isGetUserDetailsOk);
+            jsonObject.addProperty("__ok", isOk);
             respondWithJson(httpRequest, jsonObject);
         } catch (JsonSyntaxException ex) {
             respondWithError(httpRequest, SC_BAD_REQUEST, ex);

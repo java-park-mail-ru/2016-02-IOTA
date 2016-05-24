@@ -20,15 +20,18 @@ public interface FrontendService {
 
     void signOut() throws SuspendExecution;
 
-    @Nullable UserProfile getSignedInUser() throws SuspendExecution;
+    @Nullable
+    UserProfile getSignedInUser() throws SuspendExecution;
 
     boolean editProfile(@Nullable UserProfile userProfile) throws SuspendExecution;
 
     boolean deleteUser(@Nullable UserProfile userProfile) throws SuspendExecution;
 
-    boolean getUserDetails(@Nullable UserProfile userProfile) throws SuspendExecution;
+    @Nullable
+    UserProfile getUserById(long userId) throws SuspendExecution;
 
-    @NotNull PlayerActionMessage.ResultMessage performPlayerAction(@NotNull PlayerActionMessage playerActionMessage) throws SuspendExecution, InterruptedException;
+    @NotNull
+    PlayerActionMessage.ResultMessage performPlayerAction(@NotNull PlayerActionMessage playerActionMessage) throws SuspendExecution, InterruptedException;
 
     void setGameSession(@NotNull ActorRef<Object> frontend, Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSessionActor) throws SuspendExecution, InterruptedException;
 

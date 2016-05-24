@@ -125,7 +125,7 @@ public class AccountServiceJdbiImpl implements AccountService {
     }
 
     @Nullable
-    private UserProfile getUserProfileWhere(@NotNull String andWhereClause, @NotNull Map<String, ?> whereParams) {
+    private UserProfile getUserProfileWhere(@NotNull String andWhereClause, @NotNull Map<String, ?> whereParams) throws SuspendExecution {
         try (Handle handle = dbi.open()) {
             return handle.createQuery("select id, login, email, birth_date from user where 1 " + andWhereClause)
                     .bindFromMap(whereParams)
@@ -135,7 +135,7 @@ public class AccountServiceJdbiImpl implements AccountService {
         }
     }
 
-    private boolean isUserExistentWhere(@NotNull String andWhereClause, @NotNull Map<String, ?> whereParams) {
+    private boolean isUserExistentWhere(@NotNull String andWhereClause, @NotNull Map<String, ?> whereParams) throws SuspendExecution {
         try (Handle handle = dbi.open()) {
             return handle.createQuery("select exists( select 1 from user where 1 " + andWhereClause + " )")
                     .bindFromMap(whereParams)
