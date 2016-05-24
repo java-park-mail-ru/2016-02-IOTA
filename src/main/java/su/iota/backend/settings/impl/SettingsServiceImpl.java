@@ -8,13 +8,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jvnet.hk2.annotations.Service;
 import su.iota.backend.settings.SettingsService;
 
-import javax.inject.Singleton;
-
 @Service
 @Immediate
 public class SettingsServiceImpl implements SettingsService {
 
-    private Config config;
+    private final Config config;
 
     public SettingsServiceImpl() {
         config = ConfigFactory.load();

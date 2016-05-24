@@ -7,17 +7,15 @@ import co.paralleluniverse.actors.LifecycleMessage;
 import co.paralleluniverse.actors.behaviors.Server;
 import co.paralleluniverse.comsat.webactors.*;
 import co.paralleluniverse.fibers.SuspendExecution;
-import com.esotericsoftware.minlog.Log;
 import com.google.gson.*;
-import org.glassfish.hk2.api.ServiceLocator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.PlayerActionMessage;
-import su.iota.backend.settings.SettingsService;
 import su.iota.backend.misc.ServiceUtils;
 import su.iota.backend.models.UserProfile;
+import su.iota.backend.settings.SettingsService;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -35,7 +33,7 @@ public final class FrontendActor extends BasicActor<Object, Void> {
     private boolean isInitialized = false;
     private String contextPath;
     private FrontendService frontendService;
-    private Set<ActorRef<WebMessage>> webSockets = new HashSet<>();
+    private final Set<ActorRef<WebMessage>> webSockets = new HashSet<>();
     private Object gameSessionWatch;
 
     private void init() throws InterruptedException, SuspendExecution {

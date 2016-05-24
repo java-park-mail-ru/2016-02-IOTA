@@ -3,11 +3,8 @@ package su.iota.backend.main;
 import co.paralleluniverse.comsat.webactors.servlet.WebActorInitializer;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.SuspendableRunnable;
-import com.esotericsoftware.minlog.Log;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
-import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.component.AbstractLifeCycle;
 import org.eclipse.jetty.util.component.LifeCycle;
@@ -18,15 +15,12 @@ import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.jvnet.hk2.annotations.Service;
-import su.iota.backend.settings.SettingsService;
 import su.iota.backend.misc.ServiceUtils;
+import su.iota.backend.settings.SettingsService;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-import java.io.IOException;
 
 @Service
 @Immediate

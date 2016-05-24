@@ -61,7 +61,8 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
         frontend.send(getGameStateMessageForFrontend(frontend));
     }
 
-    private @NotNull PlayerActionMessage.ResultMessage handlePlayerActionMessage(PlayerActionMessage message) throws SuspendExecution {
+    @NotNull
+    private PlayerActionMessage.ResultMessage handlePlayerActionMessage(PlayerActionMessage message) throws SuspendExecution {
         //noinspection unchecked
         final ActorRef<Object> frontend = (ActorRef<Object>) message.getFrom();
         if (frontend == null) {

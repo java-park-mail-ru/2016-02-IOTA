@@ -31,7 +31,7 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
     @Inject
     ServiceLocator serviceLocator;
 
-    private Queue<PlayerBucket> buckets = new ArrayQueue<>();
+    private final Queue<PlayerBucket> buckets = new ArrayQueue<>();
 
     public MatchmakingServiceImpl() {
         super(false);
@@ -77,8 +77,8 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
 
         public static final int MAX_PLAYERS = 2;
 
-        private int capacity;
-        private Map<ActorRef<Object>, UserProfile> players;
+        private final int capacity;
+        private final Map<ActorRef<Object>, UserProfile> players;
         private Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession;
 
         PlayerBucket(int capacity) {
