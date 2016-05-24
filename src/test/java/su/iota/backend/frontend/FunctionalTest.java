@@ -13,6 +13,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClients;
+import org.eclipse.jetty.server.Authentication;
 import org.eclipse.jetty.server.Server;
 import org.glassfish.hk2.api.MultiException;
 import org.glassfish.hk2.api.ServiceLocator;
@@ -88,7 +89,7 @@ public class FunctionalTest extends ProxyServerActor {
     @Test
     public void testSignUpAndSignIn() throws Exception {
         checkSignOut();
-        checkIsSignedIn();
+        checkIsNotSignedIn();
 
         final UserProfile userProfile = new UserProfile();
         userProfile.setLogin("maxim.galaganov");
@@ -98,6 +99,46 @@ public class FunctionalTest extends ProxyServerActor {
         checkAutoSignIn(userId);
         checkSignOut();
         checkSignIn(userProfile);
+
+        checkRepeatedSignUp(userProfile);
+        checkUserProfile(userId, userProfile);
+        checkProfileNotExistentUser(-1);
+    }
+
+    private void checkProfileNotExistentUser(long userId) throws IOException {
+        final JsonElement response = client.execute(new HttpGet(getResourceUri("/user/" + userId)), httpResponse -> {
+            assertHttpStatus(httpResponse, SC_OK);
+            return jsonResponse(httpResponse);
+        });
+        final JsonObject obj = response.getAsJsonObject();
+        assertTrue(obj.has("__ok"));
+        assertFalse(obj.get("__ok").getAsBoolean());
+    }
+
+    private void checkUserProfile(long userId, UserProfile userProfile) throws IOException {
+        final JsonElement response = client.execute(new HttpGet(getResourceUri("/user/" + userId)), httpResponse -> {
+            assertHttpStatus(httpResponse, SC_OK);
+            return jsonResponse(httpResponse);
+        });
+        final JsonObject obj = response.getAsJsonObject();
+        assertTrue(obj.has("__ok"));
+        assertTrue(obj.get("__ok").getAsBoolean());
+        assertTrue(obj.has("id"));
+        assertEquals(obj.get("id").getAsLong(), userId);
+        assertTrue(obj.has("login"));
+        assertEquals(obj.get("login").getAsString(), userProfile.getLogin());
+    }
+
+    private void checkRepeatedSignUp(UserProfile userProfile) throws IOException {
+        final HttpPut signUpRequest = new HttpPut(getResourceUri("/user"));
+        signUpRequest.setEntity(new ByteArrayEntity(new Gson().toJson(userProfile).getBytes()));
+        final JsonElement response = client.execute(signUpRequest, httpResponse -> {
+            assertHttpStatus(httpResponse, SC_OK);
+            return jsonResponse(httpResponse);
+        });
+        final JsonObject obj = response.getAsJsonObject();
+        assertTrue(obj.has("__ok"));
+        assertFalse(obj.get("__ok").getAsBoolean());
     }
 
     private void checkSignIn(UserProfile userProfile) throws IOException {
@@ -113,7 +154,7 @@ public class FunctionalTest extends ProxyServerActor {
         assertTrue(obj.get("__ok").getAsBoolean());
     }
 
-    private void checkIsSignedIn() throws IOException {
+    private void checkIsNotSignedIn() throws IOException {
         final JsonElement response = client.execute(new HttpGet(getResourceUri("/session")), httpResponse -> {
             assertHttpStatus(httpResponse, SC_OK);
             return jsonResponse(httpResponse);
