@@ -12,9 +12,12 @@ import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainer
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.api.Immediate;
 import org.glassfish.hk2.api.ServiceLocator;
+import org.glassfish.hk2.utilities.Binder;
 import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.jvnet.hk2.annotations.Service;
+import su.iota.backend.accounts.AccountService;
+import su.iota.backend.accounts.impl.AccountServiceJdbiImpl;
 import su.iota.backend.misc.ServiceUtils;
 import su.iota.backend.settings.SettingsService;
 
@@ -65,15 +68,15 @@ public final class ApplicationBootstrapper implements SuspendableRunnable {
         server.join();
     }
 
-    public static ServiceLocator setupServiceLocator() throws SuspendExecution {
+    public static ServiceLocator setupServiceLocator(Binder binder) throws SuspendExecution {
         final ServiceLocator serviceLocator = ServiceLocatorUtilities.createAndPopulateServiceLocator();
-        ServiceLocatorUtilities.bind(serviceLocator, new DependencyBinder());
+        ServiceLocatorUtilities.bind(serviceLocator, binder);
         ServiceLocatorUtilities.enableImmediateScope(serviceLocator);
         return serviceLocator;
     }
 
     public static void main(String[] args) throws SuspendExecution, InterruptedException {
-        final ServiceLocator serviceLocator = setupServiceLocator();
+        final ServiceLocator serviceLocator = setupServiceLocator(new DependencyBinder());
         ServiceUtils.setupServiceUtils(serviceLocator);
         serviceLocator.getService(ApplicationBootstrapper.class).run();
         ServiceUtils.teardownServiceUtils();
@@ -84,6 +87,7 @@ public final class ApplicationBootstrapper implements SuspendableRunnable {
         @Override
         protected void configure() {
             bindFactory(DataSourceFactory.class).to(DataSource.class).in(Immediate.class);
+            bind(AccountServiceJdbiImpl.class).to(AccountService.class).in(Immediate.class);
         }
 
     }

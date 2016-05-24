@@ -16,12 +16,13 @@ import su.iota.backend.accounts.exceptions.UserNotFoundException;
 import su.iota.backend.models.UserProfile;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
-@Immediate
+@Singleton
 public class AccountServiceJdbiImpl implements AccountService {
 
     private final FiberDBI dbi;
