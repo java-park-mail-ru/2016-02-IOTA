@@ -102,7 +102,7 @@ public class FunctionalTest extends ProxyServerActor {
 
         checkRepeatedSignUp(userProfile);
         checkUserProfile(userId, userProfile);
-        checkProfileNotExistentUser(2);
+        checkProfileNotExistentUser(-1);
     }
 
     private void checkProfileNotExistentUser(long userId) throws IOException {
@@ -124,9 +124,9 @@ public class FunctionalTest extends ProxyServerActor {
         assertTrue(obj.has("__ok"));
         assertTrue(obj.get("__ok").getAsBoolean());
         assertTrue(obj.has("id"));
-        assertTrue(obj.get("id").getAsLong() == userId);
+        assertEquals(obj.get("id").getAsLong(), userId);
         assertTrue(obj.has("login"));
-        assertTrue(obj.get("login").getAsString().equals(userProfile.getLogin()));
+        assertEquals(obj.get("login").getAsString(), userProfile.getLogin());
     }
 
     private void checkRepeatedSignUp(UserProfile userProfile) throws IOException {
