@@ -85,7 +85,6 @@ public class FunctionalTest extends ProxyServerActor {
         client.close();
     }
 
-    @SuppressWarnings("TooBroadScope")
     @Test
     public void testSignUpAndSignIn() throws Exception {
         checkSignOut();
