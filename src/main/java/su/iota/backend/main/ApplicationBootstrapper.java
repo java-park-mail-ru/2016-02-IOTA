@@ -32,24 +32,24 @@ public final class ApplicationBootstrapper implements SuspendableRunnable {
     @Inject
     SettingsService settingsService;
 
-    @Override
-    public void run() throws SuspendExecution, InterruptedException {
+    public Server setupServer() throws SuspendExecution {
         final Server server = new Server(settingsService.getServerPortSetting());
         final ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-
-        ServiceUtils.setupServiceUtils(serviceLocator);
         WebActorInitializer.setUserClassLoader(ClassLoader.getSystemClassLoader());
-
         server.setHandler(contextHandler);
         contextHandler.setContextPath(settingsService.getServerContextPathSetting());
         contextHandler.addEventListener(new WebActorInitializer());
-
         try {
             WebSocketServerContainerInitializer.configureContext(contextHandler);
         } catch (ServletException e) {
             throw new AssertionError(e);
         }
+        return server;
+    }
 
+    @Override
+    public void run() throws SuspendExecution, InterruptedException {
+        final Server server = setupServer();
         //noinspection AnonymousInnerClassMayBeStatic
         server.addLifeCycleListener(new AbstractLifeCycle.AbstractLifeCycleListener() {
             @Override
@@ -57,21 +57,26 @@ public final class ApplicationBootstrapper implements SuspendableRunnable {
                 System.out.println(ASCII_LOGO);
             }
         });
-
         try {
             server.start();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
         server.join();
     }
 
-    public static void main(String[] args) throws SuspendExecution, InterruptedException {
+    public static ServiceLocator setupServiceLocator() throws SuspendExecution {
         final ServiceLocator serviceLocator = ServiceLocatorUtilities.createAndPopulateServiceLocator();
         ServiceLocatorUtilities.bind(serviceLocator, new DependencyBinder());
         ServiceLocatorUtilities.enableImmediateScope(serviceLocator);
+        return serviceLocator;
+    }
+
+    public static void main(String[] args) throws SuspendExecution, InterruptedException {
+        final ServiceLocator serviceLocator = setupServiceLocator();
+        ServiceUtils.setupServiceUtils(serviceLocator);
         serviceLocator.getService(ApplicationBootstrapper.class).run();
+        ServiceUtils.teardownServiceUtils();
     }
 
     private static class DependencyBinder extends AbstractBinder {

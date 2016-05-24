@@ -11,12 +11,15 @@ import org.glassfish.hk2.api.ServiceLocator;
 
 public final class ServiceUtils {
 
-    private static final String ACTOR_NAME = "__aux_ServiceUtilsActor";
+    private static volatile Server<Class<?>, Object, Void> actor;
 
     private ServiceUtils() {
     }
 
     public static void setupServiceUtils(final ServiceLocator serviceLocator) throws SuspendExecution {
+        if (actor != null) {
+            throw new AssertionError();
+        }
         final ServerHandler<Class<?>, Object, Void> serverHandler = new AbstractServerHandler<Class<?>, Object, Void>() {
             @Override
             public Object handleCall(ActorRef<?> from, Object id, Class<?> m) throws SuspendExecution {
@@ -24,14 +27,21 @@ public final class ServiceUtils {
             }
         };
         //noinspection resource
-        final ServerActor<Class<?>, Object, Void> actor = new ServerActor<>(ACTOR_NAME, serverHandler);
-        actor.spawnThread();
-        actor.register();
+        final ServerActor<Class<?>, Object, Void> actor = new ServerActor<>(serverHandler);
+        ServiceUtils.actor = actor.spawnThread();
+    }
+
+    public static void teardownServiceUtils() throws SuspendExecution, InterruptedException {
+        actor.shutdown();
+        actor = null;
     }
 
     public static <T> T getService(Class<T> clazz) throws SuspendExecution, InterruptedException {
+        if (actor == null) {
+            throw new AssertionError();
+        }
         //noinspection unchecked
-        return (T) ((Server<Class<?>, Object, Void>) ActorRegistry.getActor(ACTOR_NAME)).call(clazz);
+        return (T) actor.call(clazz);
     }
 
 }

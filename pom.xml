@@ -17,6 +17,7 @@
         <mysql-connector-java.version>5.1.39</mysql-connector-java.version>
         <jdbi.version>2.73</jdbi.version>
         <jetty.version>9.3.8.v20160314</jetty.version>
+        <httpclient.version>4.5.2</httpclient.version>
         <javax-websocket-server-impl.version>9.3.9.M1</javax-websocket-server-impl.version>
         <testng.version>6.9.10</testng.version>
         <mockito.version>1.10.19</mockito.version>
@@ -114,6 +115,11 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
             <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty.websocket</groupId>

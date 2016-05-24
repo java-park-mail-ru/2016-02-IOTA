@@ -25,7 +25,7 @@ import java.util.function.Function;
 
 import static co.paralleluniverse.comsat.webactors.HttpResponse.error;
 import static co.paralleluniverse.comsat.webactors.HttpResponse.ok;
-import static javax.servlet.http.HttpServletResponse.*;
+import static org.apache.http.HttpStatus.*;
 
 @WebActor(httpUrlPatterns = {"/session", "/user/*", "/game", "/highscore"}, webSocketUrlPatterns = {"/ws"})
 public final class FrontendActor extends BasicActor<Object, Void> {
