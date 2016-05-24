@@ -60,8 +60,8 @@ public final class FrontendActor extends BasicActor<Object, Void> {
                 }
             } else if (message instanceof Server) {
                 //noinspection unchecked
-                final Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession =
-                        (Server<IncomingMessage, OutgoingMessage, ActorRef<Object>>) message;
+                final Server<IncomingMessage, OutgoingMessage, Object> gameSession =
+                        (Server<IncomingMessage, OutgoingMessage, Object>) message;
                 gameSessionWatch = watch(gameSession);
                 frontendService.setGameSession(self(), gameSession);
             } else if (message instanceof ExitMessage) {
@@ -69,6 +69,9 @@ public final class FrontendActor extends BasicActor<Object, Void> {
                 final ActorRef dyingActor = exitMessage.getActor();
                 if (webSockets.contains(dyingActor)) {
                     webSockets.remove(dyingActor);
+                    if (webSockets.isEmpty()) {
+                        frontendService.dropPlayerFromGameSession(self());
+                    }
                 } else if (exitMessage.getWatch().equals(gameSessionWatch)) {
                     gameSessionWatch = null;
                     frontendService.resetGameSession();
@@ -268,9 +271,7 @@ public final class FrontendActor extends BasicActor<Object, Void> {
 
     private void handleHttpConcreteUserDelete(HttpRequest httpRequest, JsonObject jsonObject, Long userId) throws SuspendExecution {
         try {
-            final UserProfile userProfile = new UserProfile();
-            userProfile.setId(userId);
-            jsonObject.addProperty("__ok", frontendService.deleteUser(userProfile));
+            jsonObject.addProperty("__ok", frontendService.deleteUser(userId));
             respondWithJson(httpRequest, jsonObject);
         } catch (JsonSyntaxException ex) {
             respondWithError(httpRequest, SC_BAD_REQUEST, ex);

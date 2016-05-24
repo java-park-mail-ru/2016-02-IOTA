@@ -54,7 +54,7 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
         final List<PlayerBucket> fullBuckets = buckets.stream().filter(PlayerBucket::isFull).collect(Collectors.toList());
         for (PlayerBucket fullBucket : fullBuckets) {
             final Map<ActorRef<Object>, UserProfile> players = fullBucket.getPlayers();
-            final Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession = createGameSession(players);
+            final Server<IncomingMessage, OutgoingMessage, Object> gameSession = createGameSession(players);
             fullBucket.setGameSession(gameSession);
             for (ActorRef<Object> playerFrontend : players.keySet()) {
                 playerFrontend.send(gameSession);
@@ -63,9 +63,9 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
         buckets.removeIf(b -> b.getGameSession() != null);
     }
 
-    private Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> createGameSession(@NotNull Map<ActorRef<Object>, UserProfile> players) throws SuspendExecution, InterruptedException {
+    private Server<IncomingMessage, OutgoingMessage, Object> createGameSession(@NotNull Map<ActorRef<Object>, UserProfile> players) throws SuspendExecution, InterruptedException {
         Log.info("Making match for players (" + players.values().stream().map(UserProfile::getLogin).collect(Collectors.joining(";")) + ")!");
-        final Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession = serviceLocator.getService(GameSessionActor.class).spawn();
+        final Server<IncomingMessage, OutgoingMessage, Object> gameSession = serviceLocator.getService(GameSessionActor.class).spawn();
         final GameSessionInitMessage.Result result = (GameSessionInitMessage.Result) gameSession.call(new GameSessionInitMessage(players));
         if (!result.isOk()) {
             throw new AssertionError();
@@ -79,7 +79,7 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
 
         private final int capacity;
         private final Map<ActorRef<Object>, UserProfile> players;
-        private Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession;
+        private Server<IncomingMessage, OutgoingMessage, Object> gameSession;
 
         PlayerBucket(int capacity) {
             this.capacity = capacity;
@@ -98,11 +98,11 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
             return players;
         }
 
-        public Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> getGameSession() {
+        public Server<IncomingMessage, OutgoingMessage, Object> getGameSession() {
             return gameSession;
         }
 
-        public void setGameSession(Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession) {
+        public void setGameSession(Server<IncomingMessage, OutgoingMessage, Object> gameSession) {
             this.gameSession = gameSession;
         }
     }

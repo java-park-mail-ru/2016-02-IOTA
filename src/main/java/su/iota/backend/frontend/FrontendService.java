@@ -25,7 +25,7 @@ public interface FrontendService {
 
     boolean editProfile(@Nullable UserProfile userProfile) throws SuspendExecution;
 
-    boolean deleteUser(@Nullable UserProfile userProfile) throws SuspendExecution;
+    boolean deleteUser(long userId) throws SuspendExecution;
 
     @Nullable
     UserProfile getUserById(long userId) throws SuspendExecution;
@@ -33,10 +33,12 @@ public interface FrontendService {
     @NotNull
     PlayerActionMessage.ResultMessage performPlayerAction(@NotNull PlayerActionMessage playerActionMessage) throws SuspendExecution, InterruptedException;
 
-    void setGameSession(@NotNull ActorRef<Object> frontend, Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSessionActor) throws SuspendExecution, InterruptedException;
+    void setGameSession(@NotNull ActorRef<Object> frontend, Server<IncomingMessage, OutgoingMessage, Object> gameSessionActor) throws SuspendExecution, InterruptedException;
 
     void resetGameSession() throws SuspendExecution;
 
-    boolean askGameStateUpdate(ActorRef<Object> frontend) throws SuspendExecution, InterruptedException;
+    boolean askGameStateUpdate(@NotNull ActorRef<Object> frontend) throws SuspendExecution, InterruptedException;
+
+    void dropPlayerFromGameSession(@NotNull ActorRef<Object> frontend) throws SuspendExecution, InterruptedException;
 
 }
