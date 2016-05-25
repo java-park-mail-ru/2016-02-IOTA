@@ -5,9 +5,6 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
-import org.mockito.internal.matchers.Equals;
-
-import javax.jws.soap.SOAPBinding;
 
 public class UserProfile {
 
