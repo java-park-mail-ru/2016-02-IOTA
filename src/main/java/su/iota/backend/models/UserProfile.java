@@ -1,8 +1,6 @@
 package su.iota.backend.models;
 
 import com.google.gson.annotations.Expose;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 
@@ -27,37 +25,6 @@ public class UserProfile {
     private DateTime birthDate;
 
     public UserProfile() {
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 31)
-                .append(this.id)
-                .append(this.login)
-                .append(this.email)
-                .append(this.password)
-                .append(this.birthDate)
-                .toHashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (!(obj instanceof UserProfile)) {
-            return false;
-        }
-
-        final UserProfile userProfile = (UserProfile) obj;
-        return new EqualsBuilder()
-                .append(this.id, userProfile.id)
-                .append(this.login, userProfile.login)
-                .append(this.email, userProfile.email)
-                .append(this.password, userProfile.password)
-                .append(this.birthDate, userProfile.birthDate)
-                .isEquals();
     }
 
     public UserProfile(long id, @Nullable String login, @Nullable String email) {
@@ -117,4 +84,30 @@ public class UserProfile {
         this.birthDate = birthDate;
     }
 
+    @SuppressWarnings("OverlyComplexMethod")
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final UserProfile userProfile = (UserProfile) o;
+
+        if (id != null ? !id.equals(userProfile.id) : userProfile.id != null) return false;
+        if (login != null ? !login.equals(userProfile.login) : userProfile.login != null) return false;
+        if (email != null ? !email.equals(userProfile.email) : userProfile.email != null) return false;
+        //noinspection SimplifiableIfStatement
+        if (password != null ? !password.equals(userProfile.password) : userProfile.password != null) return false;
+        return birthDate != null ? birthDate.equals(userProfile.birthDate) : userProfile.birthDate == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (login != null ? login.hashCode() : 0);
+        result = 31 * result + (email != null ? email.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
+        result = 31 * result + (birthDate != null ? birthDate.hashCode() : 0);
+        return result;
+    }
 }
