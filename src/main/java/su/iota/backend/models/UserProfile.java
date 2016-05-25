@@ -1,8 +1,13 @@
 package su.iota.backend.models;
 
 import com.google.gson.annotations.Expose;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
+import org.mockito.internal.matchers.Equals;
+
+import javax.jws.soap.SOAPBinding;
 
 public class UserProfile {
 
@@ -25,6 +30,37 @@ public class UserProfile {
     private DateTime birthDate;
 
     public UserProfile() {
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 31)
+                .append(this.id)
+                .append(this.login)
+                .append(this.email)
+                .append(this.password)
+                .append(this.birthDate)
+                .toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (!(obj instanceof UserProfile)) {
+            return false;
+        }
+
+        final UserProfile userProfile = (UserProfile) obj;
+        return new EqualsBuilder()
+                .append(this.id, userProfile.id)
+                .append(this.login, userProfile.login)
+                .append(this.email, userProfile.email)
+                .append(this.password, userProfile.password)
+                .append(this.birthDate, userProfile.birthDate)
+                .isEquals();
     }
 
     public UserProfile(long id, @Nullable String login, @Nullable String email) {
