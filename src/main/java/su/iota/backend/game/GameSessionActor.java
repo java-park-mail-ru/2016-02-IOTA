@@ -14,7 +14,6 @@ import su.iota.backend.messages.game.PlayerActionMessage;
 import su.iota.backend.messages.game.GameStateMessage;
 import su.iota.backend.messages.internal.GameSessionDropPlayerMessage;
 import su.iota.backend.messages.internal.GameSessionInitMessage;
-import su.iota.backend.messages.internal.GameSessionTerminateMessage;
 import su.iota.backend.models.UserProfile;
 
 import javax.inject.Inject;
@@ -22,7 +21,7 @@ import java.util.*;
 
 @Service
 @PerLookup
-public final class GameSessionActor extends ServerActor<IncomingMessage, OutgoingMessage, ActorRef<Object>> {
+public final class GameSessionActor extends ServerActor<IncomingMessage, OutgoingMessage, Object> {
 
     @Inject
     GameMechanics gameMechanics;
@@ -41,10 +40,6 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
                 this.players.keySet().forEach(this::watch);
                 return new GameSessionInitMessage.Result(true);
             }
-        } else if (message instanceof GameSessionTerminateMessage) {
-            return null; // todo
-        } else if (message instanceof GameSessionDropPlayerMessage) {
-            return null;// todo
         } else if (message instanceof PlayerActionMessage) {
             final PlayerActionMessage.ResultMessage resultMessage = handlePlayerActionMessage((PlayerActionMessage) message);
             if (resultMessage.isBroadcastTrigger()) {
@@ -57,8 +52,23 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
     }
 
     @Override
-    protected void handleCast(ActorRef<?> from, Object id, ActorRef<Object> frontend) throws SuspendExecution {
-        frontend.send(getGameStateMessageForFrontend(frontend));
+    protected void handleCast(ActorRef<?> from, Object id, Object message) throws SuspendExecution {
+        if (message instanceof GameSessionDropPlayerMessage) {
+            final GameSessionDropPlayerMessage dropMessage = (GameSessionDropPlayerMessage) message;
+            final ActorRef<Object> player = dropMessage.getPlayer();
+            if (players.containsKey(player)) {
+                players.remove(player); // todo: tell game mechanics!
+                Log.info("Dropping player from game! " + player.toString());
+            }
+            if (players.isEmpty()) {
+                Log.info("Last player disconnected, shutting down! " + self().toString());
+                shutdown();
+            }
+        } else if (message instanceof ActorRef<?>) {
+            //noinspection unchecked
+            final ActorRef<Object> frontend = (ActorRef<Object>) message;
+            frontend.send(getGameStateMessageForFrontend(frontend));
+        }
     }
 
     @NotNull

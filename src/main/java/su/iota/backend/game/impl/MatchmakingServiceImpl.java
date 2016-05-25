@@ -18,10 +18,7 @@ import su.iota.backend.models.UserProfile;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,7 +51,7 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
         final List<PlayerBucket> fullBuckets = buckets.stream().filter(PlayerBucket::isFull).collect(Collectors.toList());
         for (PlayerBucket fullBucket : fullBuckets) {
             final Map<ActorRef<Object>, UserProfile> players = fullBucket.getPlayers();
-            final Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession = createGameSession(players);
+            final Server<IncomingMessage, OutgoingMessage, Object> gameSession = createGameSession(players);
             fullBucket.setGameSession(gameSession);
             for (ActorRef<Object> playerFrontend : players.keySet()) {
                 playerFrontend.send(gameSession);
@@ -63,9 +60,24 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
         buckets.removeIf(b -> b.getGameSession() != null);
     }
 
-    private Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> createGameSession(@NotNull Map<ActorRef<Object>, UserProfile> players) throws SuspendExecution, InterruptedException {
-        Log.info("Making match for players (" + players.values().stream().map(UserProfile::getLogin).collect(Collectors.joining(";")) + ")!");
-        final Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession = serviceLocator.getService(GameSessionActor.class).spawn();
+    @Override
+    public void dropPlayerFromMatchmaking(@NotNull ActorRef<Object> frontend) {
+        final List<PlayerBucket> emptyBuckets = new ArrayList<>();
+        for (PlayerBucket bucket : buckets) {
+            bucket.dropPlayer(frontend);
+            if (bucket.isEmpty()) {
+                emptyBuckets.add(bucket);
+            }
+        }
+        if (!emptyBuckets.isEmpty()) {
+            buckets.removeIf(emptyBuckets::contains);
+            Log.info("Dropping player from matchmaking along with " + emptyBuckets.size() + " buckets, frontend: " + frontend.toString());
+        }
+    }
+
+    private Server<IncomingMessage, OutgoingMessage, Object> createGameSession(@NotNull Map<ActorRef<Object>, UserProfile> players) throws SuspendExecution, InterruptedException {
+        Log.info("Making match for players!");
+        final Server<IncomingMessage, OutgoingMessage, Object> gameSession = serviceLocator.getService(GameSessionActor.class).spawn();
         final GameSessionInitMessage.Result result = (GameSessionInitMessage.Result) gameSession.call(new GameSessionInitMessage(players));
         if (!result.isOk()) {
             throw new AssertionError();
@@ -79,7 +91,7 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
 
         private final int capacity;
         private final Map<ActorRef<Object>, UserProfile> players;
-        private Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession;
+        private Server<IncomingMessage, OutgoingMessage, Object> gameSession;
 
         PlayerBucket(int capacity) {
             this.capacity = capacity;
@@ -90,19 +102,27 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
             return capacity <= players.size();
         }
 
+        public boolean isEmpty() {
+            return players.isEmpty();
+        }
+
         public boolean tryPut(ActorRef<Object> frontend, UserProfile player) {
             return !isFull() && players.putIfAbsent(frontend, player) == null;
+        }
+
+        public void dropPlayer(@NotNull ActorRef<Object> player) {
+            players.remove(player);
         }
 
         public Map<ActorRef<Object>, UserProfile> getPlayers() {
             return players;
         }
 
-        public Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> getGameSession() {
+        public Server<IncomingMessage, OutgoingMessage, Object> getGameSession() {
             return gameSession;
         }
 
-        public void setGameSession(Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession) {
+        public void setGameSession(Server<IncomingMessage, OutgoingMessage, Object> gameSession) {
             this.gameSession = gameSession;
         }
     }

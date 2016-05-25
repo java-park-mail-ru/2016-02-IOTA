@@ -11,4 +11,6 @@ public interface MatchmakingService {
 
     void makeMatch(@NotNull UserProfile player, @NotNull ActorRef<Object> frontend) throws SuspendExecution, InterruptedException;
 
+    void dropPlayerFromMatchmaking(@NotNull ActorRef<Object> frontend) throws SuspendExecution;
+
 }
