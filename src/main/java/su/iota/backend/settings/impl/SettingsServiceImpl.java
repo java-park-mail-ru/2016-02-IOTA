@@ -30,21 +30,26 @@ public class SettingsServiceImpl implements SettingsService {
         return config.getString("contextPath");
     }
 
+    @Override
+    public int getHttpSessionTimeoutSeconds() throws SuspendExecution {
+        return config.getInt("httpSessionTimeoutSeconds");
+    }
+
     @NotNull
     @Override
-    public String getDatabaseUserID() {
+    public String getDatabaseUserID() throws SuspendExecution {
         return config.getString("db.user");
     }
 
     @NotNull
     @Override
-    public String getDatabasePassword() {
+    public String getDatabasePassword() throws SuspendExecution {
         return config.getString("db.password");
     }
 
     @NotNull
     @Override
-    public String getDatabaseName() {
+    public String getDatabaseName() throws SuspendExecution {
         return config.getString("db.name");
     }
     

@@ -26,21 +26,27 @@ public class SettingsServiceFixedImpl implements SettingsService {
         return "/test/api";
     }
 
+    @Override
+    public int getHttpSessionTimeoutSeconds() throws SuspendExecution {
+        //noinspection MagicNumber
+        return 3600;
+    }
+
     @NotNull
     @Override
-    public String getDatabaseUserID() {
+    public String getDatabaseUserID() throws SuspendExecution {
         return "unused";
     }
 
     @NotNull
     @Override
-    public String getDatabasePassword() {
+    public String getDatabasePassword() throws SuspendExecution {
         return "unused";
     }
 
     @NotNull
     @Override
-    public String getDatabaseName() {
+    public String getDatabaseName() throws SuspendExecution {
         return "unused";
     }
 

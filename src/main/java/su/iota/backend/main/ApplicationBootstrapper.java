@@ -2,6 +2,7 @@ package su.iota.backend.main;
 
 import co.paralleluniverse.comsat.webactors.servlet.WebActorInitializer;
 import co.paralleluniverse.fibers.SuspendExecution;
+import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.strands.SuspendableRunnable;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import org.eclipse.jetty.server.Server;
@@ -42,6 +43,9 @@ public final class ApplicationBootstrapper implements SuspendableRunnable {
         server.setHandler(contextHandler);
         contextHandler.setContextPath(settingsService.getServerContextPathSetting());
         contextHandler.addEventListener(new WebActorInitializer());
+        contextHandler.getSessionHandler().getSessionManager().setMaxInactiveInterval(
+                settingsService.getHttpSessionTimeoutSeconds()
+        );
         try {
             WebSocketServerContainerInitializer.configureContext(contextHandler);
         } catch (ServletException e) {
@@ -97,12 +101,17 @@ public final class ApplicationBootstrapper implements SuspendableRunnable {
         @Inject
         private SettingsService settingsService;
 
+        @Suspendable
         @Override
         public DataSource provide() {
             final MysqlDataSource dataSource = new MysqlDataSource();
-            dataSource.setDatabaseName(settingsService.getDatabaseName());
-            dataSource.setUser(settingsService.getDatabaseUserID());
-            dataSource.setPassword(settingsService.getDatabasePassword());
+            try {
+                dataSource.setDatabaseName(settingsService.getDatabaseName());
+                dataSource.setUser(settingsService.getDatabaseUserID());
+                dataSource.setPassword(settingsService.getDatabasePassword());
+            } catch (SuspendExecution ex) {
+                throw new AssertionError(ex);
+            }
             return dataSource;
         }
 

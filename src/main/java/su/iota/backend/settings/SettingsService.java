@@ -11,10 +11,12 @@ public interface SettingsService {
 
     @NotNull String getServerContextPathSetting() throws SuspendExecution;
 
-    @NotNull String getDatabaseUserID();
+    int getHttpSessionTimeoutSeconds() throws SuspendExecution;
 
-    @NotNull String getDatabasePassword();
+    @NotNull String getDatabaseUserID() throws SuspendExecution;
 
-    @NotNull String getDatabaseName();
+    @NotNull String getDatabasePassword() throws SuspendExecution;
+
+    @NotNull String getDatabaseName() throws SuspendExecution;
 
 }
