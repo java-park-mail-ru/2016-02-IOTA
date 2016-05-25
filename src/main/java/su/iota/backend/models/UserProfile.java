@@ -36,6 +36,13 @@ public class UserProfile {
         this.password = password;
     }
 
+    public UserProfile(long id, @NotNull String login, @NotNull String email, @NotNull String password) {
+        this.id = id;
+        this.login = login;
+        this.email = email;
+        this.password = password;
+    }
+
     @NotNull
     public Long getId() {
         return id;
@@ -81,10 +88,9 @@ public class UserProfile {
         final UserProfile userProfile = (UserProfile) o;
 
         if (!id.equals(userProfile.id)) return false;
-        if (!login.equals(userProfile.login)) return false;
-        if (!email.equals(userProfile.email)) return false;
         //noinspection SimplifiableIfStatement
-        return password.equals(userProfile.password);
+        if (!login.equals(userProfile.login)) return false;
+        return email.equals(userProfile.email);
 
     }
 
@@ -93,8 +99,15 @@ public class UserProfile {
         int result = id.hashCode();
         result = 31 * result + login.hashCode();
         result = 31 * result + email.hashCode();
-        result = 31 * result + password.hashCode();
         return result;
     }
 
+    @Override
+    public String toString() {
+        return "UserProfile{" +
+                "id=" + id +
+                ", login='" + login + '\'' +
+                ", email='" + email + '\'' +
+                '}';
+    }
 }

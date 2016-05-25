@@ -1,5 +1,6 @@
 package su.iota.backend.accounts;
 
+import com.esotericsoftware.minlog.Log;
 import org.jvnet.testing.hk2testng.HK2;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
@@ -85,6 +86,8 @@ public class AccountServiceTest {
         final UserProfile userProfile = new UserProfile(login, email, password);
         final long userId = accountService.createUser(userProfile);
         final UserProfile userProfileByLogin = accountService.getUserProfile(login);
+        assertNotNull(userProfileByLogin);
+        userProfile.setId(userProfileByLogin.getId());
         assertEquals(userProfile, userProfileByLogin);
     }
 
@@ -93,6 +96,8 @@ public class AccountServiceTest {
         final UserProfile userProfile = new UserProfile(login, email, password);
         final long userId = accountService.createUser(userProfile);
         final UserProfile userProfileById = accountService.getUserProfile(userId);
+        assertNotNull(userProfileById);
+        userProfile.setId(userProfileById.getId());
         assertEquals(userProfile, userProfileById);
     }
 
