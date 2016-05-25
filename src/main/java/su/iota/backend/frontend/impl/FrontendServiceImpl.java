@@ -17,6 +17,7 @@ import su.iota.backend.game.MatchmakingService;
 import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.PlayerActionMessage;
+import su.iota.backend.messages.internal.GameSessionDropPlayerMessage;
 import su.iota.backend.models.UserProfile;
 
 import javax.inject.Inject;
@@ -33,7 +34,7 @@ public class FrontendServiceImpl implements FrontendService {
     AccountService accountService;
 
     private UserProfile signedInUser;
-    private Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession;
+    private Server<IncomingMessage, OutgoingMessage, Object> gameSession;
 
     @Override
     public boolean signUp(@Nullable UserProfile userProfile) throws SuspendExecution {
@@ -93,16 +94,6 @@ public class FrontendServiceImpl implements FrontendService {
         return signedInUser;
     }
 
-    @Override
-    public boolean editProfile(@Nullable UserProfile userProfile) throws SuspendExecution {
-        return false; // todo
-    }
-
-    @Override
-    public boolean deleteUser(@Nullable UserProfile userProfile) throws SuspendExecution {
-        return false; // todo
-    }
-
     @Nullable
     @Override
     public UserProfile getUserById(long userId) throws SuspendExecution {
@@ -126,7 +117,7 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
-    public boolean askGameStateUpdate(ActorRef<Object> frontend) throws SuspendExecution, InterruptedException {
+    public boolean askGameStateUpdate(@NotNull ActorRef<Object> frontend) throws SuspendExecution, InterruptedException {
         if (signedInUser == null) {
             return false;
         }
@@ -139,7 +130,7 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
-    public void setGameSession(@NotNull ActorRef<Object> frontend, Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession) throws SuspendExecution, InterruptedException {
+    public void setGameSession(@NotNull ActorRef<Object> frontend, Server<IncomingMessage, OutgoingMessage, Object> gameSession) throws SuspendExecution, InterruptedException {
         this.gameSession = gameSession;
         if (!askGameStateUpdate(frontend)) {
             throw new AssertionError();
@@ -149,6 +140,20 @@ public class FrontendServiceImpl implements FrontendService {
     @Override
     public void resetGameSession() throws SuspendExecution {
         gameSession = null;
+    }
+
+    @Override
+    public void dropPlayer(@NotNull ActorRef<Object> frontend) throws SuspendExecution, InterruptedException {
+        softDropPlayer(frontend);
+        if (gameSession != null) {
+            gameSession.cast(new GameSessionDropPlayerMessage(frontend));
+        }
+        resetGameSession();
+    }
+
+    @Override
+    public void softDropPlayer(@NotNull ActorRef<Object> frontend) throws SuspendExecution {
+        matchmakingService.dropPlayerFromMatchmaking(frontend);
     }
 
 }

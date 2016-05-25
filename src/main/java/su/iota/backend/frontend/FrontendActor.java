@@ -50,31 +50,43 @@ public final class FrontendActor extends BasicActor<Object, Void> {
         }
         //noinspection InfiniteLoopStatement
         while (true) {
-            final Object message = receive(5, TimeUnit.SECONDS);
+            final Object message = receive(12, TimeUnit.SECONDS);
             if (message instanceof WebMessage) {
                 handleWebMessage((WebMessage) message);
             } else if (message instanceof OutgoingMessage) {
-                final WebMessage jsonMessage = new WebDataMessage(self(), getGson().toJson(message));
-                for (ActorRef<WebMessage> webSocket : webSockets) {
-                    webSocket.send(jsonMessage);
-                }
+                handleOutgoingMessage(message);
             } else if (message instanceof Server) {
                 //noinspection unchecked
-                final Server<IncomingMessage, OutgoingMessage, ActorRef<Object>> gameSession =
-                        (Server<IncomingMessage, OutgoingMessage, ActorRef<Object>>) message;
+                final Server<IncomingMessage, OutgoingMessage, Object> gameSession =
+                        (Server<IncomingMessage, OutgoingMessage, Object>) message;
                 gameSessionWatch = watch(gameSession);
                 frontendService.setGameSession(self(), gameSession);
             } else if (message instanceof ExitMessage) {
-                final ExitMessage exitMessage = (ExitMessage) message;
-                final ActorRef dyingActor = exitMessage.getActor();
-                if (webSockets.contains(dyingActor)) {
-                    webSockets.remove(dyingActor);
-                } else if (exitMessage.getWatch().equals(gameSessionWatch)) {
-                    gameSessionWatch = null;
-                    frontendService.resetGameSession();
-                }
+                handleExitMessage((ExitMessage) message);
+            } else if (webSockets.isEmpty()) {
+                frontendService.dropPlayer(self());
             }
             checkCodeSwap();
+        }
+    }
+
+    private void handleOutgoingMessage(Object message) throws SuspendExecution, InterruptedException {
+        final WebMessage jsonMessage = new WebDataMessage(self(), getGson().toJson(message));
+        for (ActorRef<WebMessage> webSocket : webSockets) {
+            webSocket.send(jsonMessage);
+        }
+    }
+
+    private void handleExitMessage(ExitMessage exitMessage) throws SuspendExecution {
+        final ActorRef dyingActor = exitMessage.getActor();
+        if (webSockets.contains(dyingActor)) {
+            webSockets.remove(dyingActor);
+            if (webSockets.isEmpty()) {
+                frontendService.softDropPlayer(self());
+            }
+        } else if (exitMessage.getWatch().equals(gameSessionWatch)) {
+            gameSessionWatch = null;
+            frontendService.resetGameSession();
         }
     }
 
@@ -220,12 +232,6 @@ public final class FrontendActor extends BasicActor<Object, Void> {
             case "GET":
                 handleHttpConcreteUserGet(httpRequest, jsonObject, userId);
                 break;
-            case "POST":
-                handleHttpConcreteUserPost(httpRequest, jsonObject, userId);
-                break;
-            case "DELETE":
-                handleHttpConcreteUserDelete(httpRequest, jsonObject, userId);
-                break;
             default:
                 respondWithError(httpRequest, SC_METHOD_NOT_ALLOWED);
                 break;
@@ -243,34 +249,6 @@ public final class FrontendActor extends BasicActor<Object, Void> {
                 }
             }
             jsonObject.addProperty("__ok", isOk);
-            respondWithJson(httpRequest, jsonObject);
-        } catch (JsonSyntaxException ex) {
-            respondWithError(httpRequest, SC_BAD_REQUEST, ex);
-        }
-    }
-
-    private void handleHttpConcreteUserPost(HttpRequest httpRequest, JsonObject jsonObject, Long userId) throws SuspendExecution {
-        try {
-            final UserProfile userProfile = getGson().fromJson(httpRequest.getStringBody(), UserProfile.class);
-            if (userProfile != null) {
-                @Nullable final Long someId = userProfile.getId();
-                if (someId == null || someId <= 0) {
-                    userProfile.setId(userId);
-                    jsonObject.addProperty("__ok", frontendService.editProfile(userProfile));
-                    respondWithJson(httpRequest, jsonObject);
-                    return;
-                }
-            }
-        } catch (JsonSyntaxException ignored) {
-        }
-        respondWithError(httpRequest, SC_BAD_REQUEST);
-    }
-
-    private void handleHttpConcreteUserDelete(HttpRequest httpRequest, JsonObject jsonObject, Long userId) throws SuspendExecution {
-        try {
-            final UserProfile userProfile = new UserProfile();
-            userProfile.setId(userId);
-            jsonObject.addProperty("__ok", frontendService.deleteUser(userProfile));
             respondWithJson(httpRequest, jsonObject);
         } catch (JsonSyntaxException ex) {
             respondWithError(httpRequest, SC_BAD_REQUEST, ex);
