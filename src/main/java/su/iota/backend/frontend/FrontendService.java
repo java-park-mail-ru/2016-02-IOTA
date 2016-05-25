@@ -39,6 +39,8 @@ public interface FrontendService {
 
     boolean askGameStateUpdate(@NotNull ActorRef<Object> frontend) throws SuspendExecution, InterruptedException;
 
-    void dropPlayerFromGameSession(@NotNull ActorRef<Object> frontend) throws SuspendExecution, InterruptedException;
+    void dropPlayer(@NotNull ActorRef<Object> frontend) throws SuspendExecution, InterruptedException;
+
+    void softDropPlayer(@NotNull ActorRef<Object> frontend) throws SuspendExecution;
 
 }

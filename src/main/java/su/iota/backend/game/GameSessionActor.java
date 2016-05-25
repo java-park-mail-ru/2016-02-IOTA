@@ -58,6 +58,7 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
             final ActorRef<Object> player = dropMessage.getPlayer();
             if (players.containsKey(player)) {
                 players.remove(player); // todo: tell game mechanics!
+                Log.info("Dropping player from game! " + player.toString());
             }
             if (players.isEmpty()) {
                 Log.info("Last player disconnected, shutting down! " + self().toString());

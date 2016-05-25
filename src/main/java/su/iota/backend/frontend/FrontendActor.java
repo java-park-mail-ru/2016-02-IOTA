@@ -50,14 +50,11 @@ public final class FrontendActor extends BasicActor<Object, Void> {
         }
         //noinspection InfiniteLoopStatement
         while (true) {
-            final Object message = receive(5, TimeUnit.SECONDS);
+            final Object message = receive(12, TimeUnit.SECONDS);
             if (message instanceof WebMessage) {
                 handleWebMessage((WebMessage) message);
             } else if (message instanceof OutgoingMessage) {
-                final WebMessage jsonMessage = new WebDataMessage(self(), getGson().toJson(message));
-                for (ActorRef<WebMessage> webSocket : webSockets) {
-                    webSocket.send(jsonMessage);
-                }
+                handleOutgoingMessage(message);
             } else if (message instanceof Server) {
                 //noinspection unchecked
                 final Server<IncomingMessage, OutgoingMessage, Object> gameSession =
@@ -65,19 +62,31 @@ public final class FrontendActor extends BasicActor<Object, Void> {
                 gameSessionWatch = watch(gameSession);
                 frontendService.setGameSession(self(), gameSession);
             } else if (message instanceof ExitMessage) {
-                final ExitMessage exitMessage = (ExitMessage) message;
-                final ActorRef dyingActor = exitMessage.getActor();
-                if (webSockets.contains(dyingActor)) {
-                    webSockets.remove(dyingActor);
-                    if (webSockets.isEmpty()) {
-                        frontendService.dropPlayerFromGameSession(self());
-                    }
-                } else if (exitMessage.getWatch().equals(gameSessionWatch)) {
-                    gameSessionWatch = null;
-                    frontendService.resetGameSession();
-                }
+                handleExitMessage((ExitMessage) message);
+            } else if (webSockets.isEmpty()) {
+                frontendService.dropPlayer(self());
             }
             checkCodeSwap();
+        }
+    }
+
+    private void handleOutgoingMessage(Object message) throws SuspendExecution, InterruptedException {
+        final WebMessage jsonMessage = new WebDataMessage(self(), getGson().toJson(message));
+        for (ActorRef<WebMessage> webSocket : webSockets) {
+            webSocket.send(jsonMessage);
+        }
+    }
+
+    private void handleExitMessage(ExitMessage exitMessage) throws SuspendExecution {
+        final ActorRef dyingActor = exitMessage.getActor();
+        if (webSockets.contains(dyingActor)) {
+            webSockets.remove(dyingActor);
+            if (webSockets.isEmpty()) {
+                frontendService.softDropPlayer(self());
+            }
+        } else if (exitMessage.getWatch().equals(gameSessionWatch)) {
+            gameSessionWatch = null;
+            frontendService.resetGameSession();
         }
     }
 

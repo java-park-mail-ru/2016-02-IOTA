@@ -153,10 +153,17 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
-    public void dropPlayerFromGameSession(@NotNull ActorRef<Object> frontend) throws SuspendExecution, InterruptedException {
+    public void dropPlayer(@NotNull ActorRef<Object> frontend) throws SuspendExecution, InterruptedException {
+        softDropPlayer(frontend);
         if (gameSession != null) {
             gameSession.cast(new GameSessionDropPlayerMessage(frontend));
         }
         resetGameSession();
     }
+
+    @Override
+    public void softDropPlayer(@NotNull ActorRef<Object> frontend) throws SuspendExecution {
+        matchmakingService.dropPlayerFromMatchmaking(frontend);
+    }
+
 }

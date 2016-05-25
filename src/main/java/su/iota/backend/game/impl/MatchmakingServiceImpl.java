@@ -18,10 +18,7 @@ import su.iota.backend.models.UserProfile;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,8 +60,23 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
         buckets.removeIf(b -> b.getGameSession() != null);
     }
 
+    @Override
+    public void dropPlayerFromMatchmaking(@NotNull ActorRef<Object> frontend) {
+        final List<PlayerBucket> emptyBuckets = new ArrayList<>();
+        for (PlayerBucket bucket : buckets) {
+            bucket.dropPlayer(frontend);
+            if (bucket.isEmpty()) {
+                emptyBuckets.add(bucket);
+            }
+        }
+        if (!emptyBuckets.isEmpty()) {
+            buckets.removeIf(emptyBuckets::contains);
+            Log.info("Dropping player from matchmaking along with " + emptyBuckets.size() + " buckets, frontend: " + frontend.toString());
+        }
+    }
+
     private Server<IncomingMessage, OutgoingMessage, Object> createGameSession(@NotNull Map<ActorRef<Object>, UserProfile> players) throws SuspendExecution, InterruptedException {
-        Log.info("Making match for players (" + players.values().stream().map(UserProfile::getLogin).collect(Collectors.joining(";")) + ")!");
+        Log.info("Making match for players!");
         final Server<IncomingMessage, OutgoingMessage, Object> gameSession = serviceLocator.getService(GameSessionActor.class).spawn();
         final GameSessionInitMessage.Result result = (GameSessionInitMessage.Result) gameSession.call(new GameSessionInitMessage(players));
         if (!result.isOk()) {
@@ -90,8 +102,16 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
             return capacity <= players.size();
         }
 
+        public boolean isEmpty() {
+            return players.isEmpty();
+        }
+
         public boolean tryPut(ActorRef<Object> frontend, UserProfile player) {
             return !isFull() && players.putIfAbsent(frontend, player) == null;
+        }
+
+        public void dropPlayer(@NotNull ActorRef<Object> player) {
+            players.remove(player);
         }
 
         public Map<ActorRef<Object>, UserProfile> getPlayers() {
