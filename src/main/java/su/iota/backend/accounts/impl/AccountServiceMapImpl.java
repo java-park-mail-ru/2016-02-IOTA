@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Named
-@Rank(-100)
 @Service
 @Singleton
 public class AccountServiceMapImpl extends ProxyServerActor implements AccountService {
@@ -47,7 +46,7 @@ public class AccountServiceMapImpl extends ProxyServerActor implements AccountSe
     @Override
     public void editUser(long userId, @NotNull UserProfile newUserProfile) throws UserNotFoundException, UserAlreadyExistsException {
         final String newUserLogin = newUserProfile.getLogin();
-        if (newUserLogin == null || newUserLogin.isEmpty()) {
+        if (newUserLogin.isEmpty()) {
             return;
         }
         if (userIds.containsKey(newUserLogin)) {
@@ -58,7 +57,7 @@ public class AccountServiceMapImpl extends ProxyServerActor implements AccountSe
             throw new UserNotFoundException();
         }
         final String password = newUserProfile.getPassword();
-        if (password != null) {
+        if (!password.isEmpty()) {
             userPasswords.replace(userId, newUserProfile.getPassword());
         }
         userIds.remove(oldUserProfile.getLogin());

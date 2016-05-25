@@ -43,7 +43,7 @@ public class FrontendServiceImpl implements FrontendService {
         }
         final String login = userProfile.getLogin();
         final String password = userProfile.getPassword();
-        if (login == null || password == null) {
+        if (login.isEmpty() || password.isEmpty()) {
             return false;
         }
         try {
@@ -65,7 +65,7 @@ public class FrontendServiceImpl implements FrontendService {
         }
         final String login = userProfile.getLogin();
         final String password = userProfile.getPassword();
-        if (login == null || password == null) {
+        if (login.isEmpty() || password.isEmpty()) {
             return false;
         }
         final Long userId = accountService.getUserId(login);

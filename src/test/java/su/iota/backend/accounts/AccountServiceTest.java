@@ -92,12 +92,12 @@ public class AccountServiceTest {
         accountService.createUser(newUserProfile);
     }
 
-    // Todo: specify exception type
-    @Test(expectedExceptions = Exception.class)
-    public void testCreateUserWithNullLogin() throws Exception {
-        final UserProfile newUserProfile = new UserProfile(null, email2, password2);
-        accountService.createUser(newUserProfile);
-    }
+//    // Todo: specify exception type
+//    @Test(expectedExceptions = Exception.class)
+//    public void testCreateUserWithNullLogin() throws Exception {
+//        final UserProfile newUserProfile = new UserProfile(null, email2, password2);
+//        accountService.createUser(newUserProfile);
+//    }
 
     // Todo: specify exception type
     @Test(expectedExceptions = Exception.class)
@@ -106,12 +106,12 @@ public class AccountServiceTest {
         accountService.createUser(newUserProfile);
     }
 
-    // Todo: specify exception type
-    @Test(expectedExceptions = Exception.class)
-    public void testCreateUserWithNullEmail() throws Exception {
-        final UserProfile newUserProfile = new UserProfile(login2, null, password2);
-        accountService.createUser(newUserProfile);
-    }
+//    // Todo: specify exception type
+//    @Test(expectedExceptions = Exception.class)
+//    public void testCreateUserWithNullEmail() throws Exception {
+//        final UserProfile newUserProfile = new UserProfile(login2, null, password2);
+//        accountService.createUser(newUserProfile);
+//    }
 
     // Todo: specify exception type
     @Test(expectedExceptions = Exception.class)
@@ -120,12 +120,12 @@ public class AccountServiceTest {
         accountService.createUser(newUserProfile);
     }
 
-    // Todo: specify exception type
-    @Test(expectedExceptions = Exception.class)
-    public void testCreateUserWithNullPassword() throws Exception {
-        final UserProfile newUserProfile = new UserProfile(login2, email2, null);
-        accountService.createUser(newUserProfile);
-    }
+//    // Todo: specify exception type
+//    @Test(expectedExceptions = Exception.class)
+//    public void testCreateUserWithNullPassword() throws Exception {
+//        final UserProfile newUserProfile = new UserProfile(login2, email2, null);
+//        accountService.createUser(newUserProfile);
+//    }
 
     // Todo: specify exception type
     @Test(expectedExceptions = Exception.class)

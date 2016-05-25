@@ -1,86 +1,86 @@
 package su.iota.backend.models;
 
 import com.google.gson.annotations.Expose;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.joda.time.DateTime;
 
 public class UserProfile {
 
-    @Nullable
+    @NotNull
     @Expose
-    private Long id;
+    private Long id = -1L;
 
-    @Nullable
+    @NotNull
     @Expose
-    private String login;
+    private String login = "";
 
-    @Nullable
+    @NotNull
     @Expose
-    private String email;
+    private String email = "";
 
-    @Nullable
-    private String password;
+    @NotNull
+    private String password = "";
 
-    @Nullable
-    private DateTime birthDate;
+    @NotNull
+    private DateTime birthDate = new DateTime();
 
     public UserProfile() {
     }
 
-    public UserProfile(long id, @Nullable String login, @Nullable String email) {
+    public UserProfile(long id, @NotNull String login, @NotNull String email) {
         this.id = id;
         this.login = login;
         this.email = email;
     }
 
-    public UserProfile(@Nullable String login, @Nullable String email, @Nullable String password) {
+    public UserProfile(@NotNull String login, @NotNull String email, @NotNull String password) {
         this.login = login;
         this.email = email;
         this.password = password;
     }
 
-    @Nullable
+    @NotNull
     public Long getId() {
         return id;
     }
 
-    public void setId(@Nullable Long id) {
+    public void setId(@NotNull Long id) {
         this.id = id;
     }
 
-    @Nullable
+    @NotNull
     public String getLogin() {
         return login;
     }
 
-    public void setLogin(@Nullable String login) {
+    public void setLogin(@NotNull String login) {
         this.login = login;
     }
 
-    @Nullable
+    @NotNull
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(@Nullable String email) {
+    public void setEmail(@NotNull String email) {
         this.email = email;
     }
 
-    @Nullable
+    @NotNull
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(@Nullable String password) {
+    public void setPassword(@NotNull String password) {
         this.password = password;
     }
 
-    @Nullable
+    @NotNull
     public DateTime getBirthDate() {
         return birthDate;
     }
 
-    public void setBirthDate(@Nullable DateTime birthDate) {
+    public void setBirthDate(@NotNull DateTime birthDate) {
         this.birthDate = birthDate;
     }
 
@@ -92,22 +92,22 @@ public class UserProfile {
 
         final UserProfile userProfile = (UserProfile) o;
 
-        if (id != null ? !id.equals(userProfile.id) : userProfile.id != null) return false;
-        if (login != null ? !login.equals(userProfile.login) : userProfile.login != null) return false;
-        if (email != null ? !email.equals(userProfile.email) : userProfile.email != null) return false;
+        if (!id.equals(userProfile.id)) return false;
+        if (!login.equals(userProfile.login)) return false;
+        if (!email.equals(userProfile.email)) return false;
         //noinspection SimplifiableIfStatement
-        if (password != null ? !password.equals(userProfile.password) : userProfile.password != null) return false;
-        return birthDate != null ? birthDate.equals(userProfile.birthDate) : userProfile.birthDate == null;
+        if (!password.equals(userProfile.password)) return false;
+        return birthDate.equals(userProfile.birthDate);
 
     }
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (login != null ? login.hashCode() : 0);
-        result = 31 * result + (email != null ? email.hashCode() : 0);
-        result = 31 * result + (password != null ? password.hashCode() : 0);
-        result = 31 * result + (birthDate != null ? birthDate.hashCode() : 0);
+        int result = id.hashCode();
+        result = 31 * result + login.hashCode();
+        result = 31 * result + email.hashCode();
+        result = 31 * result + password.hashCode();
+        result = 31 * result + birthDate.hashCode();
         return result;
     }
 }
