@@ -82,7 +82,7 @@ public final class ApplicationBootstrapper implements SuspendableRunnable {
         ServiceUtils.teardownServiceUtils();
     }
 
-    private static class DependencyBinder extends AbstractBinder {
+    public static class DependencyBinder extends AbstractBinder {
 
         @Override
         protected void configure() {

@@ -5,6 +5,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 import su.iota.backend.accounts.exceptions.UserAlreadyExistsException;
 import su.iota.backend.accounts.impl.AccountServiceMapImpl;
+import su.iota.backend.main.ApplicationBootstrapper;
 import su.iota.backend.models.UserProfile;
 
 import javax.inject.Inject;
@@ -12,7 +13,8 @@ import javax.inject.Named;
 
 import static org.testng.Assert.*;
 
-@HK2
+//@HK2
+@HK2(binders = ApplicationBootstrapper.DependencyBinder.class)
 public class AccountServiceTest {
 
     private final String login = "Ustimov";
@@ -20,13 +22,13 @@ public class AccountServiceTest {
     private final String email = "art@ustimov.org";
 
     @Inject
-    @Named("AccountServiceMapImpl")
+//    @Named("AccountServiceMapImpl")
     private AccountService accountService;
 
-    @Test
-    public void testAccountServiceNamedInjection() throws Exception {
-        assertEquals(accountService.getClass(), AccountServiceMapImpl.class);
-    }
+//    @Test
+//    public void testAccountServiceNamedInjection() throws Exception {
+//        assertEquals(accountService.getClass(), AccountServiceMapImpl.class);
+//    }
 
     @AfterMethod
     public void tearDown() throws Exception{

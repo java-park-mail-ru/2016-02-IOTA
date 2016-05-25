@@ -21,9 +21,6 @@ public class UserProfile {
     @NotNull
     private String password = "";
 
-    @NotNull
-    private String birthDate = "";
-
     public UserProfile() {
     }
 
@@ -75,15 +72,6 @@ public class UserProfile {
         this.password = password;
     }
 
-    @NotNull
-    public String getBirthDate() {
-        return birthDate;
-    }
-
-    public void setBirthDate(@NotNull String birthDate) {
-        this.birthDate = birthDate;
-    }
-
     @SuppressWarnings("OverlyComplexMethod")
     @Override
     public boolean equals(Object o) {
@@ -96,8 +84,7 @@ public class UserProfile {
         if (!login.equals(userProfile.login)) return false;
         if (!email.equals(userProfile.email)) return false;
         //noinspection SimplifiableIfStatement
-        if (!password.equals(userProfile.password)) return false;
-        return birthDate.equals(userProfile.birthDate);
+        return password.equals(userProfile.password);
 
     }
 
@@ -107,7 +94,6 @@ public class UserProfile {
         result = 31 * result + login.hashCode();
         result = 31 * result + email.hashCode();
         result = 31 * result + password.hashCode();
-        result = 31 * result + birthDate.hashCode();
         return result;
     }
 
