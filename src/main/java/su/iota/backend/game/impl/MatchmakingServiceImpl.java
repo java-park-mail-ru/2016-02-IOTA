@@ -15,6 +15,7 @@ import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.internal.GameSessionInitMessage;
 import su.iota.backend.models.UserProfile;
+import su.iota.backend.settings.SettingsService;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -26,7 +27,10 @@ import java.util.stream.Collectors;
 public class MatchmakingServiceImpl extends ProxyServerActor implements MatchmakingService {
 
     @Inject
-    ServiceLocator serviceLocator;
+    private ServiceLocator serviceLocator;
+
+    @Inject
+    private SettingsService settingsService;
 
     private final Queue<PlayerBucket> buckets = new ArrayQueue<>();
 
@@ -36,12 +40,13 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
 
     @Override
     public void makeMatch(@NotNull UserProfile player, @NotNull ActorRef<Object> frontend) throws SuspendExecution, InterruptedException {
+        final int playersInBucket = settingsService.getPlayersInBucket();
         if (!buckets.isEmpty()) {
             if (!buckets.stream().anyMatch(bucket -> bucket.tryPut(frontend, player))) {
                 Log.info("MM: tryPut() failed for all possible buckets for player " + player.getLogin());
             }
         } else {
-            final PlayerBucket newBucket = new PlayerBucket(PlayerBucket.MAX_PLAYERS);
+            final PlayerBucket newBucket = new PlayerBucket(playersInBucket);
             if (!newBucket.tryPut(frontend, player)) {
                 throw new AssertionError();
             }
@@ -86,8 +91,6 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
     }
 
     private static class PlayerBucket {
-
-        public static final int MAX_PLAYERS = 2;
 
         private final int capacity;
         private final Map<ActorRef<Object>, UserProfile> players;

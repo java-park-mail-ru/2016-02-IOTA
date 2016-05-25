@@ -50,4 +50,9 @@ public class SettingsServiceFixedImpl implements SettingsService {
         return "unused";
     }
 
+    @Override
+    public int getPlayersInBucket() throws SuspendExecution {
+        return 2;
+    }
+    
 }

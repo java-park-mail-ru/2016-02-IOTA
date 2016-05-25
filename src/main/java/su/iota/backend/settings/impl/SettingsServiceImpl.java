@@ -52,5 +52,10 @@ public class SettingsServiceImpl implements SettingsService {
     public String getDatabaseName() throws SuspendExecution {
         return config.getString("db.name");
     }
-    
+
+    @Override
+    public int getPlayersInBucket() throws SuspendExecution {
+        return config.getInt("playersInBucket");
+    }
+
 }

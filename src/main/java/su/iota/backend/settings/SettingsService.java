@@ -9,14 +9,20 @@ public interface SettingsService {
 
     int getServerPortSetting() throws SuspendExecution;
 
-    @NotNull String getServerContextPathSetting() throws SuspendExecution;
+    @NotNull
+    String getServerContextPathSetting() throws SuspendExecution;
 
     int getHttpSessionTimeoutSeconds() throws SuspendExecution;
 
-    @NotNull String getDatabaseUserID() throws SuspendExecution;
+    @NotNull
+    String getDatabaseUserID() throws SuspendExecution;
 
-    @NotNull String getDatabasePassword() throws SuspendExecution;
+    @NotNull
+    String getDatabasePassword() throws SuspendExecution;
 
-    @NotNull String getDatabaseName() throws SuspendExecution;
+    @NotNull
+    String getDatabaseName() throws SuspendExecution;
+
+    int getPlayersInBucket() throws SuspendExecution;
 
 }
