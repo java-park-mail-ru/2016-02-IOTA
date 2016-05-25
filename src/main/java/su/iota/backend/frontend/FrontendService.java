@@ -23,10 +23,6 @@ public interface FrontendService {
     @Nullable
     UserProfile getSignedInUser() throws SuspendExecution;
 
-    boolean editProfile(@Nullable UserProfile userProfile) throws SuspendExecution;
-
-    boolean deleteUser(long userId) throws SuspendExecution;
-
     @Nullable
     UserProfile getUserById(long userId) throws SuspendExecution;
 

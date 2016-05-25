@@ -94,16 +94,6 @@ public class FrontendServiceImpl implements FrontendService {
         return signedInUser;
     }
 
-    @Override
-    public boolean editProfile(@Nullable UserProfile userProfile) throws SuspendExecution {
-        return false; // todo
-    }
-
-    @Override
-    public boolean deleteUser(long userId) throws SuspendExecution {
-        return false; // todo
-    }
-
     @Nullable
     @Override
     public UserProfile getUserById(long userId) throws SuspendExecution {

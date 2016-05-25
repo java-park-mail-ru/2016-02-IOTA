@@ -232,12 +232,6 @@ public final class FrontendActor extends BasicActor<Object, Void> {
             case "GET":
                 handleHttpConcreteUserGet(httpRequest, jsonObject, userId);
                 break;
-            case "POST":
-                handleHttpConcreteUserPost(httpRequest, jsonObject, userId);
-                break;
-            case "DELETE":
-                handleHttpConcreteUserDelete(httpRequest, jsonObject, userId);
-                break;
             default:
                 respondWithError(httpRequest, SC_METHOD_NOT_ALLOWED);
                 break;
@@ -255,32 +249,6 @@ public final class FrontendActor extends BasicActor<Object, Void> {
                 }
             }
             jsonObject.addProperty("__ok", isOk);
-            respondWithJson(httpRequest, jsonObject);
-        } catch (JsonSyntaxException ex) {
-            respondWithError(httpRequest, SC_BAD_REQUEST, ex);
-        }
-    }
-
-    private void handleHttpConcreteUserPost(HttpRequest httpRequest, JsonObject jsonObject, Long userId) throws SuspendExecution {
-        try {
-            final UserProfile userProfile = getGson().fromJson(httpRequest.getStringBody(), UserProfile.class);
-            if (userProfile != null) {
-                @Nullable final Long someId = userProfile.getId();
-                if (someId == null || someId <= 0) {
-                    userProfile.setId(userId);
-                    jsonObject.addProperty("__ok", frontendService.editProfile(userProfile));
-                    respondWithJson(httpRequest, jsonObject);
-                    return;
-                }
-            }
-        } catch (JsonSyntaxException ignored) {
-        }
-        respondWithError(httpRequest, SC_BAD_REQUEST);
-    }
-
-    private void handleHttpConcreteUserDelete(HttpRequest httpRequest, JsonObject jsonObject, Long userId) throws SuspendExecution {
-        try {
-            jsonObject.addProperty("__ok", frontendService.deleteUser(userId));
             respondWithJson(httpRequest, jsonObject);
         } catch (JsonSyntaxException ex) {
             respondWithError(httpRequest, SC_BAD_REQUEST, ex);
