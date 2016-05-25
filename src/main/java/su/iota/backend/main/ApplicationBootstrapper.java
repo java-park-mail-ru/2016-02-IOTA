@@ -86,8 +86,8 @@ public final class ApplicationBootstrapper implements SuspendableRunnable {
 
         @Override
         protected void configure() {
-//            bindFactory(DataSourceFactory.class).to(DataSource.class).in(Immediate.class);
-//            bind(AccountServiceJdbiImpl.class).to(AccountService.class).in(Immediate.class);
+            bindFactory(DataSourceFactory.class).to(DataSource.class).in(Immediate.class);
+            bind(AccountServiceJdbiImpl.class).to(AccountService.class).in(Immediate.class);
         }
 
     }

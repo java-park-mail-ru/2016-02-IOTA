@@ -22,7 +22,7 @@ public class UserProfile {
     private String password = "";
 
     @NotNull
-    private DateTime birthDate = new DateTime();
+    private String birthDate = "";
 
     public UserProfile() {
     }
@@ -76,11 +76,11 @@ public class UserProfile {
     }
 
     @NotNull
-    public DateTime getBirthDate() {
+    public String getBirthDate() {
         return birthDate;
     }
 
-    public void setBirthDate(@NotNull DateTime birthDate) {
+    public void setBirthDate(@NotNull String birthDate) {
         this.birthDate = birthDate;
     }
 
@@ -110,4 +110,5 @@ public class UserProfile {
         result = 31 * result + birthDate.hashCode();
         return result;
     }
+
 }

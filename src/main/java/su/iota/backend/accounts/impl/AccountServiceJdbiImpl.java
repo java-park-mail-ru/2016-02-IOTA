@@ -4,7 +4,6 @@ import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.fibers.jdbi.FiberDBI;
 import org.glassfish.hk2.api.Immediate;
-import org.glassfish.hk2.api.Rank;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
@@ -23,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-@Rank(-100)
 @Singleton
 public class AccountServiceJdbiImpl implements AccountService {
 

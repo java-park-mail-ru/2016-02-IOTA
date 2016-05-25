@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Named
+@Rank(-100)
 @Service
 @Singleton
 public class AccountServiceMapImpl extends ProxyServerActor implements AccountService {
