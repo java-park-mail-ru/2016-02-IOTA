@@ -33,6 +33,12 @@ public class UserProfile {
         this.email = email;
     }
 
+    public UserProfile(@Nullable String login, @Nullable String email, @Nullable String password) {
+        this.login = login;
+        this.email = email;
+        this.password = password;
+    }
+
     @Nullable
     public Long getId() {
         return id;
