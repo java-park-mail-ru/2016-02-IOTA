@@ -3,8 +3,6 @@ package su.iota.backend.frontend.impl;
 import co.paralleluniverse.actors.ActorRef;
 import co.paralleluniverse.actors.behaviors.Server;
 import co.paralleluniverse.fibers.SuspendExecution;
-import com.esotericsoftware.minlog.Log;
-import org.apache.commons.beanutils.BeanUtils;
 import org.glassfish.hk2.api.PerLookup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,12 +14,12 @@ import su.iota.backend.frontend.FrontendService;
 import su.iota.backend.game.MatchmakingService;
 import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.OutgoingMessage;
-import su.iota.backend.messages.game.PlayerActionMessage;
+import su.iota.backend.messages.game.AbstractPlayerActionMessage;
+import su.iota.backend.messages.game.impl.IllegalPlayerActionResultMessage;
 import su.iota.backend.messages.internal.GameSessionDropPlayerMessage;
 import su.iota.backend.models.UserProfile;
 
 import javax.inject.Inject;
-import java.lang.reflect.InvocationTargetException;
 
 @Service
 @PerLookup
@@ -105,15 +103,15 @@ public class FrontendServiceImpl implements FrontendService {
 
     @NotNull
     @Override
-    public PlayerActionMessage.ResultMessage performPlayerAction(@NotNull PlayerActionMessage playerActionMessage) throws SuspendExecution, InterruptedException {
+    public AbstractPlayerActionMessage.AbstractResultMessage performPlayerAction(@NotNull AbstractPlayerActionMessage playerActionMessage) throws SuspendExecution, InterruptedException {
         if (signedInUser == null || gameSession == null) {
-            return new PlayerActionMessage.ResultMessage(false);
+            return new IllegalPlayerActionResultMessage();
         }
         final OutgoingMessage result = gameSession.call(playerActionMessage);
-        if (!(result instanceof PlayerActionMessage.ResultMessage)) {
+        if (!(result instanceof AbstractPlayerActionMessage.AbstractResultMessage)) {
             throw new AssertionError();
         }
-        return (PlayerActionMessage.ResultMessage) result;
+        return (AbstractPlayerActionMessage.AbstractResultMessage) result;
     }
 
     @Override

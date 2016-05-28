@@ -8,12 +8,14 @@ import co.paralleluniverse.actors.behaviors.Server;
 import co.paralleluniverse.comsat.webactors.*;
 import co.paralleluniverse.fibers.SuspendExecution;
 import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.OutgoingMessage;
-import su.iota.backend.messages.game.PlayerActionMessage;
+import su.iota.backend.messages.game.AbstractPlayerActionMessage;
 import su.iota.backend.misc.ServiceUtils;
+import su.iota.backend.misc.gson.RuntimeTypeAdapterFactory;
 import su.iota.backend.models.UserProfile;
 import su.iota.backend.settings.SettingsService;
 
@@ -63,7 +65,7 @@ public final class FrontendActor extends BasicActor<Object, Void> {
                 frontendService.setGameSession(self(), gameSession);
             } else if (message instanceof ExitMessage) {
                 handleExitMessage((ExitMessage) message);
-            } else if (webSockets.isEmpty()) {
+            } else if (message == null && webSockets.isEmpty()) {
                 frontendService.dropPlayer(self());
             }
             checkCodeSwap();
@@ -128,20 +130,21 @@ public final class FrontendActor extends BasicActor<Object, Void> {
     }
 
     private void handleHttpGameRequest(HttpRequest httpRequest) throws SuspendExecution, InterruptedException {
-
         if (httpRequest.getMethod().equals("GET")) {
             final JsonObject response = new JsonObject();
             response.addProperty("__ok", frontendService.askGameStateUpdate(self()));
             respondWithJson(httpRequest, response);
         } else if (httpRequest.getMethod().equals("POST")) {
+            //noinspection OverlyBroadCatchBlock
             try {
-                final PlayerActionMessage actionMessage = getGson().fromJson(httpRequest.getStringBody(), PlayerActionMessage.class);
+                final Gson gson = getGsonForPlayerActionMessages();
+                final AbstractPlayerActionMessage actionMessage = gson.fromJson(httpRequest.getStringBody(), AbstractPlayerActionMessage.class);
                 if (actionMessage != null) {
                     actionMessage.setFrom(self());
                     respondWithJson(httpRequest, frontendService.performPlayerAction(actionMessage));
                     return;
                 }
-            } catch (JsonSyntaxException ignored) {
+            } catch (JsonParseException ignored) {
             }
             respondWithError(httpRequest, SC_BAD_REQUEST);
         } else {
@@ -269,6 +272,14 @@ public final class FrontendActor extends BasicActor<Object, Void> {
 
     private Gson defaultGsonBuilderFunction(GsonBuilder gsonBuilder) {
         return gsonBuilder.excludeFieldsWithoutExposeAnnotation().create();
+    }
+
+    private Gson getGsonForPlayerActionMessages() {
+        return new GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
+                .registerTypeAdapterFactory(RuntimeTypeAdapterFactory.of(AbstractPlayerActionMessage.class, "__type")
+//                        .registerSubtype(PlayerReadyMessage.class)
+                ).create();
     }
 
     private void respondWithJson(HttpRequest httpRequest, @Nullable Object object) throws SuspendExecution {

@@ -32,6 +32,12 @@ public class SettingsServiceFixedImpl implements SettingsService {
         return 3600;
     }
 
+    @Override
+    public int getFrontendReceiveTimeoutSeconds() throws SuspendExecution {
+        //noinspection MagicNumber
+        return 12;
+    }
+
     @NotNull
     @Override
     public String getDatabaseUserID() throws SuspendExecution {

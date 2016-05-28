@@ -14,6 +14,8 @@ public interface SettingsService {
 
     int getHttpSessionTimeoutSeconds() throws SuspendExecution;
 
+    int getFrontendReceiveTimeoutSeconds() throws SuspendExecution;
+
     @NotNull
     String getDatabaseUserID() throws SuspendExecution;
 

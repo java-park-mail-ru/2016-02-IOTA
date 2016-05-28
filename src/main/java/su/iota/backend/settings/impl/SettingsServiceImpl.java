@@ -35,6 +35,11 @@ public class SettingsServiceImpl implements SettingsService {
         return config.getInt("httpSessionTimeoutSeconds");
     }
 
+    @Override
+    public int getFrontendReceiveTimeoutSeconds() throws SuspendExecution {
+        return config.getInt("frontendReceiveTimeoutSeconds");
+    }
+
     @NotNull
     @Override
     public String getDatabaseUserID() throws SuspendExecution {
