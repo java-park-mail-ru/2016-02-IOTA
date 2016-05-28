@@ -33,11 +33,11 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
     protected OutgoingMessage handleCall(ActorRef<?> from, Object id, IncomingMessage message) throws Exception, SuspendExecution {
         if (message instanceof GameSessionInitMessage) {
             final GameSessionInitMessage initMessage = ((GameSessionInitMessage) message);
-            if (this.players != null) {
+            if (players != null) {
                 return new GameSessionInitMessage.Result(false);
             } else {
-                this.players = initMessage.getPlayers();
-                this.players.keySet().forEach(this::watch);
+                players = initMessage.getPlayers();
+                players.keySet().forEach(this::watch);
                 return new GameSessionInitMessage.Result(true);
             }
         } else if (message instanceof PlayerActionMessage) {
@@ -68,6 +68,8 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
             //noinspection unchecked
             final ActorRef<Object> frontend = (ActorRef<Object>) message;
             frontend.send(getGameStateMessageForFrontend(frontend));
+        } else {
+            super.handleCast(from, id, message);
         }
     }
 

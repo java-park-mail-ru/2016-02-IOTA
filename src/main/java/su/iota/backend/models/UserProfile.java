@@ -2,7 +2,7 @@ package su.iota.backend.models;
 
 import com.google.gson.annotations.Expose;
 import org.jetbrains.annotations.NotNull;
-import org.joda.time.DateTime;
+import org.jetbrains.annotations.Nullable;
 
 public class UserProfile {
 
@@ -79,19 +79,17 @@ public class UserProfile {
         this.password = password;
     }
 
-    @SuppressWarnings("OverlyComplexMethod")
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
 
-        final UserProfile userProfile = (UserProfile) o;
+        final UserProfile userProfile = (UserProfile) obj;
 
         if (!id.equals(userProfile.id)) return false;
         //noinspection SimplifiableIfStatement
         if (!login.equals(userProfile.login)) return false;
         return email.equals(userProfile.email);
-
     }
 
     @Override
@@ -102,6 +100,7 @@ public class UserProfile {
         return result;
     }
 
+    @NotNull
     @Override
     public String toString() {
         return "UserProfile{" +
@@ -110,4 +109,5 @@ public class UserProfile {
                 ", email='" + email + '\'' +
                 '}';
     }
+
 }

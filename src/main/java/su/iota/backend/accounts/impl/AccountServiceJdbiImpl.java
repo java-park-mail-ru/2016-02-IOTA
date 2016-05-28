@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Service;
 import org.skife.jdbi.v2.Handle;
+import org.skife.jdbi.v2.IDBI;
 import org.skife.jdbi.v2.util.BooleanMapper;
 import org.skife.jdbi.v2.util.LongMapper;
 import su.iota.backend.accounts.AccountService;
@@ -25,7 +26,7 @@ import java.util.Map;
 @Singleton
 public class AccountServiceJdbiImpl implements AccountService {
 
-    private final FiberDBI dbi;
+    private final IDBI dbi;
 
     @Inject
     public AccountServiceJdbiImpl(DataSource dataSource) {

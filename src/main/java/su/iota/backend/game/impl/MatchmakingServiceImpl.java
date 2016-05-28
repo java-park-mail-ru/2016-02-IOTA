@@ -128,6 +128,7 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
         public void setGameSession(Server<IncomingMessage, OutgoingMessage, Object> gameSession) {
             this.gameSession = gameSession;
         }
+
     }
 
 }
