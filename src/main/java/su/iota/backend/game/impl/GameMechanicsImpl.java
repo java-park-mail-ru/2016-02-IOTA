@@ -25,17 +25,14 @@ public class GameMechanicsImpl extends ProxyServerActor implements GameMechanics
 
     private Field field = new Field();
     private Queue<FieldItem> cardDeck = new ArrayQueue<>();
-    private Set<UUID> cardsInDeck = new HashSet<>();
-    private Set<UUID> cardsInPlay = new HashSet<>();
+    private Map<UUID, FieldItem> cardsDrawn = new HashMap<>();
     private Set<UUID> cardsPlayed = new HashSet<>();
-    private Map<Integer, Set<UUID>> cardsInHand = new HashMap<>();
+    private Map<Integer, Set<UUID>> playerHands = new HashMap<>();
 
     {
         initCardDeck();
         final FieldItem card = drawCard();
-        if (!tryPlaceCardInternal(Field.CENTER_COORDINATE, card)) {
-            throw new AssertionError();
-        }
+        field.placeCard(Field.CENTER_COORDINATE, card);
     }
 
     @NotNull
@@ -44,56 +41,74 @@ public class GameMechanicsImpl extends ProxyServerActor implements GameMechanics
         return currentGameStateUuid;
     }
 
-    @NotNull
-    public FieldItem drawCard() {
-        final FieldItem drawnCard = cardDeck.remove();
-        final UUID cardUuid = drawnCard.getUuid();
-        cardsInDeck.remove(cardUuid);
-        cardsInPlay.add(cardUuid);
-        return drawnCard;
-    }
-
-    public boolean tryPlaceCard(int player, boolean isEphemeral, @NotNull Coordinate coordinate, @NotNull FieldItem card) {
+    public boolean canPlayCard(int player, @NotNull FieldItem card) {
         if (card.isEphemeral()) {
             return false;
         }
         final UUID uuid = card.getUuid();
-        if (cardsInDeck.contains(uuid) || !cardsInPlay.contains(uuid) || cardsPlayed.contains(uuid)) {
-            return false;
-        }
-        final Set<UUID> playerHand = cardsInHand.get(player);
-        if (playerHand == null || !playerHand.contains(uuid)) {
-            return false;
-        }
-        if (!tryPlaceCardInternal(isEphemeral, coordinate, card)) {
-            return false;
-        }
+        final Set<UUID> playerHand = playerHands.get(player);
+        //noinspection OverlyComplexBooleanExpression
+        return playerHand != null
+                && playerHand.contains(uuid)
+                && cardsDrawn.containsKey(uuid)
+                && !cardsPlayed.contains(uuid);
+    }
+
+    public boolean tryPlayCard(int player, @NotNull Coordinate coordinate, @NotNull FieldItem card) {
+        return tryPlayCardInternal(player, coordinate, card, false);
+    }
+
+    public boolean tryEphemeralPlayCard(int player, @NotNull Coordinate coordinate, @NotNull FieldItem card) {
+        return tryPlayCardInternal(player, coordinate, card, true);
+    }
+
+    private boolean tryPlayCardInternal(int player, @NotNull Coordinate coordinate, @NotNull FieldItem card, boolean isEphemeral) {
+        boolean isOk = true;
+        //noinspection ConstantConditions
+        isOk = isOk && canPlayCard(player, card);
+        isOk = isOk && field.isPlacementCorrect(coordinate, card);
         if (!isEphemeral) {
-            playerHand.remove(uuid);
-            cardsInPlay.remove(uuid);
-            cardsPlayed.add(uuid);
-        }
-        return true;
-    }
-
-    private boolean tryPlaceCardInternal(@NotNull Coordinate coordinate, @NotNull FieldItem card) {
-        return tryPlaceCardInternal(false, coordinate, card);
-    }
-
-    private boolean tryPlaceCardInternal(boolean isEphemeral, @NotNull Coordinate coordinate, @NotNull FieldItem card) {
-        final boolean isOk = field.isPlacementCorrect(coordinate, card);
-        if (isOk && !isEphemeral) {
-            field.placeCard(coordinate, card);
+            playCardInternal(player, coordinate, card);
         }
         return isOk;
+    }
+
+    private void playCardInternal(int player, @NotNull Coordinate coordinate, @NotNull FieldItem card) {
+        final Set<UUID> playerHand = playerHands.get(player);
+        final UUID uuid = card.getUuid();
+        playerHand.remove(uuid);
+        cardsPlayed.add(uuid);
+        field.placeCard(coordinate, card);
+    }
+
+    @NotNull
+    public FieldItem drawCard() {
+        final FieldItem drawnCard = cardDeck.remove();
+        final UUID uuid = drawnCard.getUuid();
+        if (cardsDrawn.containsKey(uuid)) {
+            throw new AssertionError();
+        }
+        cardsDrawn.put(uuid, drawnCard);
+        return drawnCard;
     }
 
     public void endTurn() {
         if (players.isEmpty()) {
             throw new AssertionError();
         }
-        final Integer headPlayer = players.removeFirst();
+        final int headPlayer = players.removeFirst();
+        giveCards(headPlayer);
         players.addLast(headPlayer);
+    }
+
+    private void giveCards(int headPlayer) {
+        final Set<UUID> hand = playerHands.get(headPlayer);
+        if (hand == null) {
+            throw new AssertionError();
+        }
+        while (hand.size() < 4) {
+            hand.add(drawCard().getUuid());
+        }
     }
 
     private void initCardDeck() {
@@ -102,14 +117,12 @@ public class GameMechanicsImpl extends ProxyServerActor implements GameMechanics
             for (FieldItem.Shape shape : FieldItem.Shape.values()) {
                 for (FieldItem.Number number : FieldItem.Number.values()) {
                     final Card card = new Card(color, shape, number);
-                    cardsInDeck.add(card.getUuid());
                     cards.add(card);
                 }
             }
         }
         for (int i = 0; i < 2; i++) {
             final Wildcard wildcard = new Wildcard();
-            cardsInDeck.add(wildcard.getUuid());
             cards.add(wildcard);
         }
         Collections.shuffle(cards);
