@@ -3,10 +3,7 @@ package su.iota.backend.models.game;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class Field {
@@ -78,9 +75,9 @@ public class Field {
     private boolean isPlacementValidForLine(@NotNull Coordinate start, @NotNull Coordinate increment,
                                             @NotNull Predicate<Coordinate> end, @NotNull Predicate<Coordinate> ignore,
                                             @NotNull FieldItem placement, @Nullable FieldItem existingItem) {
-        final Set<FieldItem.Color> colors = new HashSet<>(3);
-        final Set<FieldItem.Shape> shapes = new HashSet<>(3);
-        final Set<FieldItem.Number> numbers = new HashSet<>(3);
+        final Set<FieldItem.Color> colors = EnumSet.noneOf(FieldItem.Color.class);
+        final Set<FieldItem.Shape> shapes = EnumSet.noneOf(FieldItem.Shape.class);
+        final Set<FieldItem.Number> numbers = EnumSet.noneOf(FieldItem.Number.class);
 
         for (Coordinate coord = start; end.test(coord); coord = coord.plus(increment)) {
             if (ignore.test(coord)) {
@@ -133,6 +130,6 @@ public class Field {
     }
 
     public void placeCard(@NotNull Coordinate coordinate, @NotNull FieldItem card) {
-        // todo
+        field[coordinate.getX()][coordinate.getY()] = card; // todo
     }
 }

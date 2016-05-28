@@ -38,7 +38,10 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
                 return new GameSessionInitMessage.Result(false);
             } else {
                 players = initMessage.getPlayers();
-                players.keySet().forEach(this::watch);
+                for (final ActorRef<Object> frontend : players.keySet()) {
+                    watch(frontend);
+                    gameMechanics.addPlayer(getGameSessionKeyForPlayer(frontend));
+                }
                 return new GameSessionInitMessage.Result(true);
             }
         } else if (message instanceof AbstractPlayerActionMessage) {
@@ -59,7 +62,8 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
             final GameSessionDropPlayerMessage dropMessage = (GameSessionDropPlayerMessage) message;
             final ActorRef<Object> player = dropMessage.getPlayer();
             if (players.containsKey(player)) {
-                players.remove(player); // todo: tell game mechanics!
+                players.remove(player);
+                gameMechanics.dropPlayer(getGameSessionKeyForPlayer(player));
                 Log.info("Dropping player from game! " + player.toString());
             }
             if (players.isEmpty()) {
@@ -90,6 +94,10 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
         for (ActorRef<Object> playerFrontend : players.keySet()) {
             playerFrontend.send(getGameStateMessageForFrontend(playerFrontend));
         }
+    }
+
+    private int getGameSessionKeyForPlayer(@NotNull ActorRef<Object> frontend) {
+        return System.identityHashCode(frontend);
     }
 
     private GameStateMessage getGameStateMessageForFrontend(ActorRef<Object> frontend) {
