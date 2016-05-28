@@ -1,27 +1,32 @@
 package su.iota.backend.models.game;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.function.Predicate;
 
 public class Field {
 
-    private final FieldCell[][] field = new FieldCell[34][34];
+    public static final Coordinate CENTER_COORDINATE = new Coordinate(0, 0);
+
+    private final FieldItem[][] field = new FieldItem[34][34];
 
     @SuppressWarnings("OverlyComplexMethod")
-    public boolean isPlacementCorrect(@NotNull Coordinate placementCoordinate, @NotNull FieldCell placement) {
+    public boolean isPlacementCorrect(@NotNull Coordinate placementCoordinate, @NotNull FieldItem placement) {
+        if (placement.isEphemeral()) {
+            return false;
+        }
         final int xCoord = placementCoordinate.getX();
         final int yCoord = placementCoordinate.getY();
-        final FieldCell currentCell = field[xCoord][yCoord];
-        if (currentCell != null) {
-            if (currentCell.isConcrete()) {
+        final FieldItem existingItem = field[xCoord][yCoord];
+        if (existingItem != null) {
+            if (existingItem.isConcrete()) {
                 return false;
             }
-            final Collection<FieldCell> substitutes = currentCell.getSubstitutes();
-            return substitutes != null && substitutes.contains(placement);
         }
         final int leftLineLength = getLineLength(placementCoordinate, new Coordinate(-1, 0));
         final int rightLineLength = getLineLength(placementCoordinate, new Coordinate(1, 0));
@@ -45,7 +50,8 @@ public class Field {
                     new Coordinate(1, 0),
                     coordinate -> coordinate.getX() < xCoord + rightLineLength + 1,
                     coordinate -> coordinate.equals(placementCoordinate),
-                    placement
+                    placement,
+                    existingItem
             );
             if (!isValidForX) {
                 return false;
@@ -58,7 +64,8 @@ public class Field {
                     new Coordinate(0, 1),
                     coordinate -> coordinate.getY() < yCoord + bottomLineLength + 1,
                     coordinate -> coordinate.equals(placementCoordinate),
-                    placement
+                    placement,
+                    existingItem
             );
             if (!isValidForY) {
                 return false;
@@ -70,24 +77,42 @@ public class Field {
 
     private boolean isPlacementValidForLine(@NotNull Coordinate start, @NotNull Coordinate increment,
                                             @NotNull Predicate<Coordinate> end, @NotNull Predicate<Coordinate> ignore,
-                                            @NotNull FieldCell placement) {
-        final Set<Integer> colors = new HashSet<>(3);
-        final Set<Integer> shapes = new HashSet<>(3);
-        final Set<Integer> numbers = new HashSet<>(3);
+                                            @NotNull FieldItem placement, @Nullable FieldItem existingItem) {
+        final Set<FieldItem.Color> colors = new HashSet<>(3);
+        final Set<FieldItem.Shape> shapes = new HashSet<>(3);
+        final Set<FieldItem.Number> numbers = new HashSet<>(3);
 
         for (Coordinate coord = start; end.test(coord); coord = coord.plus(increment)) {
             if (ignore.test(coord)) {
                 continue;
             }
-            final FieldCell cell = field[coord.getX()][coord.getY()];
+            final FieldItem cell = field[coord.getX()][coord.getY()];
             colors.add(cell.getColor());
             shapes.add(cell.getShape());
             numbers.add(cell.getNumber());
         }
 
+        if (existingItem != null) {
+            if (existingItem.isConcrete()) {
+                throw new AssertionError();
+            }
+            Collection<FieldItem> substitutes = existingItem.getSubstitutes();
+            if (substitutes == null) {
+                substitutes = calculatePossibleSubstitutes(existingItem);
+                existingItem.setSubstitutes(substitutes);
+            }
+            if (!substitutes.contains(placement)) {
+                return false;
+            }
+        }
+
         return isLineConditionSatisfied(colors, placement.getColor())
                 && isLineConditionSatisfied(shapes, placement.getShape())
                 && isLineConditionSatisfied(numbers, placement.getNumber());
+    }
+
+    private Collection<FieldItem> calculatePossibleSubstitutes(FieldItem cell) {
+        return new LinkedList<>(); // todo
     }
 
     private int getLineLength(@NotNull Coordinate initialCoordinate, @NotNull Coordinate incrementCoordinate) {
@@ -106,5 +131,8 @@ public class Field {
     private <T> boolean isLineConditionSatisfied(@NotNull Set<T> items, @NotNull T item) {
         return ((items.size() != 1 || !items.contains(item)) && items.contains(item));
     }
-    
+
+    public void placeCard(@NotNull Coordinate coordinate, @NotNull FieldItem card) {
+        // todo
+    }
 }

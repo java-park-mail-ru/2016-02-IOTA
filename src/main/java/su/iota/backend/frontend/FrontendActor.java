@@ -8,7 +8,6 @@ import co.paralleluniverse.actors.behaviors.Server;
 import co.paralleluniverse.comsat.webactors.*;
 import co.paralleluniverse.fibers.SuspendExecution;
 import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.iota.backend.messages.IncomingMessage;
@@ -176,6 +175,7 @@ public final class FrontendActor extends BasicActor<Object, Void> {
         final UserProfile signedInUser = frontendService.getSignedInUser();
         if (signedInUser != null) {
             jsonObject.addProperty("id", signedInUser.getId());
+            jsonObject.addProperty("ref", System.identityHashCode(self()));
         }
         jsonObject.addProperty("__ok", signedInUser != null);
         respondWithJson(httpRequest, jsonObject);
