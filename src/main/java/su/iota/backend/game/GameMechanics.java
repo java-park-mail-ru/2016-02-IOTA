@@ -29,8 +29,6 @@ public interface GameMechanics {
     @Nullable
     Integer getCurrentPlayer() throws SuspendExecution;
 
-    boolean isPassAllowed() throws SuspendExecution;
-
     boolean isConcluded() throws SuspendExecution;
 
     void setConcluded(boolean concluded) throws SuspendExecution;
@@ -38,6 +36,10 @@ public interface GameMechanics {
     boolean tryPlayCard(int player, @NotNull Coordinate coordinate, @NotNull UUID uuid) throws SuspendExecution;
 
     boolean tryEphemeralPlayCard(int player, @NotNull Coordinate coordinate, @NotNull UUID uuid) throws SuspendExecution;
+
+    boolean tryPassCard(int player, @NotNull UUID uuid) throws SuspendExecution;
+
+    boolean tryEphemeralPassCard(int player, @NotNull UUID uuid) throws SuspendExecution;
 
     boolean endTurn(int player) throws SuspendExecution;
 

@@ -10,7 +10,7 @@ public class Field {
 
     public static final Coordinate CENTER_COORDINATE = new Coordinate(0, 0);
 
-    private final FieldItem[][] field = new FieldItem[34][34];
+    private final FieldItem[][] field = new FieldItem[36][36];
 
     @SuppressWarnings("OverlyComplexMethod")
     public boolean isPlacementCorrect(@NotNull Coordinate placementCoordinate, @NotNull FieldItem placement) {

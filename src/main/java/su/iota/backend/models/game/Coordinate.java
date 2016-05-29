@@ -11,8 +11,8 @@ public class Coordinate {
     @Expose
     private final int offY;
 
-    public static final int BASE_X = 34 / 2;
-    public static final int BASE_Y = 34 / 2;
+    public static final int BASE_X = 36 / 2;
+    public static final int BASE_Y = 36 / 2;
 
     public Coordinate(int offX, int offY) {
         this.offX = offX;
@@ -47,6 +47,17 @@ public class Coordinate {
     @NotNull
     public Coordinate minus(@NotNull Coordinate other) {
         return new Coordinate(offX - other.offX, offY - other.offY);
+    }
+
+    @SuppressWarnings("MagicNumber")
+    public boolean isInRange() {
+        final int x = getX();
+        final int y = getY();
+        boolean isOk = true;
+        //noinspection ConstantConditions
+        isOk = isOk && (x > 0 && x < 35);
+        isOk = isOk && (y > 0 && y < 35);
+        return isOk;
     }
 
     @Override

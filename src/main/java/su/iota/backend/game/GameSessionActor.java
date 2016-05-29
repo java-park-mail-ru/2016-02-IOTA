@@ -13,6 +13,7 @@ import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.AbstractPlayerActionMessage;
 import su.iota.backend.messages.game.impl.GameStateMessage;
 import su.iota.backend.messages.game.impl.IllegalPlayerActionResultMessage;
+import su.iota.backend.messages.game.impl.PlayerPassCardMessage;
 import su.iota.backend.messages.game.impl.PlayerPlaceCardMessage;
 import su.iota.backend.messages.internal.GameSessionDropPlayerMessage;
 import su.iota.backend.messages.internal.GameSessionInitMessage;
@@ -94,15 +95,11 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
         }
         if (message instanceof PlayerPlaceCardMessage) {
             return handlePlaceCardMessage((PlayerPlaceCardMessage) message, frontend);
-        } /* else if (message instanceof PlayerPassCardMessage) {
+        } else if (message instanceof PlayerPassCardMessage) {
             return handlePassCardMessage((PlayerPassCardMessage) message, frontend);
-        } */
+        }
         return new IllegalPlayerActionResultMessage();
     }
-
-//    private PlayerPassCardMessage.ResultMessage handlePassCardMessage(@NotNull PlayerPassCardMessage message, @NotNull ActorRef<Object> frontend) throws SuspendExecution {
-//        return null;
-//    }
 
     @NotNull
     private PlayerPlaceCardMessage.ResultMessage handlePlaceCardMessage(@NotNull PlayerPlaceCardMessage message, @NotNull ActorRef<Object> frontend) throws SuspendExecution {
@@ -119,6 +116,19 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
             gameMechanics.endTurn(playerKey);
         }
         return new PlayerPlaceCardMessage.ResultMessage(true);
+    }
+
+    @NotNull
+    private PlayerPassCardMessage.ResultMessage handlePassCardMessage(@NotNull PlayerPassCardMessage message, @NotNull ActorRef<Object> frontend) throws SuspendExecution {
+        final int playerRef = getGameKeyForPlayer(frontend);
+        final UUID uuid = message.getUuid();
+        boolean isOk = uuid != null;
+        if (isOk) {
+            isOk = message.isEphemeral()
+                    ? gameMechanics.tryEphemeralPassCard(playerRef, uuid)
+                    : gameMechanics.tryPassCard(playerRef, uuid);
+        }
+        return new PlayerPassCardMessage.ResultMessage(isOk);
     }
 
     private void broadcastGameState() throws SuspendExecution {
