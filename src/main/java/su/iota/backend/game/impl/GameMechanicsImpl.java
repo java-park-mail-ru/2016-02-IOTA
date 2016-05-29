@@ -33,6 +33,7 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
     private Map<Integer, Integer> playerScores = new HashMap<>();
     private boolean initialized = false;
     private boolean concluded = false;
+    private boolean passAllowed = true;
 
     @Override
     public void initialize() throws SuspendExecution {
@@ -86,6 +87,7 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
         isOk = isOk && canPlayCard(player, card);
         isOk = isOk && field.isPlacementCorrect(coordinate, card);
         if (!isEphemeral) {
+            passAllowed = false;
             playCardInternal(player, coordinate, card);
             updateGameStateUuid();
         }
@@ -134,6 +136,7 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
         final int headPlayer = players.removeFirst();
         giveCards(headPlayer);
         players.addLast(headPlayer);
+        passAllowed = true;
         if (checkGameConcluded()) {
             concluded = true;
         }
@@ -163,6 +166,11 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
     @Override
     public Integer getCurrentPlayer() throws SuspendExecution {
         return players.peek();
+    }
+
+    @Override
+    public boolean isPassAllowed() throws SuspendExecution {
+        return true;
     }
 
     @Override
@@ -244,7 +252,8 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
 
     @NotNull
     @Override
-    public FieldItem[][] getRawField() {
+    public FieldItem[][] getRawField() throws SuspendExecution {
         return field.getRawField();
     }
+
 }

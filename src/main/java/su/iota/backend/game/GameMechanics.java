@@ -28,6 +28,8 @@ public interface GameMechanics {
     @Nullable
     Integer getCurrentPlayer() throws SuspendExecution;
 
+    boolean isPassAllowed() throws SuspendExecution;
+
     boolean isConcluded() throws SuspendExecution;
 
     void setConcluded(boolean concluded) throws SuspendExecution;

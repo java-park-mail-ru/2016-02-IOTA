@@ -2,6 +2,7 @@ package su.iota.backend.messages.game.impl;
 
 import com.google.gson.annotations.Expose;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import su.iota.backend.messages.game.AbstractPlayerActionMessage;
 import su.iota.backend.models.game.Coordinate;
 
@@ -9,35 +10,30 @@ import java.util.UUID;
 
 public class PlayerPlaceCardMessage extends AbstractPlayerActionMessage {
 
-    @Expose
-    private Coordinate coordinate;
+    private Integer offX;
 
-    @Expose
-    private UUID uuid;
+    private Integer offY;
 
+    private String uuid;
+
+    @Nullable
     public Coordinate getCoordinate() {
-        return coordinate;
+        if (offX == null || offY == null) {
+            return null;
+        }
+        return new Coordinate(offX, offY);
     }
 
-    public void setCoordinate(Coordinate coordinate) {
-        this.coordinate = coordinate;
-    }
-
+    @Nullable
     public UUID getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
-    }
-
-    @NotNull
-    @Override
-    public String toString() {
-        return "PlayerPlaceCardMessage{" +
-                "coordinate=" + coordinate +
-                ", uuid=" + uuid +
-                '}';
+        if (uuid == null) {
+            return null;
+        }
+        try {
+            return UUID.fromString(uuid);
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
     }
 
     public static class ResultMessage extends AbstractPlayerActionMessage.AbstractResultMessage {
