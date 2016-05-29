@@ -63,4 +63,9 @@ public class SettingsServiceImpl implements SettingsService {
         return config.getInt("playersInBucket");
     }
 
+    @Override
+    public long getWsIdleTimeoutMillis() throws SuspendExecution {
+        return config.getLong("wsIdleTimeoutMillis");
+    }
+
 }

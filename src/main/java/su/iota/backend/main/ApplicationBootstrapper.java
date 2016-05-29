@@ -9,6 +9,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.util.component.AbstractLifeCycle;
 import org.eclipse.jetty.util.component.LifeCycle;
+import org.eclipse.jetty.websocket.jsr356.server.ServerContainer;
 import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.api.Immediate;
@@ -47,7 +48,11 @@ public final class ApplicationBootstrapper implements SuspendableRunnable {
                 settingsService.getHttpSessionTimeoutSeconds()
         );
         try {
-            WebSocketServerContainerInitializer.configureContext(contextHandler);
+            final ServerContainer serverContainer
+                    = WebSocketServerContainerInitializer.configureContext(contextHandler);
+            serverContainer.getPolicy().setIdleTimeout(
+                    settingsService.getWsIdleTimeoutMillis()
+            );
         } catch (ServletException e) {
             throw new AssertionError(e);
         }

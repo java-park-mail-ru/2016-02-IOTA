@@ -27,4 +27,6 @@ public interface SettingsService {
 
     int getPlayersInBucket() throws SuspendExecution;
 
+    long getWsIdleTimeoutMillis() throws SuspendExecution;
+
 }

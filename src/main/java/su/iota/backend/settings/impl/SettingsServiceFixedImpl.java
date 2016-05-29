@@ -60,5 +60,11 @@ public class SettingsServiceFixedImpl implements SettingsService {
     public int getPlayersInBucket() throws SuspendExecution {
         return 2;
     }
-    
+
+    @Override
+    public long getWsIdleTimeoutMillis() throws SuspendExecution {
+        //noinspection MagicNumber
+        return 1800000;
+    }
+
 }
