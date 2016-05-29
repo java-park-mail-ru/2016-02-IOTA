@@ -1,10 +1,14 @@
 package su.iota.backend.models.game;
 
+import com.google.gson.annotations.Expose;
 import org.jetbrains.annotations.NotNull;
 
 public class Coordinate {
 
+    @Expose
     private final int offX;
+
+    @Expose
     private final int offY;
 
     public static final int BASE_X = 34 / 2;
@@ -60,4 +64,13 @@ public class Coordinate {
         return result;
     }
 
+    @NotNull
+    @Override
+    public String toString() {
+        return "Coordinate{" +
+                "offX=" + offX +
+                ", offY=" + offY +
+                '}';
+    }
+    
 }

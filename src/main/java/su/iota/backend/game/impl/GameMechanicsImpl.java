@@ -1,6 +1,7 @@
 package su.iota.backend.game.impl;
 
 import co.paralleluniverse.actors.behaviors.ProxyServerActor;
+import co.paralleluniverse.fibers.SuspendExecution;
 import org.eclipse.jetty.util.ArrayQueue;
 import org.glassfish.hk2.api.PerLookup;
 import org.jetbrains.annotations.NotNull;
@@ -33,24 +34,27 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
     private boolean concluded = false;
 
     {
-        initCardDeck();
-        updateGameStateUuid();
-        final FieldItem card = drawCard();
-        field.placeCard(Field.CENTER_COORDINATE, card);
+        try {
+            initCardDeck();
+            updateGameStateUuid();
+            final FieldItem card = drawCard();
+            field.placeCard(Field.CENTER_COORDINATE, card);
+        } catch (SuspendExecution ex) {
+            throw new AssertionError(ex);
+        }
     }
 
     @NotNull
     @Override
-    public UUID getCurrentGameStateUuid() {
+    public UUID getCurrentGameStateUuid() throws SuspendExecution {
         return currentGameStateUuid;
     }
 
-    private void updateGameStateUuid() {
+    private void updateGameStateUuid() throws SuspendExecution {
         currentGameStateUuid = UUID.randomUUID();
     }
 
-    @Override
-    public boolean canPlayCard(int player, @NotNull FieldItem card) {
+    private boolean canPlayCard(int player, @NotNull FieldItem card) throws SuspendExecution {
         if (card.isEphemeral()) {
             return false;
         }
@@ -64,16 +68,18 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
     }
 
     @Override
-    public boolean tryPlayCard(int player, @NotNull Coordinate coordinate, @NotNull FieldItem card) {
-        return tryPlayCardInternal(player, coordinate, card, false);
+    public boolean tryPlayCard(int player, @NotNull Coordinate coordinate, @NotNull UUID uuid) throws SuspendExecution {
+        final FieldItem card = getDrawnCardByUuid(uuid);
+        return card != null && tryPlayCardInternal(player, coordinate, card, false);
     }
 
     @Override
-    public boolean tryEphemeralPlayCard(int player, @NotNull Coordinate coordinate, @NotNull FieldItem card) {
-        return tryPlayCardInternal(player, coordinate, card, true);
+    public boolean tryEphemeralPlayCard(int player, @NotNull Coordinate coordinate, @NotNull UUID uuid) throws SuspendExecution {
+        final FieldItem card = getDrawnCardByUuid(uuid);
+        return card != null && tryPlayCardInternal(player, coordinate, card, true);
     }
 
-    private boolean tryPlayCardInternal(int player, @NotNull Coordinate coordinate, @NotNull FieldItem card, boolean isEphemeral) {
+    private boolean tryPlayCardInternal(int player, @NotNull Coordinate coordinate, @NotNull FieldItem card, boolean isEphemeral) throws SuspendExecution {
         boolean isOk = true;
         //noinspection ConstantConditions
         isOk = isOk && canPlayCard(player, card);
@@ -85,7 +91,7 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
         return isOk;
     }
 
-    private void playCardInternal(int player, @NotNull Coordinate coordinate, @NotNull FieldItem card) {
+    private void playCardInternal(int player, @NotNull Coordinate coordinate, @NotNull FieldItem card) throws SuspendExecution {
         final Set<UUID> playerHand = playerHands.get(player);
         final UUID uuid = card.getUuid();
         playerHand.remove(uuid);
@@ -94,7 +100,7 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
     }
 
     @NotNull
-    private FieldItem drawCard() {
+    private FieldItem drawCard() throws SuspendExecution {
         final FieldItem drawnCard = cardDeck.remove();
         final UUID uuid = drawnCard.getUuid();
         if (cardsDrawn.containsKey(uuid)) {
@@ -105,7 +111,7 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
     }
 
     @Override
-    public boolean endTurn(int player) {
+    public boolean endTurn(int player) throws SuspendExecution {
         final Integer headPlayer = players.peek();
         final boolean isOk = headPlayer != null && headPlayer == player;
         if (isOk) {
@@ -114,7 +120,13 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
         return isOk;
     }
 
-    private void endTurnInternal() {
+    @Nullable
+    @Override
+    public FieldItem getDrawnCardByUuid(@NotNull UUID uuid) throws SuspendExecution {
+        return cardsDrawn.get(uuid);
+    }
+
+    private void endTurnInternal() throws SuspendExecution {
         if (players.isEmpty()) {
             throw new AssertionError();
         }
@@ -126,7 +138,7 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
         }
     }
 
-    private boolean checkGameConcluded() {
+    private boolean checkGameConcluded() throws SuspendExecution {
         if (players.size() < 2) {
             return true;
         }
@@ -143,22 +155,22 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
 
     @Override
     @Nullable
-    public Integer getPlayerScores(int player) {
+    public Integer getPlayerScores(int player) throws SuspendExecution {
         return playerScores.get(player);
     }
 
     @Override
-    public boolean isConcluded() {
+    public boolean isConcluded() throws SuspendExecution {
         return concluded;
     }
 
     @Override
-    public void setConcluded(boolean concluded) {
+    public void setConcluded(boolean concluded) throws SuspendExecution {
         this.concluded = concluded;
     }
 
     @Override
-    public boolean addPlayer(int player) {
+    public boolean addPlayer(int player) throws SuspendExecution {
         if (concluded) {
             return false;
         }
@@ -172,7 +184,7 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
     }
 
     @Override
-    public void dropPlayer(int player) {
+    public void dropPlayer(int player) throws SuspendExecution {
         if (players.isEmpty()) {
             return;
         }
@@ -191,7 +203,7 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
         }
     }
 
-    private void giveCards(int headPlayer) {
+    private void giveCards(int headPlayer) throws SuspendExecution {
         final Set<UUID> hand = playerHands.get(headPlayer);
         if (hand == null) {
             throw new AssertionError();
@@ -201,7 +213,7 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
         }
     }
 
-    private void initCardDeck() {
+    private void initCardDeck() throws SuspendExecution {
         final List<FieldItem> cards = new ArrayList<>();
         for (FieldItem.Color color : FieldItem.Color.values()) {
             for (FieldItem.Shape shape : FieldItem.Shape.values()) {

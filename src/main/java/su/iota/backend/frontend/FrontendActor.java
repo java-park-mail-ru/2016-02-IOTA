@@ -13,6 +13,8 @@ import org.jetbrains.annotations.Nullable;
 import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.AbstractPlayerActionMessage;
+import su.iota.backend.messages.game.impl.PlayerPassCardMessage;
+import su.iota.backend.messages.game.impl.PlayerPlaceCardMessage;
 import su.iota.backend.misc.ServiceUtils;
 import su.iota.backend.misc.gson.RuntimeTypeAdapterFactory;
 import su.iota.backend.models.UserProfile;
@@ -278,7 +280,8 @@ public final class FrontendActor extends BasicActor<Object, Void> {
         return new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
                 .registerTypeAdapterFactory(RuntimeTypeAdapterFactory.of(AbstractPlayerActionMessage.class, "__type")
-//                        .registerSubtype(PlayerReadyMessage.class)
+                        .registerSubtype(PlayerPlaceCardMessage.class)
+                        .registerSubtype(PlayerPassCardMessage.class)
                 ).create();
     }
 

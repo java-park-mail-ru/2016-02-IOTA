@@ -13,9 +13,13 @@ import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.AbstractPlayerActionMessage;
 import su.iota.backend.messages.game.impl.GameStateMessage;
 import su.iota.backend.messages.game.impl.IllegalPlayerActionResultMessage;
+import su.iota.backend.messages.game.impl.PlayerPassCardMessage;
+import su.iota.backend.messages.game.impl.PlayerPlaceCardMessage;
 import su.iota.backend.messages.internal.GameSessionDropPlayerMessage;
 import su.iota.backend.messages.internal.GameSessionInitMessage;
 import su.iota.backend.models.UserProfile;
+import su.iota.backend.models.game.Coordinate;
+import su.iota.backend.models.game.FieldItem;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -40,7 +44,7 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
                 players = initMessage.getPlayers();
                 for (final ActorRef<Object> frontend : players.keySet()) {
                     watch(frontend);
-                    gameMechanics.addPlayer(getGameSessionKeyForPlayer(frontend));
+                    gameMechanics.addPlayer(getGameKeyForPlayer(frontend));
                 }
                 return new GameSessionInitMessage.Result(true);
             }
@@ -63,7 +67,7 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
             final ActorRef<Object> player = dropMessage.getPlayer();
             if (players.containsKey(player)) {
                 players.remove(player);
-                gameMechanics.dropPlayer(getGameSessionKeyForPlayer(player));
+                gameMechanics.dropPlayer(getGameKeyForPlayer(player));
                 Log.info("Dropping player from game! " + player.toString());
             }
             if (players.isEmpty()) {
@@ -86,8 +90,33 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
         if (frontend == null || !players.containsKey(frontend)) {
             throw new AssertionError();
         }
-
+        if (message instanceof PlayerPlaceCardMessage) {
+            return handlePlaceCardMessage((PlayerPlaceCardMessage) message, frontend);
+        } /* else if (message instanceof PlayerPassCardMessage) {
+            return handlePassCardMessage((PlayerPassCardMessage) message, frontend);
+        } */
         return new IllegalPlayerActionResultMessage();
+    }
+
+//    private PlayerPassCardMessage.ResultMessage handlePassCardMessage(@NotNull PlayerPassCardMessage message, @NotNull ActorRef<Object> frontend) throws SuspendExecution {
+//        return null;
+//    }
+
+    @NotNull
+    private PlayerPlaceCardMessage.ResultMessage handlePlaceCardMessage(@NotNull PlayerPlaceCardMessage message, @NotNull ActorRef<Object> frontend) throws SuspendExecution {
+        final UUID uuid = message.getUuid();
+        final Coordinate coordinate = message.getCoordinate();
+        if (uuid == null || coordinate == null) {
+            return new PlayerPlaceCardMessage.ResultMessage(false);
+        }
+        final int playerKey = getGameKeyForPlayer(frontend);
+        final boolean isOk = message.isEphemeral()
+                ? gameMechanics.tryEphemeralPlayCard(playerKey, coordinate, uuid)
+                : gameMechanics.tryPlayCard(playerKey, coordinate, uuid);
+        if (message.isEndSequenceTrigger()) {
+            gameMechanics.endTurn(playerKey);
+        }
+        return new PlayerPlaceCardMessage.ResultMessage(true);
     }
 
     private void broadcastGameState() throws SuspendExecution {
@@ -96,11 +125,11 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
         }
     }
 
-    private int getGameSessionKeyForPlayer(@NotNull ActorRef<Object> frontend) {
+    private int getGameKeyForPlayer(@NotNull ActorRef<Object> frontend) throws SuspendExecution {
         return System.identityHashCode(frontend);
     }
 
-    private GameStateMessage getGameStateMessageForFrontend(ActorRef<Object> frontend) {
+    private GameStateMessage getGameStateMessageForFrontend(ActorRef<Object> frontend) throws SuspendExecution {
         return new GameStateMessage(gameMechanics.getCurrentGameStateUuid()); // todo
     }
 

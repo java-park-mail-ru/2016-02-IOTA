@@ -1,5 +1,6 @@
 package su.iota.backend.game;
 
+import co.paralleluniverse.fibers.SuspendExecution;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jvnet.hk2.annotations.Contract;
@@ -12,25 +13,26 @@ import java.util.UUID;
 public interface GameMechanics {
 
     @NotNull
-    UUID getCurrentGameStateUuid();
+    UUID getCurrentGameStateUuid() throws SuspendExecution;
 
-    boolean addPlayer(int player);
+    boolean addPlayer(int player) throws SuspendExecution;
 
-    void dropPlayer(int player);
+    void dropPlayer(int player) throws SuspendExecution;
 
     @Nullable
-    Integer getPlayerScores(int player);
+    Integer getPlayerScores(int player) throws SuspendExecution;
 
-    boolean isConcluded();
+    boolean isConcluded() throws SuspendExecution;
 
-    void setConcluded(boolean concluded);
+    void setConcluded(boolean concluded) throws SuspendExecution;
 
-    boolean canPlayCard(int player, @NotNull FieldItem card);
+    boolean tryPlayCard(int player, @NotNull Coordinate coordinate, @NotNull UUID uuid) throws SuspendExecution;
 
-    boolean tryPlayCard(int player, @NotNull Coordinate coordinate, @NotNull FieldItem card);
+    boolean tryEphemeralPlayCard(int player, @NotNull Coordinate coordinate, @NotNull UUID uuid) throws SuspendExecution;
 
-    boolean tryEphemeralPlayCard(int player, @NotNull Coordinate coordinate, @NotNull FieldItem card);
+    boolean endTurn(int player) throws SuspendExecution;
 
-    boolean endTurn(int player);
-    
+    @Nullable
+    FieldItem getDrawnCardByUuid(@NotNull UUID uuid) throws SuspendExecution;
+
 }
