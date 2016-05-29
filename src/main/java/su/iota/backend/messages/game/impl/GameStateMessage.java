@@ -38,6 +38,9 @@ public class GameStateMessage implements OutgoingMessage, FromMessage {
     private Map<Integer, String> playerLogins = new HashMap<>();
 
     @NotNull
+    private Map<Integer, Collection<FieldItem>> playerHands = new HashMap<>();
+
+    @NotNull
     private Map<Coordinate, FieldItem> field = new HashMap<>();
 
     public void setUuid(@NotNull UUID uuid) {
@@ -48,15 +51,22 @@ public class GameStateMessage implements OutgoingMessage, FromMessage {
         ref = playerRef;
     }
 
-    public void addPlayer(int playerRef, long id, int score, @NotNull String login) {
+    public void addPlayer(int playerRef, long id, int score, @NotNull String login, @Nullable Collection<FieldItem> hand) {
         players.add(playerRef);
         playerIds.put(playerRef, id);
         playerScores.put(playerRef, score);
         playerLogins.put(playerRef, login);
+        if (hand != null) {
+            playerHands.put(playerRef, hand);
+        }
     }
 
     public void addFieldItem(@NotNull Coordinate coordnate, @NotNull FieldItem fieldItem) {
         field.put(coordnate, fieldItem);
+    }
+
+    public void filterFor(int playerRef) {
+        playerHands.entrySet().removeIf(e -> e.getKey() == playerRef);
     }
 
     @Nullable
@@ -93,6 +103,9 @@ public class GameStateMessage implements OutgoingMessage, FromMessage {
                 jsonObject.addProperty("id", src.playerIds.get(playerRef));
                 jsonObject.addProperty("score", src.playerScores.get(playerRef));
                 jsonObject.addProperty("login", src.playerLogins.get(playerRef));
+                if (src.playerHands.containsKey(playerRef)) {
+                    jsonObject.add("hand", serializeHand(src.playerHands.get(playerRef)));
+                }
                 jsonArray.add(jsonObject);
             }
             return jsonArray;
@@ -124,6 +137,15 @@ public class GameStateMessage implements OutgoingMessage, FromMessage {
                 }
             }
             return jsonObject;
+        }
+
+        @NotNull
+        private JsonArray serializeHand(@NotNull Collection<FieldItem> src) {
+            final JsonArray jsonArray = new JsonArray();
+            for (final FieldItem fieldItem : src) {
+                jsonArray.add(serializeFieldItem(fieldItem));
+            }
+            return jsonArray;
         }
 
     }

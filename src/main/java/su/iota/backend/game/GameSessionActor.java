@@ -76,7 +76,10 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
             }
         } else if (message instanceof ActorRef<?>) {
             //noinspection unchecked
-            ((ActorRef<Object>) message).send(buildGameStateMessage());
+            final ActorRef<Object> frontend = (ActorRef<Object>) message;
+            final GameStateMessage gameStateMessage = buildGameStateMessage();
+            gameStateMessage.filterFor(getGameKeyForPlayer(frontend));
+            frontend.send(gameStateMessage);
         } else {
             super.handleCast(from, id, message);
         }
@@ -120,7 +123,9 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
 
     private void broadcastGameState() throws SuspendExecution {
         for (ActorRef<Object> playerFrontend : players.keySet()) {
-            playerFrontend.send(buildGameStateMessage());
+            final GameStateMessage gameStateMessage = buildGameStateMessage();
+            gameStateMessage.filterFor(getGameKeyForPlayer(playerFrontend));
+            playerFrontend.send(gameStateMessage);
         }
     }
 
@@ -138,7 +143,13 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
             final int playerRef = getGameKeyForPlayer(playerFrontend);
             if (gameMechanics.isPlayerPresent(playerRef)) {
                 final UserProfile playerProfile = player.getValue();
-                gameStateMessage.addPlayer(playerRef, playerProfile.getId(), gameMechanics.getPlayerScore(playerRef), playerProfile.getLogin());
+                gameStateMessage.addPlayer(
+                        playerRef,
+                        playerProfile.getId(),
+                        gameMechanics.getPlayerScore(playerRef),
+                        playerProfile.getLogin(),
+                        gameMechanics.getPlayerHand(playerRef)
+                );
             }
         }
         final FieldItem[][] rawField = gameMechanics.getRawField();

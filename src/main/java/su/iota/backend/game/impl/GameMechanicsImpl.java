@@ -39,6 +39,9 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
     public void initialize() throws SuspendExecution {
         if (!initialized) {
             initCardDeck();
+            for (int player : players) {
+                giveCards(player);
+            }
             updateGameStateUuid();
             final FieldItem card = drawCard();
             field.placeCard(Field.CENTER_COORDINATE, card);
@@ -254,6 +257,20 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
     @Override
     public FieldItem[][] getRawField() throws SuspendExecution {
         return field.getRawField();
+    }
+
+    @Nullable
+    @Override
+    public Collection<FieldItem> getPlayerHand(int playerRef) throws SuspendExecution {
+        final Set<UUID> uuidCards = playerHands.get(playerRef);
+        if (uuidCards == null) {
+            return null;
+        }
+        final Set<FieldItem> cards = new HashSet<>();
+        for (UUID uuid : uuidCards) {
+            cards.add(getDrawnCardByUuid(uuid));
+        }
+        return cards;
     }
 
 }

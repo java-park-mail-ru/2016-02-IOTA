@@ -7,6 +7,7 @@ import org.jvnet.hk2.annotations.Contract;
 import su.iota.backend.models.game.Coordinate;
 import su.iota.backend.models.game.FieldItem;
 
+import java.util.Collection;
 import java.util.UUID;
 
 @Contract
@@ -45,5 +46,8 @@ public interface GameMechanics {
 
     @NotNull
     FieldItem[][] getRawField() throws SuspendExecution;
+
+    @Nullable
+    Collection<FieldItem> getPlayerHand(int playerRef) throws SuspendExecution;
 
 }
