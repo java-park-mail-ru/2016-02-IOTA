@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.AbstractPlayerActionMessage;
+import su.iota.backend.messages.game.impl.GameStateMessage;
 import su.iota.backend.messages.game.impl.PlayerPassCardMessage;
 import su.iota.backend.messages.game.impl.PlayerPlaceCardMessage;
 import su.iota.backend.misc.ServiceUtils;
@@ -273,7 +274,10 @@ public final class FrontendActor extends BasicActor<Object, Void> {
     }
 
     private Gson defaultGsonBuilderFunction(GsonBuilder gsonBuilder) {
-        return gsonBuilder.excludeFieldsWithoutExposeAnnotation().create();
+        return gsonBuilder
+                .excludeFieldsWithoutExposeAnnotation()
+                .registerTypeAdapter(GameStateMessage.class, new GameStateMessage.Serializer())
+                .create();
     }
 
     private Gson getGsonForPlayerActionMessages() {

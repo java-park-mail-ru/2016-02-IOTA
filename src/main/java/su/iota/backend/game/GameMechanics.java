@@ -12,6 +12,8 @@ import java.util.UUID;
 @Contract
 public interface GameMechanics {
 
+    void initialize() throws SuspendExecution;
+
     @NotNull
     UUID getCurrentGameStateUuid() throws SuspendExecution;
 
@@ -19,8 +21,12 @@ public interface GameMechanics {
 
     void dropPlayer(int player) throws SuspendExecution;
 
+    boolean isPlayerPresent(int player) throws SuspendExecution;
+
+    int getPlayerScore(int player) throws SuspendExecution;
+
     @Nullable
-    Integer getPlayerScores(int player) throws SuspendExecution;
+    Integer getCurrentPlayer() throws SuspendExecution;
 
     boolean isConcluded() throws SuspendExecution;
 
@@ -34,5 +40,8 @@ public interface GameMechanics {
 
     @Nullable
     FieldItem getDrawnCardByUuid(@NotNull UUID uuid) throws SuspendExecution;
+
+    @NotNull
+    FieldItem[][] getRawField() throws SuspendExecution;
 
 }

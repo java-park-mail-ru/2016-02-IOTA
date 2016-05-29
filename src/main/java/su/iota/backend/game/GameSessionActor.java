@@ -13,7 +13,6 @@ import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.AbstractPlayerActionMessage;
 import su.iota.backend.messages.game.impl.GameStateMessage;
 import su.iota.backend.messages.game.impl.IllegalPlayerActionResultMessage;
-import su.iota.backend.messages.game.impl.PlayerPassCardMessage;
 import su.iota.backend.messages.game.impl.PlayerPlaceCardMessage;
 import su.iota.backend.messages.internal.GameSessionDropPlayerMessage;
 import su.iota.backend.messages.internal.GameSessionInitMessage;
@@ -46,6 +45,7 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
                     watch(frontend);
                     gameMechanics.addPlayer(getGameKeyForPlayer(frontend));
                 }
+                gameMechanics.initialize();
                 return new GameSessionInitMessage.Result(true);
             }
         } else if (message instanceof AbstractPlayerActionMessage) {
@@ -76,8 +76,7 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
             }
         } else if (message instanceof ActorRef<?>) {
             //noinspection unchecked
-            final ActorRef<Object> frontend = (ActorRef<Object>) message;
-            frontend.send(getGameStateMessageForFrontend(frontend));
+            ((ActorRef<Object>) message).send(buildGameStateMessage());
         } else {
             super.handleCast(from, id, message);
         }
@@ -121,7 +120,7 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
 
     private void broadcastGameState() throws SuspendExecution {
         for (ActorRef<Object> playerFrontend : players.keySet()) {
-            playerFrontend.send(getGameStateMessageForFrontend(playerFrontend));
+            playerFrontend.send(buildGameStateMessage());
         }
     }
 
@@ -129,8 +128,28 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
         return System.identityHashCode(frontend);
     }
 
-    private GameStateMessage getGameStateMessageForFrontend(ActorRef<Object> frontend) throws SuspendExecution {
-        return new GameStateMessage(gameMechanics.getCurrentGameStateUuid()); // todo
+    private GameStateMessage buildGameStateMessage() throws SuspendExecution {
+        final GameStateMessage gameStateMessage = new GameStateMessage();
+        gameStateMessage.setFrom(self());
+        gameStateMessage.setUuid(gameMechanics.getCurrentGameStateUuid());
+        gameStateMessage.setPlayerRef(gameMechanics.getCurrentPlayer());
+        for (Map.Entry<ActorRef<Object>, UserProfile> player : players.entrySet()) {
+            final ActorRef<Object> playerFrontend = player.getKey();
+            final int playerRef = getGameKeyForPlayer(playerFrontend);
+            if (gameMechanics.isPlayerPresent(playerRef)) {
+                final UserProfile playerProfile = player.getValue();
+                gameStateMessage.addPlayer(playerRef, playerProfile.getId(), gameMechanics.getPlayerScore(playerRef), playerProfile.getLogin());
+            }
+        }
+        final FieldItem[][] rawField = gameMechanics.getRawField();
+        for (int i = 0; i < rawField.length; i++) {
+            for (int j = 0; j < rawField[i].length; j++) {
+                if (rawField[i][j] != null) {
+                    gameStateMessage.addFieldItem(Coordinate.fromRaw(i, j), rawField[i][j]);
+                }
+            }
+        }
+        return gameStateMessage;
     }
 
 }

@@ -26,21 +26,22 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
     }
 
     private Field field = new Field();
-    private Queue<FieldItem> cardDeck = new ArrayQueue<>();
+    private Queue<FieldItem> cardDeck = new ArrayQueue<>(4 * 4 * 4 + 2);
     private Map<UUID, FieldItem> cardsDrawn = new HashMap<>();
     private Set<UUID> cardsPlayed = new HashSet<>();
     private Map<Integer, Set<UUID>> playerHands = new HashMap<>();
     private Map<Integer, Integer> playerScores = new HashMap<>();
+    private boolean initialized = false;
     private boolean concluded = false;
 
-    {
-        try {
+    @Override
+    public void initialize() throws SuspendExecution {
+        if (!initialized) {
             initCardDeck();
             updateGameStateUuid();
             final FieldItem card = drawCard();
             field.placeCard(Field.CENTER_COORDINATE, card);
-        } catch (SuspendExecution ex) {
-            throw new AssertionError(ex);
+            initialized = true;
         }
     }
 
@@ -154,9 +155,14 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
     }
 
     @Override
-    @Nullable
-    public Integer getPlayerScores(int player) throws SuspendExecution {
+    public int getPlayerScore(int player) throws SuspendExecution {
         return playerScores.get(player);
+    }
+
+    @Nullable
+    @Override
+    public Integer getCurrentPlayer() throws SuspendExecution {
+        return players.peek();
     }
 
     @Override
@@ -203,6 +209,11 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
         }
     }
 
+    @Override
+    public boolean isPlayerPresent(int player) throws SuspendExecution {
+        return players.contains(player);
+    }
+
     private void giveCards(int headPlayer) throws SuspendExecution {
         final Set<UUID> hand = playerHands.get(headPlayer);
         if (hand == null) {
@@ -231,4 +242,9 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
         cardDeck.addAll(cards);
     }
 
+    @NotNull
+    @Override
+    public FieldItem[][] getRawField() {
+        return field.getRawField();
+    }
 }

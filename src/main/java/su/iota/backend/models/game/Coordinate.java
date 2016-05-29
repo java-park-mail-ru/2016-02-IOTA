@@ -19,6 +19,10 @@ public class Coordinate {
         this.offY = offY;
     }
 
+    public static Coordinate fromRaw(int x, int y) {
+        return new Coordinate(x - BASE_X, y - BASE_Y);
+    }
+
     public int getOffX() {
         return offX;
     }
@@ -72,5 +76,5 @@ public class Coordinate {
                 ", offY=" + offY +
                 '}';
     }
-    
+
 }

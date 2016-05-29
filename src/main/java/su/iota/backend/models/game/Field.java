@@ -132,4 +132,9 @@ public class Field {
     public void placeCard(@NotNull Coordinate coordinate, @NotNull FieldItem card) {
         field[coordinate.getX()][coordinate.getY()] = card; // todo
     }
+
+    public FieldItem[][] getRawField() {
+        return field;
+    }
+
 }
