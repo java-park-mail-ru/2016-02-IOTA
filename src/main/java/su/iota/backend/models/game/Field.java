@@ -127,7 +127,7 @@ public class Field {
     }
 
     private <T> boolean isLineConditionSatisfied(@NotNull Set<T> items, @NotNull T item) throws SuspendExecution {
-        return ((items.size() != 1 || !items.contains(item)) && items.contains(item));
+        return (items.size() == 1) == items.contains(item);
     }
 
     public void placeCard(@NotNull Coordinate coordinate, @NotNull FieldItem card) throws SuspendExecution {
