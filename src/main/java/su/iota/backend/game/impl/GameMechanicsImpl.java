@@ -87,6 +87,7 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
     private boolean tryPlayCardInternal(int player, @NotNull Coordinate coordinate, @NotNull FieldItem card, boolean isEphemeral) throws SuspendExecution {
         boolean isOk = true;
         //noinspection ConstantConditions
+        isOk = isOk && !concluded;
         isOk = isOk && coordinate.isInRange();
         isOk = isOk && canPlayCard(player, card);
         isOk = isOk && field.isPlacementCorrect(coordinate, card);
@@ -117,18 +118,21 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
     }
 
     private boolean tryPassCardInternal(int player, @NotNull UUID uuid, boolean isEphemeral) {
-        if (cardsPlayed.contains(uuid) || !cardsDrawn.containsKey(uuid) || !playerHands.containsKey(player)) {
-            return false;
-        }
+        boolean isOk = true;
+        //noinspection ConstantConditions
+        isOk = isOk && !concluded;
+        isOk = isOk && passAllowed;
+        isOk = isOk && !cardsPlayed.contains(uuid);
+        isOk = isOk && cardsDrawn.containsKey(uuid);
+        isOk = isOk && playerHands.containsKey(player);
         final Set<UUID> playerHand = playerHands.get(player);
-        if (playerHand == null || !playerHand.contains(uuid)) {
-            return false;
-        }
-        if (passAllowed && !isEphemeral) {
+        isOk = isOk && (playerHand != null);
+        isOk = isOk && playerHand.contains(uuid);
+        if (isOk && !isEphemeral) {
             playerHand.remove(uuid);
             cardDeck.add(cardsDrawn.remove(uuid));
         }
-        return passAllowed;
+        return isOk;
     }
 
     @NotNull
