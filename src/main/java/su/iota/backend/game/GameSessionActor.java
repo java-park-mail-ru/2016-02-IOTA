@@ -50,8 +50,13 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
                 return new GameSessionInitMessage.Result(true);
             }
         } else if (message instanceof AbstractPlayerActionMessage) {
-            final AbstractPlayerActionMessage.AbstractResultMessage resultMessage
-                    = handlePlayerActionMessage((AbstractPlayerActionMessage) message);
+            final AbstractPlayerActionMessage actionMessage = (AbstractPlayerActionMessage) message;
+            //noinspection unchecked
+            final ActorRef<Object> frontend = (ActorRef<Object>) actionMessage.getFrom();
+            final AbstractPlayerActionMessage.AbstractResultMessage resultMessage = handlePlayerActionMessage(actionMessage);
+            if (actionMessage.isEndSequenceTrigger() && frontend != null) {
+                gameMechanics.endTurn(getGameKeyForPlayer(frontend));
+            }
             if (resultMessage.isBroadcastTrigger()) {
                 broadcastGameState();
             }

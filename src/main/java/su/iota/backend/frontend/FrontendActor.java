@@ -144,6 +144,9 @@ public final class FrontendActor extends BasicActor<Object, Void> {
                 if (actionMessage != null) {
                     actionMessage.setFrom(self());
                     respondWithJson(httpRequest, frontendService.performPlayerAction(actionMessage));
+                    if (actionMessage.isGoodbyeMessage()) {
+                        frontendService.dropPlayer(self());
+                    }
                     return;
                 }
             } catch (JsonParseException ignored) {
