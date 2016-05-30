@@ -10,10 +10,13 @@ import java.util.UUID;
 
 public class PlayerPlaceCardMessage extends AbstractPlayerActionMessage {
 
+    @Expose
     private Integer offX;
 
+    @Expose
     private Integer offY;
 
+    @Expose
     private String uuid;
 
     @Nullable

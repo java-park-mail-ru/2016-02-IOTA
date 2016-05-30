@@ -14,8 +14,12 @@ import java.util.Collection;
 
 public abstract class AbstractPlayerActionMessage implements FromMessage, IncomingMessage {
 
+    @SuppressWarnings("InstanceVariableNamingConvention")
+    @Nullable
+    private String __type;
+
     @Expose
-    protected boolean ephemeral = true;
+    protected boolean ephemeral = false;
 
     @Expose
     protected boolean endSequence = false;
