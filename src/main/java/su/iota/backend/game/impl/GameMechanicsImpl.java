@@ -104,7 +104,9 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
         final UUID uuid = card.getUuid();
         playerHand.remove(uuid);
         cardsPlayed.add(uuid);
-        field.placeCard(coordinate, card);
+        final int currentScore = playerScores.get(player);
+        final int addScore = field.placeCard(coordinate, card);
+        playerScores.put(player, currentScore + addScore);
     }
 
     @Override

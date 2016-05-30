@@ -130,8 +130,9 @@ public class Field {
         return (items.size() == 1) == items.contains(item);
     }
 
-    public void placeCard(@NotNull Coordinate coordinate, @NotNull FieldItem card) throws SuspendExecution {
+    public int placeCard(@NotNull Coordinate coordinate, @NotNull FieldItem card) throws SuspendExecution {
         field[coordinate.getX()][coordinate.getY()] = card; // todo
+        return 1;
     }
 
     public FieldItem[][] getRawField() throws SuspendExecution {
