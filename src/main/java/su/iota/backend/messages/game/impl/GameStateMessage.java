@@ -66,7 +66,7 @@ public class GameStateMessage implements OutgoingMessage, FromMessage {
     }
 
     public void filterFor(int playerRef) {
-        playerHands.entrySet().removeIf(e -> e.getKey() == playerRef);
+        playerHands.entrySet().removeIf(e -> e.getKey() != playerRef);
     }
 
     @Nullable
