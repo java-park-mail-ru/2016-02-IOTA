@@ -1,5 +1,6 @@
 package su.iota.backend.models.game;
 
+import co.paralleluniverse.fibers.SuspendExecution;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,7 +14,7 @@ public class Field {
     private final FieldItem[][] field = new FieldItem[36][36];
 
     @SuppressWarnings("OverlyComplexMethod")
-    public boolean isPlacementCorrect(@NotNull Coordinate placementCoordinate, @NotNull FieldItem placement) {
+    public boolean isPlacementCorrect(@NotNull Coordinate placementCoordinate, @NotNull FieldItem placement) throws SuspendExecution {
         if (placement.isEphemeral()) {
             return false;
         }
@@ -74,7 +75,7 @@ public class Field {
 
     private boolean isPlacementValidForLine(@NotNull Coordinate start, @NotNull Coordinate increment,
                                             @NotNull Predicate<Coordinate> end, @NotNull Predicate<Coordinate> ignore,
-                                            @NotNull FieldItem placement, @Nullable FieldItem existingItem) {
+                                            @NotNull FieldItem placement, @Nullable FieldItem existingItem) throws SuspendExecution {
         final Set<FieldItem.Color> colors = EnumSet.noneOf(FieldItem.Color.class);
         final Set<FieldItem.Shape> shapes = EnumSet.noneOf(FieldItem.Shape.class);
         final Set<FieldItem.Number> numbers = EnumSet.noneOf(FieldItem.Number.class);
@@ -108,11 +109,11 @@ public class Field {
                 && isLineConditionSatisfied(numbers, placement.getNumber());
     }
 
-    private Collection<FieldItem> calculatePossibleSubstitutes(FieldItem cell) {
+    private Collection<FieldItem> calculatePossibleSubstitutes(FieldItem cell) throws SuspendExecution {
         return new LinkedList<>(); // todo
     }
 
-    private int getLineLength(@NotNull Coordinate initialCoordinate, @NotNull Coordinate incrementCoordinate) {
+    private int getLineLength(@NotNull Coordinate initialCoordinate, @NotNull Coordinate incrementCoordinate) throws SuspendExecution {
         int lineLength = 0;
         Coordinate currentCoordinate = initialCoordinate;
         while (true) {
@@ -125,15 +126,15 @@ public class Field {
         }
     }
 
-    private <T> boolean isLineConditionSatisfied(@NotNull Set<T> items, @NotNull T item) {
+    private <T> boolean isLineConditionSatisfied(@NotNull Set<T> items, @NotNull T item) throws SuspendExecution {
         return ((items.size() != 1 || !items.contains(item)) && items.contains(item));
     }
 
-    public void placeCard(@NotNull Coordinate coordinate, @NotNull FieldItem card) {
+    public void placeCard(@NotNull Coordinate coordinate, @NotNull FieldItem card) throws SuspendExecution {
         field[coordinate.getX()][coordinate.getY()] = card; // todo
     }
 
-    public FieldItem[][] getRawField() {
+    public FieldItem[][] getRawField() throws SuspendExecution {
         return field;
     }
 

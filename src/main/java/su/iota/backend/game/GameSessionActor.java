@@ -148,6 +148,7 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
         gameStateMessage.setFrom(self());
         gameStateMessage.setUuid(gameMechanics.getCurrentGameStateUuid());
         gameStateMessage.setPlayerRef(gameMechanics.getCurrentPlayer());
+        gameStateMessage.setConcluded(gameMechanics.isConcluded());
         for (Map.Entry<ActorRef<Object>, UserProfile> player : players.entrySet()) {
             final ActorRef<Object> playerFrontend = player.getKey();
             final int playerRef = getGameKeyForPlayer(playerFrontend);

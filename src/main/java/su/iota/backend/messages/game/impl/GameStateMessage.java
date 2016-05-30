@@ -43,6 +43,9 @@ public class GameStateMessage implements OutgoingMessage, FromMessage {
     @NotNull
     private Map<Coordinate, FieldItem> field = new HashMap<>();
 
+    @Nullable
+    private Boolean concluded;
+
     public void setUuid(@NotNull UUID uuid) {
         this.uuid = uuid;
     }
@@ -59,6 +62,10 @@ public class GameStateMessage implements OutgoingMessage, FromMessage {
         if (hand != null) {
             playerHands.put(playerRef, hand);
         }
+    }
+
+    public void setConcluded(@Nullable Boolean concluded) {
+        this.concluded = concluded;
     }
 
     public void addFieldItem(@NotNull Coordinate coordnate, @NotNull FieldItem fieldItem) {
@@ -88,6 +95,7 @@ public class GameStateMessage implements OutgoingMessage, FromMessage {
             if (src != null) {
                 jsonObject.addProperty("state", src.uuid.toString());
                 jsonObject.addProperty("ref", src.ref);
+                jsonObject.addProperty("concluded", src.concluded);
                 jsonObject.add("players", serializePlayers(src));
                 jsonObject.add("field", serializeField(src));
             }
