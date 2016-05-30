@@ -160,7 +160,7 @@ public abstract class FieldItem {
         RED, GREEN, BLUE, YELLOW
     }
 
-    public enum Shape {SQUARE, CROSS, TRIANGLE, CIRCLE}
+    public enum Shape {SQUARE, XCROSS, TRIANGLE, CIRCLE}
 
     @SuppressWarnings("EnumeratedConstantNamingConvention")
     public enum Number {
