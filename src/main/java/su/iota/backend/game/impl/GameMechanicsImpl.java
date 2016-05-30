@@ -108,12 +108,12 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
 
     @Override
     public boolean tryPassCard(int player, @NotNull UUID uuid) throws SuspendExecution {
-        return tryPassCardInternal(player, uuid, true);
+        return tryPassCardInternal(player, uuid, false);
     }
 
     @Override
     public boolean tryEphemeralPassCard(int player, @NotNull UUID uuid) throws SuspendExecution {
-        return tryPassCardInternal(player, uuid, false);
+        return tryPassCardInternal(player, uuid, true);
     }
 
     private boolean tryPassCardInternal(int player, @NotNull UUID uuid, boolean isEphemeral) {
@@ -124,11 +124,11 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
         if (playerHand == null || !playerHand.contains(uuid)) {
             return false;
         }
-        if (!isEphemeral) {
+        if (passAllowed && !isEphemeral) {
             playerHand.remove(uuid);
             cardDeck.add(cardsDrawn.remove(uuid));
         }
-        return true;
+        return passAllowed;
     }
 
     @NotNull
