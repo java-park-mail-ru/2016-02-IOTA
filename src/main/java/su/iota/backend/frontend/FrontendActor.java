@@ -15,6 +15,7 @@ import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.AbstractPlayerActionMessage;
 import su.iota.backend.messages.game.impl.GameStateMessage;
 import su.iota.backend.messages.game.impl.PlayerPassCardMessage;
+import su.iota.backend.messages.game.impl.PlayerPingMessage;
 import su.iota.backend.messages.game.impl.PlayerPlaceCardMessage;
 import su.iota.backend.misc.ServiceUtils;
 import su.iota.backend.misc.gson.RuntimeTypeAdapterFactory;
@@ -287,6 +288,7 @@ public final class FrontendActor extends BasicActor<Object, Void> {
         return new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
                 .registerTypeAdapterFactory(RuntimeTypeAdapterFactory.of(AbstractPlayerActionMessage.class, "__type")
+                        .registerSubtype(PlayerPingMessage.class)
                         .registerSubtype(PlayerPlaceCardMessage.class)
                         .registerSubtype(PlayerPassCardMessage.class)
                 ).create();

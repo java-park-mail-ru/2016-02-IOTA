@@ -11,10 +11,7 @@ import org.jvnet.hk2.annotations.Service;
 import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.AbstractPlayerActionMessage;
-import su.iota.backend.messages.game.impl.GameStateMessage;
-import su.iota.backend.messages.game.impl.IllegalPlayerActionResultMessage;
-import su.iota.backend.messages.game.impl.PlayerPassCardMessage;
-import su.iota.backend.messages.game.impl.PlayerPlaceCardMessage;
+import su.iota.backend.messages.game.impl.*;
 import su.iota.backend.messages.internal.GameSessionDropPlayerMessage;
 import su.iota.backend.messages.internal.GameSessionInitMessage;
 import su.iota.backend.models.UserProfile;
@@ -102,6 +99,8 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
             return handlePlaceCardMessage((PlayerPlaceCardMessage) message, frontend);
         } else if (message instanceof PlayerPassCardMessage) {
             return handlePassCardMessage((PlayerPassCardMessage) message, frontend);
+        } else if (message instanceof PlayerPingMessage) {
+            return new PlayerPingMessage.ResultMessage();
         }
         return new IllegalPlayerActionResultMessage();
     }
