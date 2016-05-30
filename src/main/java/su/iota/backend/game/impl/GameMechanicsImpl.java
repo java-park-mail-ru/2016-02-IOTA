@@ -90,7 +90,7 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
         isOk = isOk && coordinate.isInRange();
         isOk = isOk && canPlayCard(player, card);
         isOk = isOk && field.isPlacementCorrect(coordinate, card);
-        if (!isEphemeral) {
+        if (isOk && !isEphemeral) {
             passAllowed = false;
             playCardInternal(player, coordinate, card);
             updateGameStateUuid();

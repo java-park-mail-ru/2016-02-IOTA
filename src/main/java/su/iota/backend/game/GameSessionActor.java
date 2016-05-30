@@ -53,6 +53,7 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
             final AbstractPlayerActionMessage.AbstractResultMessage resultMessage = handlePlayerActionMessage(actionMessage);
             if (actionMessage.isEndSequenceTrigger() && frontend != null) {
                 gameMechanics.endTurn(getGameKeyForPlayer(frontend));
+                resultMessage.setBroadcastTrigger(true);
             }
             if (resultMessage.isBroadcastTrigger()) {
                 broadcastGameState();
@@ -119,7 +120,7 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
         if (message.isEndSequenceTrigger()) {
             gameMechanics.endTurn(playerKey);
         }
-        return new PlayerPlaceCardMessage.ResultMessage(true);
+        return new PlayerPlaceCardMessage.ResultMessage(isOk);
     }
 
     @NotNull

@@ -77,6 +77,10 @@ public abstract class AbstractPlayerActionMessage implements FromMessage, Incomi
             return broadcast;
         }
 
+        public void setBroadcastTrigger(boolean broadcast) {
+            this.broadcast = broadcast;
+        }
+        
     }
 
 }
