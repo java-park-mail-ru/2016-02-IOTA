@@ -198,6 +198,7 @@ public final class FrontendActor extends BasicActor<Object, Void> {
                     throw new AssertionError();
                 }
                 jsonObject.addProperty("id", frontendService.getSignedInUser().getId());
+                jsonObject.addProperty("ref", System.identityHashCode(self()));
             }
             jsonObject.addProperty("__ok", isSignedIn);
             respondWithJson(httpRequest, jsonObject);
@@ -223,7 +224,6 @@ public final class FrontendActor extends BasicActor<Object, Void> {
             final boolean isSignedUp = frontendService.signUp(userProfile);
             if (isSignedUp) {
                 jsonObject.addProperty("id", userProfile.getId());
-                jsonObject.addProperty("ref", System.identityHashCode(self()));
             }
             jsonObject.addProperty("__ok", isSignedUp);
             respondWithJson(httpRequest, jsonObject);
