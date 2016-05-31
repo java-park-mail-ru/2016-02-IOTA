@@ -11,8 +11,8 @@ public class Coordinate {
     @Expose
     private final int offY;
 
-    public static final int BASE_X = 36 / 2;
-    public static final int BASE_Y = 36 / 2;
+    public static final int BASE_X = Field.FIELD_DIMENSION / 2;
+    public static final int BASE_Y = Field.FIELD_DIMENSION / 2;
 
     public Coordinate(int offX, int offY) {
         this.offX = offX;

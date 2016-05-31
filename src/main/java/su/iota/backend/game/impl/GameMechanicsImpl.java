@@ -44,6 +44,9 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
             }
             updateGameStateUuid();
             final FieldItem card = drawCard();
+            if (card == null) {
+                throw new AssertionError();
+            }
             field.placeCard(Field.CENTER_COORDINATE, card);
             initialized = true;
         }
@@ -137,9 +140,13 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
         return isOk;
     }
 
-    @NotNull
+    @Nullable
     private FieldItem drawCard() throws SuspendExecution {
-        final FieldItem drawnCard = cardDeck.remove();
+        final FieldItem drawnCard = cardDeck.peek();
+        if (drawnCard == null) {
+            return null;
+        }
+        cardDeck.remove();
         final UUID uuid = drawnCard.getUuid();
         if (cardsDrawn.containsKey(uuid)) {
             throw new AssertionError();
@@ -258,7 +265,11 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
             throw new AssertionError();
         }
         while (hand.size() < 4) {
-            hand.add(drawCard().getUuid());
+            final FieldItem card = drawCard();
+            if (card == null) {
+                break;
+            }
+            hand.add(card.getUuid());
         }
     }
 
