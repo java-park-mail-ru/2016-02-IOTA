@@ -223,6 +223,7 @@ public final class FrontendActor extends BasicActor<Object, Void> {
             final boolean isSignedUp = frontendService.signUp(userProfile);
             if (isSignedUp) {
                 jsonObject.addProperty("id", userProfile.getId());
+                jsonObject.addProperty("ref", System.identityHashCode(self()));
             }
             jsonObject.addProperty("__ok", isSignedUp);
             respondWithJson(httpRequest, jsonObject);
