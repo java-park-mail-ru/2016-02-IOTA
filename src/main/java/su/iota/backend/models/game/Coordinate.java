@@ -55,8 +55,8 @@ public class Coordinate {
         final int y = getY();
         boolean isOk = true;
         //noinspection ConstantConditions
-        isOk = isOk && (x > 0 && x < 35);
-        isOk = isOk && (y > 0 && y < 35);
+        isOk = isOk && (x > 0 && x < Field.FIELD_DIMENSION - 1);
+        isOk = isOk && (y > 0 && y < Field.FIELD_DIMENSION - 1);
         return isOk;
     }
 
