@@ -74,6 +74,7 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
                 players.remove(player);
                 gameMechanics.dropPlayer(getGameKeyForPlayer(player));
                 Log.info("Dropping player from game! " + player.toString());
+                broadcastGameState();
             }
             if (players.isEmpty()) {
                 Log.info("Last player disconnected, shutting down! " + self().toString());
