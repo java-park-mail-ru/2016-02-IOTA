@@ -50,7 +50,8 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
             final AbstractPlayerActionMessage actionMessage = (AbstractPlayerActionMessage) message;
             //noinspection unchecked
             final ActorRef<Object> frontend = (ActorRef<Object>) actionMessage.getFrom();
-            final AbstractPlayerActionMessage.AbstractResultMessage resultMessage = handlePlayerActionMessage(actionMessage);
+            final AbstractPlayerActionMessage.AbstractResultMessage resultMessage
+                    = handlePlayerActionMessage(actionMessage);
             if (actionMessage.isEndSequenceTrigger() && frontend != null) {
                 gameMechanics.endTurn(getGameKeyForPlayer(frontend));
                 resultMessage.setBroadcastTrigger(true);
@@ -101,6 +102,15 @@ public final class GameSessionActor extends ServerActor<IncomingMessage, Outgoin
         } else if (message instanceof PlayerPassCardMessage) {
             return handlePassCardMessage((PlayerPassCardMessage) message, frontend);
         } else if (message instanceof PlayerPingMessage) {
+            // -- todo: remove after debugging ------------
+            if (((PlayerPingMessage) message).isDebugConclude()) {
+                gameMechanics.setConcluded(true);
+                //noinspection AnonymousInnerClassMayBeStatic
+                return new PlayerPingMessage.ResultMessage() {{
+                    broadcast = true;
+                }};
+            }
+            // --------------------------------------------
             return new PlayerPingMessage.ResultMessage();
         }
         return new IllegalPlayerActionResultMessage();
