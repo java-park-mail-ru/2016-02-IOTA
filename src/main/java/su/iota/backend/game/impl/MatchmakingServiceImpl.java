@@ -81,7 +81,11 @@ public class MatchmakingServiceImpl extends ProxyServerActor implements Matchmak
     }
 
     private Server<IncomingMessage, OutgoingMessage, Object> createGameSession(@NotNull Map<ActorRef<Object>, UserProfile> players) throws SuspendExecution, InterruptedException {
-        Log.info("Making match for players!");
+        final Collection<String> playerNames = new HashSet<>();
+        for (UserProfile userProfile : players.values()) {
+            playerNames.add(userProfile.getLogin());
+        }
+        Log.info(String.format("Making match for players! ( %s )", String.join("; ", playerNames)));
         final Server<IncomingMessage, OutgoingMessage, Object> gameSession = serviceLocator.getService(GameSessionActor.class).spawn();
         final GameSessionInitMessage.Result result = (GameSessionInitMessage.Result) gameSession.call(new GameSessionInitMessage(players));
         if (!result.isOk()) {
