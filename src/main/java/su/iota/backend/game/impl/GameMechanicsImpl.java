@@ -62,19 +62,6 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
         currentGameStateUuid = UUID.randomUUID();
     }
 
-    private boolean canPlayCard(int player, @NotNull FieldItem card) throws SuspendExecution {
-        if (card.isEphemeral()) {
-            return false;
-        }
-        final UUID uuid = card.getUuid();
-        final Set<UUID> playerHand = playerHands.get(player);
-        //noinspection OverlyComplexBooleanExpression
-        return playerHand != null
-                && playerHand.contains(uuid)
-                && cardsDrawn.containsKey(uuid)
-                && !cardsPlayed.contains(uuid);
-    }
-
     @Override
     public boolean tryPlayCard(int player, @NotNull Coordinate coordinate, @NotNull UUID uuid) throws SuspendExecution {
         final FieldItem card = getDrawnCardByUuid(uuid);
@@ -87,19 +74,34 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
         return card != null && tryPlayCardInternal(player, coordinate, card, true);
     }
 
+    @SuppressWarnings("OverlyComplexMethod")
     private boolean tryPlayCardInternal(int player, @NotNull Coordinate coordinate, @NotNull FieldItem card, boolean isEphemeral) throws SuspendExecution {
-        boolean isOk = true;
-        //noinspection ConstantConditions
-        isOk = isOk && !concluded;
-        isOk = isOk && coordinate.isInRange();
-        isOk = isOk && canPlayCard(player, card);
-        isOk = isOk && field.isPlacementCorrect(coordinate, card);
-        if (isOk && !isEphemeral) {
+        if (concluded || !coordinate.isInRange() || card.isEphemeral()) {
+            return false;
+        }
+        final UUID uuid = card.getUuid();
+        final Set<UUID> playerHand = playerHands.get(player);
+        //noinspection OverlyComplexBooleanExpression
+        if (playerHand == null
+                || !playerHand.contains(uuid)
+                || !cardsDrawn.containsKey(uuid)
+                || cardsPlayed.contains(uuid)
+                || !field.isPlacementCorrect(coordinate, card)) {
+            return false;
+        }
+        if (!isEphemeral) {
             passAllowed = false;
             playCardInternal(player, coordinate, card);
             updateGameStateUuid();
         }
-        return isOk;
+        if (playerHand.isEmpty()) {
+            if (cardDeck.isEmpty()) {
+                concluded = true;
+            } else {
+                endTurn(player);
+            }
+        }
+        return true;
     }
 
     private void playCardInternal(int player, @NotNull Coordinate coordinate, @NotNull FieldItem card) throws SuspendExecution {
@@ -283,10 +285,10 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
                 }
             }
         }
-        for (int i = 0; i < 2; i++) {
-            final Wildcard wildcard = new Wildcard();
-            cards.add(wildcard);
-        }
+//        for (int i = 0; i < 2; i++) {
+//            final Wildcard wildcard = new Wildcard();
+//            cards.add(wildcard);
+//        }
         Collections.shuffle(cards);
         cardDeck.addAll(cards);
     }
