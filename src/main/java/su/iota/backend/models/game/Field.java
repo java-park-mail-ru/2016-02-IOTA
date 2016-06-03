@@ -35,13 +35,11 @@ public class Field {
         final int newLineLengthX = leftLineLength + rightLineLength + 1;
         final int newLineLengthY = topLineLength + bottomLineLength + 1;
 
-        boolean isLengthFit = true;
-        //noinspection ConstantConditions
-        isLengthFit = isLengthFit && (newLineLengthX <= 4);
-        isLengthFit = isLengthFit && (newLineLengthY <= 4);
-        if (!isLengthFit) {
+        if (newLineLengthX > 4 || newLineLengthY > 4) {
             return false;
         }
+
+        //
 
         if (newLineLengthX >= 3) {
             final boolean isValidForX = isPlacementValidForLine(
@@ -74,35 +72,60 @@ public class Field {
         return true;
     }
 
+    @NotNull
+    private Map<Coordinate, FieldItem> findWildcardsInLineIntersection(@NotNull Coordinate start, @NotNull Coordinate increment,
+                                                                       @NotNull Predicate<Coordinate> end, @NotNull Predicate<Coordinate> ignore) throws SuspendExecution {
+        final HashMap<Coordinate, FieldItem> wildcards = new HashMap<>();
+        for (Coordinate coord = start; end.test(coord); coord = coord.plus(increment)) {
+            if (ignore.test(coord)) {
+                continue;
+            }
+            final FieldItem cell = field[coord.getX()][coord.getY()];
+            if (cell.isConcrete()) {
+                continue;
+            }
+            final int leftLineLength = getLineLength(coord, new Coordinate(-1, 0));
+            final int rightLineLength = getLineLength(coord, new Coordinate(1, 0));
+            final int topLineLength = getLineLength(coord, new Coordinate(0, -1));
+            final int bottomLineLength = getLineLength(coord, new Coordinate(0, 1));
+
+            final int newLineLengthX = leftLineLength + rightLineLength + 1;
+            final int newLineLengthY = topLineLength + bottomLineLength + 1;
+            if (newLineLengthX > 1 && newLineLengthY > 1) {
+                wildcards.put(coord, cell);
+            }
+        }
+        return wildcards;
+    }
+
     private boolean isPlacementValidForLine(@NotNull Coordinate start, @NotNull Coordinate increment,
                                             @NotNull Predicate<Coordinate> end, @NotNull Predicate<Coordinate> ignore,
                                             @NotNull FieldItem placement, @Nullable FieldItem existingItem) throws SuspendExecution {
         final Set<FieldItem.Color> colors = EnumSet.noneOf(FieldItem.Color.class);
         final Set<FieldItem.Shape> shapes = EnumSet.noneOf(FieldItem.Shape.class);
         final Set<FieldItem.Number> numbers = EnumSet.noneOf(FieldItem.Number.class);
+        final Set<FieldItem> wildcards = new HashSet<>();
 
         for (Coordinate coord = start; end.test(coord); coord = coord.plus(increment)) {
             if (ignore.test(coord)) {
                 continue;
             }
             final FieldItem cell = field[coord.getX()][coord.getY()];
-            colors.add(cell.getColor());
-            shapes.add(cell.getShape());
-            numbers.add(cell.getNumber());
+            if (cell.isConcrete()) {
+                colors.add(cell.getColor());
+                shapes.add(cell.getShape());
+                numbers.add(cell.getNumber());
+            } else {
+                wildcards.add(cell);
+            }
         }
 
         if (existingItem != null) {
             if (existingItem.isConcrete()) {
                 throw new AssertionError();
             }
-            Collection<FieldItem> substitutes = existingItem.getSubstitutes();
-            if (substitutes == null) {
-                substitutes = calculatePossibleSubstitutes(existingItem);
-                existingItem.setSubstitutes(substitutes);
-            }
-            if (!substitutes.contains(placement)) {
-                return false;
-            }
+            // todo: replace wildcard with card
+            return false;
         }
 
         return isLineConditionSatisfied(colors, placement.getColor())

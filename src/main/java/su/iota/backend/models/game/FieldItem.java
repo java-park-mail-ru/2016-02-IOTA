@@ -26,6 +26,15 @@ public abstract class FieldItem {
     @Nullable
     protected Collection<FieldItem> substitutes;
 
+    public FieldItem() {
+    }
+
+    public FieldItem(@Nullable Color color, @Nullable Shape shape, @Nullable Number number) {
+        this.color = color;
+        this.shape = shape;
+        this.number = number;
+    }
+
     public boolean isEphemeral() {
         return uuid.equals(EPHEMERAL_UUID);
     }
@@ -56,20 +65,6 @@ public abstract class FieldItem {
         this.substitutes = substitutes;
     }
 
-    public void morphToConcrete(@NotNull FieldItem concreteFieldItem) {
-        if (isEphemeral()) {
-            throw new IllegalStateException();
-        }
-        if (!concreteFieldItem.concrete || substitutes == null || !substitutes.contains(concreteFieldItem)) {
-            throw new IllegalArgumentException();
-        }
-        this.substitutes = null;
-        color = concreteFieldItem.color;
-        shape = concreteFieldItem.shape;
-        number = concreteFieldItem.number;
-        uuid = concreteFieldItem.uuid;
-    }
-
     @NotNull
     public Color getColor() {
         if (!concrete) {
@@ -79,13 +74,6 @@ public abstract class FieldItem {
             throw new AssertionError();
         }
         return color;
-    }
-
-    public void setColor(@NotNull Color color) {
-        if (!concrete) {
-            throw new IllegalStateException();
-        }
-        this.color = color;
     }
 
     @NotNull
@@ -99,13 +87,6 @@ public abstract class FieldItem {
         return shape;
     }
 
-    public void setShape(@NotNull Shape shape) {
-        if (!concrete) {
-            throw new IllegalStateException();
-        }
-        this.shape = shape;
-    }
-
     @NotNull
     public Number getNumber() {
         if (!concrete) {
@@ -115,13 +96,6 @@ public abstract class FieldItem {
             throw new AssertionError();
         }
         return number;
-    }
-
-    public void setNumber(@NotNull Number number) {
-        if (!concrete) {
-            throw new IllegalStateException();
-        }
-        this.number = number;
     }
 
     @NotNull

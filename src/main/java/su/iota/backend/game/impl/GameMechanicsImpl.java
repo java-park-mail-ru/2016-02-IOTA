@@ -124,22 +124,23 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
         return tryPassCardInternal(player, uuid, true);
     }
 
-    private boolean tryPassCardInternal(int player, @NotNull UUID uuid, boolean isEphemeral) {
-        boolean isOk = true;
-        //noinspection ConstantConditions
-        isOk = isOk && !concluded;
-        isOk = isOk && passAllowed;
-        isOk = isOk && !cardsPlayed.contains(uuid);
-        isOk = isOk && cardsDrawn.containsKey(uuid);
-        isOk = isOk && playerHands.containsKey(player);
+    private boolean tryPassCardInternal(int player, @NotNull UUID uuid, boolean isEphemeral) throws SuspendExecution {
+        //noinspection OverlyComplexBooleanExpression
+        if (concluded
+                || !passAllowed
+                || cardsPlayed.contains(uuid)
+                || !playerHands.containsKey(player)) {
+            return false;
+        }
         final Set<UUID> playerHand = playerHands.get(player);
-        isOk = isOk && (playerHand != null);
-        isOk = isOk && playerHand.contains(uuid);
-        if (isOk && !isEphemeral) {
+        if (playerHand == null || !playerHand.contains(uuid)) {
+            return false;
+        }
+        if (!isEphemeral) {
             playerHand.remove(uuid);
             cardDeck.add(cardsDrawn.remove(uuid));
         }
-        return isOk;
+        return true;
     }
 
     @Nullable
