@@ -123,7 +123,7 @@ public class AccountServiceJdbiImpl implements AccountService {
     @Nullable
     private UserProfile getUserProfileWhere(@NotNull String andWhereClause, @NotNull Map<String, ?> whereParams) throws SuspendExecution {
         try (Handle handle = dbi.open()) {
-            return handle.createQuery("select id, login, email, birth_date from user where 1 " + andWhereClause)
+            return handle.createQuery("select id, login, email from user where 1 " + andWhereClause)
                     .bindFromMap(whereParams)
                     .map((index, rs, ctx) -> {
                         return new UserProfile(rs.getLong("id"), rs.getString("login"), rs.getString("email"));
@@ -158,7 +158,7 @@ public class AccountServiceJdbiImpl implements AccountService {
     private void setupTables() {
         try (Handle handle = dbi.open()) {
             handle.execute("create table if not exists user (id bigint(20) primary key not null auto_increment, " +
-                    "login varchar(255) not null, email varchar(255) not null, password varchar(255) not null, birth_date datetime," +
+                    "login varchar(255) not null, email varchar(255) not null, password varchar(255) not null," +
                     "unique index ix_login (login))");
         }
     }
