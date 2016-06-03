@@ -26,7 +26,7 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
     }
 
     private Field field = new Field();
-    private Queue<FieldItem> cardDeck = new ArrayQueue<>(4 * 4 * 4 + 2);
+    private Queue<FieldItem> cardDeck = new LinkedList<>();
     private Map<UUID, FieldItem> cardsDrawn = new HashMap<>();
     private Set<UUID> cardsPlayed = new HashSet<>();
     private Map<Integer, Set<UUID>> playerHands = new HashMap<>();
@@ -137,8 +137,14 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
             return false;
         }
         if (!isEphemeral) {
-            playerHand.remove(uuid);
-            cardDeck.add(cardsDrawn.remove(uuid));
+            final FieldItem card = cardsDrawn.get(uuid);
+            if (card == null) {
+                return false;
+            }
+            card.setPassed(true);
+        }
+        if (playerHand.isEmpty()) {
+            endTurn(player);
         }
         return true;
     }
@@ -179,6 +185,22 @@ public final class GameMechanicsImpl extends ProxyServerActor implements GameMec
             throw new AssertionError();
         }
         final int headPlayer = players.removeFirst();
+        final Set<UUID> playerHand = playerHands.get(headPlayer);
+        if (playerHand != null) {
+            final Set<UUID> passedCards = new HashSet<>();
+            for (UUID uuid : playerHand) {
+                final FieldItem card = cardsDrawn.get(uuid);
+                if (card != null && card.isPassed()) {
+                    passedCards.add(uuid);
+                }
+            }
+            for (UUID uuid : passedCards) {
+                final FieldItem card = cardsDrawn.get(uuid);
+                card.setPassed(false);
+                playerHand.remove(uuid);
+                cardDeck.add(cardsDrawn.remove(uuid));
+            }
+        }
         giveCards(headPlayer);
         players.addLast(headPlayer);
         passAllowed = true;

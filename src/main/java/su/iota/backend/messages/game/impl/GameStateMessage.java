@@ -142,6 +142,7 @@ public class GameStateMessage implements OutgoingMessage, FromMessage {
                     jsonObject.addProperty("color", String.valueOf(src.getColor()));
                     jsonObject.addProperty("shape", String.valueOf(src.getShape()));
                     jsonObject.addProperty("number", String.valueOf(src.getNumber()));
+                    jsonObject.addProperty("passed", src.isPassed());
                 }
             }
             return jsonObject;

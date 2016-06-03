@@ -16,6 +16,7 @@ import su.iota.backend.messages.IncomingMessage;
 import su.iota.backend.messages.OutgoingMessage;
 import su.iota.backend.messages.game.AbstractPlayerActionMessage;
 import su.iota.backend.messages.game.impl.IllegalPlayerActionResultMessage;
+import su.iota.backend.messages.game.impl.PlayerPingMessage;
 import su.iota.backend.messages.internal.GameSessionDropPlayerMessage;
 import su.iota.backend.models.UserProfile;
 
@@ -104,8 +105,21 @@ public class FrontendServiceImpl implements FrontendService {
     @NotNull
     @Override
     public AbstractPlayerActionMessage.AbstractResultMessage performPlayerAction(@NotNull AbstractPlayerActionMessage playerActionMessage) throws SuspendExecution, InterruptedException {
-        if (signedInUser == null || gameSession == null) {
+        if (signedInUser == null) {
             return new IllegalPlayerActionResultMessage();
+        }
+        if (gameSession == null) {
+            if (playerActionMessage instanceof PlayerPingMessage && playerActionMessage.isGoodbyeMessage()) {
+                //noinspection unchecked
+                final ActorRef<Object> frontend = (ActorRef<Object>) playerActionMessage.getFrom();
+                if (frontend == null) {
+                    return new IllegalPlayerActionResultMessage();
+                }
+                softDropPlayer(frontend);
+                return new PlayerPingMessage.ResultMessage();
+            } else {
+                return new IllegalPlayerActionResultMessage();
+            }
         }
         final OutgoingMessage result = gameSession.call(playerActionMessage);
         if (!(result instanceof AbstractPlayerActionMessage.AbstractResultMessage)) {

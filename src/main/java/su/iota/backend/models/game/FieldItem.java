@@ -11,6 +11,8 @@ public abstract class FieldItem {
 
     protected boolean concrete = true;
 
+    protected boolean passed = false;
+
     @Nullable
     protected Color color;
 
@@ -96,6 +98,14 @@ public abstract class FieldItem {
             throw new AssertionError();
         }
         return number;
+    }
+
+    public boolean isPassed() {
+        return passed;
+    }
+
+    public void setPassed(boolean passed) {
+        this.passed = passed;
     }
 
     @NotNull

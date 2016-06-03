@@ -128,6 +128,10 @@ public class Field {
             return false;
         }
 
+        if (!placement.isConcrete()) {
+            return true;
+        }
+
         return isLineConditionSatisfied(colors, placement.getColor())
                 && isLineConditionSatisfied(shapes, placement.getShape())
                 && isLineConditionSatisfied(numbers, placement.getNumber());
