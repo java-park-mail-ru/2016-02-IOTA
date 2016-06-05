@@ -38,12 +38,14 @@ public final class FrontendActor extends BasicActor<Object, Void> {
     private boolean isInitialized = false;
     private String contextPath;
     private FrontendService frontendService;
+    private int receiveTimeout;
     private final Set<ActorRef<WebMessage>> webSockets = new HashSet<>();
     private Object gameSessionWatch;
 
     private void init() throws InterruptedException, SuspendExecution {
         final SettingsService settingsService = ServiceUtils.getService(SettingsService.class);
         contextPath = settingsService.getServerContextPathSetting();
+        receiveTimeout = settingsService.getFrontendReceiveTimeoutSeconds();
         frontendService = ServiceUtils.getService(FrontendService.class);
     }
 
@@ -55,7 +57,7 @@ public final class FrontendActor extends BasicActor<Object, Void> {
         }
         //noinspection InfiniteLoopStatement
         while (true) {
-            final Object message = receive(12, TimeUnit.SECONDS);
+            final Object message = receive(receiveTimeout, TimeUnit.SECONDS);
             if (message instanceof WebMessage) {
                 handleWebMessage((WebMessage) message);
             } else if (message instanceof OutgoingMessage) {
@@ -68,8 +70,6 @@ public final class FrontendActor extends BasicActor<Object, Void> {
                 frontendService.setGameSession(self(), gameSession);
             } else if (message instanceof ExitMessage) {
                 handleExitMessage((ExitMessage) message);
-            } else if (message == null && webSockets.isEmpty()) {
-                frontendService.dropPlayer(self());
             }
             checkCodeSwap();
         }
